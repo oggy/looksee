@@ -200,7 +200,23 @@ describe Looksee::LookupPath do
         EOS
       end
 
-      it "should show singleton classes as class names in angled brackets"
+      it "should show singleton classes as class names in brackets" do
+        lookup_path = Looksee::LookupPath.new([Derived.singleton_class], :public)
+        stub_methods(Derived.singleton_class, ['public1', 'public2'], [], [])
+        lookup_path.inspect.should == <<-EOS.demargin
+          |[Derived]
+          |  public1  public2
+        EOS
+      end
+
+      it "should handle singleton classes of singleton classes correctly" do
+        lookup_path = Looksee::LookupPath.new([Derived.singleton_class.singleton_class], :public)
+        stub_methods(Derived.singleton_class.singleton_class, ['public1', 'public2'], [], [])
+        lookup_path.inspect.should == <<-EOS.demargin
+          |[[Derived]]
+          |  public1  public2
+        EOS
+      end
     end
 
     describe "styles" do
