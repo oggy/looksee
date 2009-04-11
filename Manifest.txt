@@ -1,0 +1,15 @@
+.autotest
+History.txt
+Manifest.txt
+README.rdoc
+Rakefile
+ext/looksee/extconf.rb
+ext/looksee/looksee.c
+lib/looksee.rb
+lib/looksee/version.rb
+script/console
+script/destroy
+script/generate
+spec/looksee_spec.rb
+tasks/extconf.rake
+tasks/extconf/looksee.rake

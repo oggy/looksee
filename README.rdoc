@@ -1,0 +1,120 @@
+= Looksee
+
+* http://github.com/oggy/looksee
+
+== DESCRIPTION:
+
+Looksee lets you examine the method lookup path of objects in ways not
+possible in plain ruby.
+
+== SYNOPSIS:
+
+Pop this in your .irbrc :
+
+    require 'looksee'
+    def ls(*args)
+      Looksee.looksee(*args)
+    end
+
+Now:
+
+    irb(main):001:0> ls []
+    => Array
+      &            concat      frozen?      push          taguri
+      *            count       hash         rassoc        taguri=
+      +            cycle       include?     reject        take
+      -            delete      index        reject!       take_while
+      <<           delete_at   indexes      replace       to_a
+      <=>          delete_if   indices      reverse       to_ary
+      ==           drop        insert       reverse!      to_s
+      []           drop_while  inspect      reverse_each  to_yaml
+      []=          each        join         rindex        transpose
+      assoc        each_index  last         select        uniq
+      at           empty?      length       shift         uniq!
+      choice       eql?        map          shuffle       unshift
+      clear        fetch       map!         shuffle!      values_at
+      collect      fill        nitems       size          yaml_initialize
+      collect!     find_index  pack         slice         zip
+      combination  first       permutation  slice!        |
+      compact      flatten     pop          sort
+      compact!     flatten!    product      sort!
+    Enumerable
+      all?        each_slice       first     min        reverse_each
+      any?        each_with_index  grep      min_by     select
+      collect     entries          group_by  minmax     sort
+      count       enum_cons        include?  minmax_by  sort_by
+      cycle       enum_slice       inject    none?      take
+      detect      enum_with_index  map       one?       take_while
+      drop        find             max       partition  to_a
+      drop_while  find_all         max_by    reduce     zip
+      each_cons   find_index       member?   reject
+    Object
+      taguri  taguri=  to_yaml  to_yaml_properties  to_yaml_style
+    Kernel
+      ==        hash                        object_id
+      ===       id                          private_methods
+      =~        inspect                     protected_methods
+      __id__    instance_eval               public_methods
+      __send__  instance_exec               respond_to?
+      class     instance_of?                send
+      clone     instance_variable_defined?  singleton_methods
+      display   instance_variable_get       taint
+      dup       instance_variable_set       tainted?
+      enum_for  instance_variables          tap
+      eql?      is_a?                       to_a
+      equal?    kind_of?                    to_enum
+      extend    method                      to_s
+      freeze    methods                     type
+      frozen?   nil?                        untaint
+
+It'll also color the methods according to whether they're public,
+protected, private, or overridden.  So pretty.  You gotta try it.
+
+By default, it shows public and protected methods.  Add private ones
+with:
+
+    ls [], :private => true
+    ls [], :private  # shortcut
+
+Or if you don't want protected:
+
+    ls [], :protected => false
+
+You can configure the defaults and colors:
+
+    ri Looksee
+
+Enjoy!
+
+== INSTALL:
+
+  gem install looksee
+
+== FEATURES/PROBLEMS:
+
+* Currently only does MRI 1.8, 1.9.
+
+== LICENSE:
+
+(The MIT License)
+
+Copyright (c) 2009 George Ogata
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
