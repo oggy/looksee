@@ -12,13 +12,13 @@ possible in plain ruby.
 Pop this in your .irbrc :
 
     require 'looksee'
-    def ls(*args)
-      Looksee.looksee(*args)
+    def lp(*args)
+      Looksee.lookup_path(*args)
     end
 
 Now:
 
-    irb(main):001:0> ls []
+    irb(main):001:0> lp []
     => Array
       &            concat      frozen?      push          taguri
       *            count       hash         rassoc        taguri=
@@ -71,14 +71,14 @@ It'll also color the methods according to whether they're public,
 protected, private, or overridden.  So pretty.  You gotta try it.
 
 By default, it shows public and protected methods.  Add private ones
-with:
+like so:
 
-    ls [], :private => true
-    ls [], :private  # shortcut
+    lp [], :private => true
+    lp [], :private          # shortcut
 
 Or if you don't want protected:
 
-    ls [], :protected => false
+    lp [], :protected => false
 
 You can configure the defaults and colors:
 
