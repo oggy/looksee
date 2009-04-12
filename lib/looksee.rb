@@ -70,14 +70,14 @@ module Looksee
     attr_accessor :styles
   end
 
-  self.default_options = {:public => true, :protected => true, :shadowed => true}
+  self.default_options = {:public => true, :protected => true, :overridden => true}
   self.default_width = 80
   self.styles = {
-    :module    => "\e[1;37m%s\e[0m",
-    :public    => "\e[1;32m%s\e[0m",
-    :protected => "\e[1;33m%s\e[0m",
-    :private   => "\e[1;31m%s\e[0m",
-    :shadowed  => "\e[1;30m%s\e[0m",
+    :module     => "\e[1;37m%s\e[0m",
+    :public     => "\e[1;32m%s\e[0m",
+    :protected  => "\e[1;33m%s\e[0m",
+    :private    => "\e[1;31m%s\e[0m",
+    :overridden => "\e[1;30m%s\e[0m",
   }
 
   class LookupPath
@@ -157,7 +157,7 @@ module Looksee
       def add_methods(methods, access, seen)
         methods.each do |method|
           @methods << method
-          @accesses[method] = seen[method] ? :shadowed : access
+          @accesses[method] = seen[method] ? :overridden : access
         end
       end
 

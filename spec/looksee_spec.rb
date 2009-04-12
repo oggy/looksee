@@ -112,8 +112,8 @@ describe Looksee do
     it "should allow symbol arguments as shortcuts for true options" do
       object = Object.new
       Looksee.stubs(:default_options).returns({})
-      Looksee::LookupPath.expects(:new).with(object, {:public => true, :shadowed => true})
-      Looksee.lookup_path(object, :public, :shadowed)
+      Looksee::LookupPath.expects(:new).with(object, {:public => true, :overridden => true})
+      Looksee.lookup_path(object, :public, :overridden)
     end
 
     it "should merge the default options, with the symbols, and the options hash" do
@@ -178,7 +178,7 @@ describe Looksee::LookupPath do
       end
 
       it "should show only public instance methods when only public methods are requested" do
-        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true, :shadowed => true)
+        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true, :overridden => true)
         first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
           |Derived
           |  public1  public2
@@ -188,7 +188,7 @@ describe Looksee::LookupPath do
       end
 
       it "should show modules and protected instance methods when only protected methods are requested" do
-        lookup_path = Looksee::LookupPath.new(Derived.new, :protected => true, :shadowed => true)
+        lookup_path = Looksee::LookupPath.new(Derived.new, :protected => true, :overridden => true)
         first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
           |Derived
           |  protected1  protected2
@@ -198,7 +198,7 @@ describe Looksee::LookupPath do
       end
 
       it "should show modules and private instance methods when only private methods are requested" do
-        lookup_path = Looksee::LookupPath.new(Derived.new, :private => true, :shadowed => true)
+        lookup_path = Looksee::LookupPath.new(Derived.new, :private => true, :overridden => true)
         first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
           |Derived
           |  private1  private2
@@ -208,7 +208,7 @@ describe Looksee::LookupPath do
       end
 
       it "should show modules with public and private instance methods when only public and private methods are requested" do
-        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true, :private => true, :shadowed => true)
+        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true, :private => true, :overridden => true)
         first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
           |Derived
           |  private1  private2  public1  public2
@@ -239,11 +239,11 @@ describe Looksee::LookupPath do
     describe "styles" do
       before do
         styles = {
-          :module    => "`%s'",
-          :public    => "{%s}",
-          :protected => "[%s]",
-          :private   => "<%s>",
-          :shadowed  => "(%s)",
+          :module     => "`%s'",
+          :public     => "{%s}",
+          :protected  => "[%s]",
+          :private    => "<%s>",
+          :overridden => "(%s)",
         }
         Looksee.stubs(:styles).returns(styles)
       end
@@ -251,7 +251,7 @@ describe Looksee::LookupPath do
       it "should delimit each word with the configured delimiters" do
         stub_methods(Derived, ['public'], ['protected'], ['private'])
         stub_methods(Mod2, ['public', 'foo'], [], [])
-        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true, :protected => true, :private => true, :shadowed => true)
+        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true, :protected => true, :private => true, :overridden => true)
         first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
           |\`Derived\'
           |  <private>  [protected]  {public}
