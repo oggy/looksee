@@ -31,5 +31,5 @@ task :default => :spec
 
 require 'spec/rake/spectask'
 Spec::Rake::SpecTask.new(:spec => :compile) do |t|
-  t.libs << 'lib'
+  t.libs << 'lib' << 'spec'
 end

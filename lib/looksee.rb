@@ -55,14 +55,14 @@ module Looksee
     #   * http://www.hokstad.com/ruby-object-model.html
     #   * The rdoc for the Object class.
     #
-    def looksee(object, options=nil)
-      classes = []
-      klass = internal_class(object)
-      while klass
-        classes << internal_class_to_module(klass)
-        klass = internal_superclass(klass)
+    def lookup_path(object, *options)
+      normalized_options = Looksee.default_options.dup
+      hash_options = options.last.is_a?(Hash) ? options.pop : {}
+      options.each do |option|
+        normalized_options[option] = true
       end
-      LookupPath.new(classes, options)
+      normalized_options.update(hash_options)
+      LookupPath.new(object, normalized_options)
     end
 
     attr_accessor :default_options
@@ -81,27 +81,33 @@ module Looksee
   }
 
   class LookupPath
-    def initialize(modules, *options)
-      @options = normalize_initialize_options(options)
-      @modules = modules
-    end
+    attr_reader :entries
 
-    def normalize_initialize_options(options)
-      normalized_options = Looksee.default_options.dup
-      hash_options = options.last.is_a?(Hash) ? options.pop : {}
-      options.each do |option|
-        normalized_options[option] = true
+    def initialize(object, options={})
+      @entries = []
+      seen = {}
+      find_modules(object).each do |mod|
+        entry = Entry.new(mod, seen, options)
+        entry.methods.each{|m| seen[m] = true}
+        @entries << entry
       end
-      normalized_options.update(hash_options)
     end
-
-    attr_reader :modules, :options
 
     def inspect(options={})
       options = normalize_inspect_options(options)
-      data = inspect_data
-      lines = layout(options[:width], data)
-      lines.join("\n") << "\n"
+      entries.map{|e| e.inspect(options)}.join
+    end
+
+    private  # -------------------------------------------------------
+
+    def find_modules(object)
+      modules = []
+      klass = Looksee.internal_class(object)
+      while klass
+        modules << Looksee.internal_class_to_module(klass)
+        klass = Looksee.internal_superclass(klass)
+      end
+      modules
     end
 
     def normalize_inspect_options(options)
@@ -110,119 +116,124 @@ module Looksee
     end
 
     #
-    # Return the entries to display.
+    # An entry in the LookupPath.
     #
-    # Return value is a structure of the following grammatical form:
+    # Contains a module and its methods, along with access
+    # information (public, private, etc.).
     #
-    #   [
-    #     [styled module name, [method-entry, method-entry, ...]],
-    #     [styled module name, [method-entry, method-entry, ...]],
-    #     ...
-    #   ]
-    #
-    # where each method-entry is a triple that contains:
-    #
-    #   [name, styled name, display width]
-    #
-    def inspect_data
-      styles = Looksee.styles
-      style_widths = Hash.new{|h,k| h[k] = display_width(styles[k] % '')}
-      make_entry = lambda do |name, style_name|
-        [name, styles[style_name] % name, style_widths[style_name] + name.length]
+    class Entry
+      def initialize(mod, seen, options)
+        @module = mod
+        @methods = []
+        @accesses = {}
+        add_methods(mod.public_instance_methods(false)   , :public   , seen) if options[:public   ]
+        add_methods(mod.protected_instance_methods(false), :protected, seen) if options[:protected]
+        add_methods(mod.private_instance_methods(false)  , :private  , seen) if options[:private  ]
+        @methods.sort!
       end
 
-      seen = {}
-      @modules.map do |mod|
-        entries = []
-        [:public, :protected, :private].each do |access|
-          next if !options[access]
-          mod.send("#{access}_instance_methods", false).each do |name|
-            name = name.to_s
-            if seen[name]
-              options[:shadowed] or
-                next
-              entries << make_entry.call(name, :shadowed)
-            else
-              entries << make_entry.call(name, access)
-              seen[name] = true
-            end
+      attr_reader :module, :methods
+
+      def module_name
+        name = @module.to_s  # #name doesn't do singleton classes right
+        nil while name.sub!(/#<Class:(.*)>/, '[\\1]')
+        name
+      end
+
+      def each
+        @methods.each do |name|
+          yield name, @accesses[name]
+        end
+      end
+
+      include Enumerable
+
+      def inspect(options={})
+        styled_module_name << "\n" << Columnizer.columnize(styled_methods, options[:width])
+      end
+
+      private  # -----------------------------------------------------
+
+      def add_methods(methods, access, seen)
+        methods.each do |method|
+          @methods << method
+          @accesses[method] = seen[method] ? :shadowed : access
+        end
+      end
+
+      def styled_module_name
+        Looksee.styles[:module] % module_name
+      end
+
+      def styled_methods
+        map do |name, access|
+          Looksee.styles[access] % name
+        end
+      end
+    end
+  end
+
+  module Columnizer
+    class << self
+      def columnize(strings, width)
+        num_columns = 1
+        layout = [strings]
+        loop do
+          break if layout.first.length <= 1
+          next_layout = layout_in_columns(strings, num_columns + 1)
+          break if layout_width(next_layout) > width
+          layout = next_layout
+          num_columns += 1
+        end
+
+        pad_strings(layout)
+        rectangularize_layout(layout)
+        layout.transpose.map do |row|
+          '  ' + row.compact.join('  ')
+        end.join("\n") << "\n"
+      end
+
+      private  # -----------------------------------------------------
+
+      def layout_in_columns(strings, num_columns)
+        strings_per_column = (strings.length / num_columns.to_f).ceil
+        (0...num_columns).map{|i| strings[i*strings_per_column...(i+1)*strings_per_column] || []}
+      end
+
+      def layout_width(layout)
+        widths = layout_column_widths(layout)
+        widths.inject(0, :+) + 2*layout.length
+      end
+
+      def layout_column_widths(layout)
+        layout.map do |column|
+          column.map{|string| display_width(string)}.max || 0
+        end
+      end
+
+      def display_width(string)
+        # remove terminal control sequences
+        string.gsub(/\e\[.*?m/, '').length
+      end
+
+      def pad_strings(layout)
+        widths = layout_column_widths(layout)
+        layout.each_with_index do |column, i|
+          column_width = widths[i]
+          column.each do |string|
+            padding = column_width - display_width(string)
+            string << ' '*padding
           end
         end
-        mod_name = mod.to_s
-        nil while mod_name.sub!(/#<Class:(.*)>/, '[\\1]')
-        [styles[:module] % mod_name, entries.sort!]
-      end
-    end
-
-    def display_width(string)
-      # remove terminal control sequences
-      string.gsub(/\e\[.*?m/, '').length
-    end
-
-    #
-    # Return whether the modules should be on a separate line, and the
-    # list of column widths to display the strings in.
-    #
-    def layout(width, data)
-      lines = []
-      data.map do |styled_module_name, method_entries|
-        lines << styled_module_name
-        lines.concat layout_methods(width, method_entries)
-      end
-      lines
-    end
-
-    def layout_methods(width, entries)
-      num_columns = 1
-      layout = [entries]
-      loop do
-        break if layout.first.length <= 1
-        next_layout = layout_methods_in_columns(entries, num_columns + 1)
-        break if layout_width(next_layout) > width
-        layout = next_layout
-        num_columns += 1
       end
 
-      create_display_strings(layout)
-      rectangularize_layout(layout)
-      layout.transpose.map do |row|
-        '  ' + row.compact.join('  ')
-      end
-    end
-
-    def layout_methods_in_columns(entries, num_columns)
-      entries_per_column = (entries.length / num_columns.to_f).ceil
-      (0...num_columns).map{|i| entries[i*entries_per_column...(i+1)*entries_per_column] || []}
-    end
-
-    def layout_width(layout)
-      widths = layout_column_widths(layout)
-      widths.inject(0, :+) + 2*widths.length
-    end
-
-    def layout_column_widths(layout)
-      widths = layout.map do |column|
-        column.map{|entry| entry[2]}.max || 0
-      end
-    end
-
-    def create_display_strings(layout)
-      widths = layout_column_widths(layout)
-      widths.length.times do |i|
-        column_width = widths[i]
-        layout[i].map! do |entry|
-          padding = column_width - entry[2]
-          entry[1] + ' '*padding
+      def rectangularize_layout(layout)
+        return if layout.length == 1
+        height = layout[0].length
+        layout[1..-1].each do |column|
+          column.length == height or
+            column[height - 1] = nil
         end
-      end
-    end
-
-    def rectangularize_layout(layout)
-      return if layout.length == 1
-      height = layout[0].length
-      layout[1..-1].each do |column|
-        column.length == height or
-          column[height - 1] = nil
       end
     end
   end
