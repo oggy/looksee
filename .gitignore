@@ -1,0 +1,7 @@
+/ext/looksee/Makefile
+/ext/looksee/*.o
+/ext/looksee/*.bundle
+/ext/looksee/*.so
+/ext/looksee/*.dll
+/pkg
+/doc
