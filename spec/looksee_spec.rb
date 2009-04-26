@@ -104,21 +104,21 @@ describe Looksee do
 
     it "should return a LookupPath object for the given object" do
       object = Object.new
-      Looksee.stubs(:default_options).returns({})
+      Looksee.stubs(:default_lookup_path_options).returns({})
       Looksee::LookupPath.expects(:new).with(object, {})
       lookup_path = Looksee.lookup_path(object)
     end
 
     it "should allow symbol arguments as shortcuts for true options" do
       object = Object.new
-      Looksee.stubs(:default_options).returns({})
+      Looksee.stubs(:default_lookup_path_options).returns({})
       Looksee::LookupPath.expects(:new).with(object, {:public => true, :overridden => true})
       Looksee.lookup_path(object, :public, :overridden)
     end
 
     it "should merge the default options, with the symbols, and the options hash" do
       object = Object.new
-      Looksee.stubs(:default_options).returns({:public => false, :protected => false, :private => false})
+      Looksee.stubs(:default_lookup_path_options).returns({:public => false, :protected => false, :private => false})
       Looksee::LookupPath.expects(:new).with(object, {:public => false, :protected => true, :private => false})
       Looksee.lookup_path(object, :protected, :private, :private => false)
     end
@@ -127,7 +127,7 @@ end
 
 describe Looksee::LookupPath do
   before do
-    Looksee.default_options = {}
+    Looksee.default_lookup_path_options = {}
   end
 
   def stub_methods(mod, public, protected, private)

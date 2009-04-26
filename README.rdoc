@@ -2,21 +2,18 @@
 
 * http://github.com/oggy/looksee
 
-== DESCRIPTION:
+== DESCRIPTION
 
 Looksee lets you examine the method lookup path of objects in ways not
 possible in plain ruby.
 
-== SYNOPSIS:
+== SYNOPSIS
 
 Pop this in your .irbrc :
 
-    require 'looksee'
-    def lp(*args)
-      Looksee.lookup_path(*args)
-    end
+    require 'looksee/shortcuts'
 
-Now:
+This defines a method +lp+ ("lookup path") which lets you do:
 
     irb(main):001:0> lp []
     => Array
@@ -80,21 +77,22 @@ Or if you don't want protected:
 
     lp [], :protected => false
 
-You can configure the defaults and colors:
+There are variations too.  And you can configure things.  And you can
+use it as a library without polluting the built-in classes.  See:
 
-    ri Looksee
+    $ ri Looksee
 
 Enjoy!
 
-== INSTALL:
+== INSTALL
 
   gem install looksee
 
-== FEATURES/PROBLEMS:
+== FEATURES/PROBLEMS
 
 * Currently only does MRI 1.8, 1.9.
 
-== LICENSE:
+== LICENSE
 
 (The MIT License)
 

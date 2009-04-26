@@ -2,6 +2,60 @@ require "rbconfig"
 require File.dirname(__FILE__) + "/../ext/looksee/looksee.#{Config::CONFIG['DLEXT']}"
 require "looksee/version"
 
+#
+# Looksee lets you inspect the method lookup path of an object.  There
+# are two ways to use it:
+#
+# 1. Keep all methods contained in the Looksee namespace:
+#
+#     require 'looksee'
+#
+# 2. Let it all hang out:
+#
+#     require 'looksee/shortcuts'
+#
+# The latter adds the following shortcuts to the built-in classes:
+#
+#   Object#lookup_path
+#   Object#dump_lookup_path
+#   Object#lp
+#   Object#lpi
+#
+# See their docs.
+#
+# == Usage
+#
+# In irb:
+#
+#     require 'looksee/shortcuts'
+#     lp some_object
+#
+# +lp+ returns a LookupPath object, which has +inspect+ defined to
+# print things out pretty.  By default, it shows public, protected,
+# and overridden methods.  They're all colored, which makes showing
+# overridden methods not such a strange idea.
+#
+# Some examples of the other shortcuts:
+#
+#     lpi Array
+#     some_object.lookup_path
+#     foo.bar.screw.you.demeter.dump_lookup_path.etc
+#
+# If you're being namespace-clean, you'll need to do:
+#
+#     require 'looksee'
+#     Looksee.lookup_path(some_object, :private)
+#
+# == Configuration
+#
+# Set these:
+#
+#     Looksee.default_lookup_path_options
+#     Looksee.default_width
+#     Looksee.styles
+#
+# See their docs.
+#
 module Looksee
   class << self
     #
@@ -9,11 +63,10 @@ module Looksee
     # according to the options given.  The following options are
     # recognized:
     #
-    # :public - include public methods
-    # :protected - include protected methods
-    # :private - include private methods
-    # :all - same as [:public, :protected, :private]
-    # :overridden - include methods overridden by subclasses
+    # * +:public+ - include public methods
+    # * +:protected+ - include protected methods
+    # * +:private+ - include private methods
+    # * +:overridden+ - include methods overridden by subclasses
     #
     # The default (if options is nil or omitted) is [:public].
     #
@@ -56,7 +109,7 @@ module Looksee
     #   * The rdoc for the Object class.
     #
     def lookup_path(object, *options)
-      normalized_options = Looksee.default_options.dup
+      normalized_options = Looksee.default_lookup_path_options.dup
       hash_options = options.last.is_a?(Hash) ? options.pop : {}
       options.each do |option|
         normalized_options[option] = true
@@ -65,12 +118,49 @@ module Looksee
       LookupPath.new(object, normalized_options)
     end
 
-    attr_accessor :default_options
+    #
+    # The default options passed to lookup_path.
+    #
+    # Default: <tt>{:public => true, :protected => true, :overridden => true}</tt>
+    #
+    attr_accessor :default_lookup_path_options
+
+    #
+    # The width to use for displaying output, when not available in
+    # the COLUMNS environment variable.
+    #
+    # Default: 80
+    #
     attr_accessor :default_width
+
+    #
+    # The default styles to use for the +inspect+ strings.
+    #
+    # This is a hash with keys:
+    #
+    # * :module
+    # * :public
+    # * :protected
+    # * :private
+    # * :overridden
+    #
+    # The values are format strings.  They should all contain a single
+    # "%s", which is where the name is inserted.
+    #
+    # Default:
+    #
+    #       {
+    #         :module     => "\e[1;37m%s\e[0m",
+    #         :public     => "\e[1;32m%s\e[0m",
+    #         :protected  => "\e[1;33m%s\e[0m",
+    #         :private    => "\e[1;31m%s\e[0m",
+    #         :overridden => "\e[1;30m%s\e[0m",
+    #       }
+    #
     attr_accessor :styles
   end
 
-  self.default_options = {:public => true, :protected => true, :overridden => true}
+  self.default_lookup_path_options = {:public => true, :protected => true, :overridden => true}
   self.default_width = 80
   self.styles = {
     :module     => "\e[1;37m%s\e[0m",
@@ -83,6 +173,17 @@ module Looksee
   class LookupPath
     attr_reader :entries
 
+    #
+    # Create a LookupPath for the given object.
+    #
+    # Options may be given to restrict which visibilities are
+    # included.
+    #
+    #   :public
+    #   :protected
+    #   :private
+    #   :overridden
+    #
     def initialize(object, options={})
       @entries = []
       seen = {}
@@ -118,14 +219,17 @@ module Looksee
     #
     # An entry in the LookupPath.
     #
-    # Contains a module and its methods, along with access
+    # Contains a module and its methods, along with visibility
     # information (public, private, etc.).
     #
     class Entry
+      #
+      # Don't call me, silly.  I'm just part of a LookupPath.
+      #
       def initialize(mod, seen, options)
         @module = mod
         @methods = []
-        @accesses = {}
+        @visibilities = {}
         add_methods(mod.public_instance_methods(false)   , :public   , seen) if options[:public   ]
         add_methods(mod.protected_instance_methods(false), :protected, seen) if options[:protected]
         add_methods(mod.private_instance_methods(false)  , :private  , seen) if options[:private  ]
@@ -134,30 +238,47 @@ module Looksee
 
       attr_reader :module, :methods
 
+      #
+      # Return the name of the class or module.
+      #
+      # Singleton classes are displayed in brackets.  Singleton class
+      # of singleton classes are displayed in double brackets.  But
+      # you'd never need that, would you?
+      #
       def module_name
         name = @module.to_s  # #name doesn't do singleton classes right
         nil while name.sub!(/#<Class:(.*)>/, '[\\1]')
         name
       end
 
+      #
+      # Yield each method along with its visibility (:public,
+      # :private, :protected, or :overridden).
+      #
       def each
         @methods.each do |name|
-          yield name, @accesses[name]
+          yield name, @visibilities[name]
         end
       end
 
       include Enumerable
 
+      #
+      # Return a nice, pretty string for inspection.
+      #
+      # Contains the module name, plus the method names laid out in
+      # columns.  Pass a :width option to control the output width.
+      #
       def inspect(options={})
         styled_module_name << "\n" << Columnizer.columnize(styled_methods, options[:width])
       end
 
       private  # -----------------------------------------------------
 
-      def add_methods(methods, access, seen)
+      def add_methods(methods, visibility, seen)
         methods.each do |method|
           @methods << method
-          @accesses[method] = seen[method] ? :overridden : access
+          @visibilities[method] = seen[method] ? :overridden : visibility
         end
       end
 
@@ -166,8 +287,8 @@ module Looksee
       end
 
       def styled_methods
-        map do |name, access|
-          Looksee.styles[access] % name
+        map do |name, visibility|
+          Looksee.styles[visibility] % name
         end
       end
     end
@@ -175,6 +296,11 @@ module Looksee
 
   module Columnizer
     class << self
+      #
+      # Arrange the given strings in columns, restricted to the given
+      # width.  Smart enough to ignore content in terminal control
+      # sequences.
+      #
       def columnize(strings, width)
         num_columns = 1
         layout = [strings]
