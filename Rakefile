@@ -2,7 +2,7 @@
 require File.dirname(__FILE__) + '/lib/looksee/version'
 
 $hoe = Hoe.new('looksee', Looksee::VERSION) do |p|
-  p.developer('FIXME full name', 'FIXME email')
+  p.developer('George Ogata', 'george.ogata@gmail.com')
   p.changes              = p.paragraphs_of("History.txt", 0..1).join("\n\n")
   #p.post_install_message = 'PostInstall.txt'
   p.rubyforge_name       = p.name
