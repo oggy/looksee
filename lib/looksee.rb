@@ -328,7 +328,7 @@ module Looksee
 
       def layout_width(layout)
         widths = layout_column_widths(layout)
-        widths.inject(0, :+) + 2*layout.length
+        widths.inject(0){|sum, w| sum + w} + 2*layout.length
       end
 
       def layout_column_widths(layout)
