@@ -9,7 +9,7 @@
  * before using it in ruby.
  */
 VALUE Looksee_internal_superclass(VALUE self, VALUE internal_class) {
-  VALUE super = RCLASS(internal_class)->super;
+  VALUE super = RCLASS_SUPER(internal_class);
   if (!super)
     return Qnil;
   return super;
@@ -41,7 +41,7 @@ VALUE Looksee_internal_class_to_module(VALUE self, VALUE internal_class) {
       return internal_class;
     }
   }
-  rb_raise(rb_eArgError, "not an internal class: %s", RSTRING(rb_inspect(internal_class))->ptr);
+  rb_raise(rb_eArgError, "not an internal class: %s", RSTRING_PTR(rb_inspect(internal_class)));
 }
 
 void Init_looksee(void) {
