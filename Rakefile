@@ -9,8 +9,8 @@ $hoe = Hoe.new('looksee', Looksee::VERSION) do |p|
   #p.extra_deps           = [['gemname', 'version']]
   p.extra_dev_deps = [
     ['newgem', ">= #{::Newgem::VERSION}"],
-    ['rspec', '1.2.0'],
-    ['mocha', '0.9.5'],
+    ['rspec', '>= 1.2.7'],
+    ['mocha', '>= 0.9.5'],
   ]
 
   p.clean_globs |= %w[**/.DS_Store tmp *.log]
