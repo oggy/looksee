@@ -34,7 +34,5 @@ Spec::Rake::SpecTask.new(:spec => :compile) do |t|
   t.libs << 'lib' << 'spec'
 end
 
-task :regem do
-  rm_f FileList['pkg/*.gem']
-  Rake::Task['gem'].invoke
-end
+desc "Rebuild the gem from scratch."
+task :regem => [:clobber, :gem]
