@@ -1,5 +1,11 @@
 #include "ruby.h"
 
+#if RUBY_VERSION < 187
+#  define RCLASS_IV_TBL(c) (RCLASS(c)->iv_tbl)
+#  define RCLASS_M_TBL(c) (RCLASS(c)->m_tbl)
+#  define RCLASS_SUPER(c) (RCLASS(c)->super)
+#endif
+
 /*
  * Return the internal superclass of this class.
  *

@@ -136,10 +136,20 @@ describe Looksee::LookupPath do
     mod.stubs(:private_instance_methods  ).returns(private)
   end
 
+  #
   # Ditch junk in our testing environment at the end of the list.
+  #
   def predictable_modules(lookup_path)
     modules = lookup_path.entries.map{|entry| entry.module_name}
-    modules.reject{|m| m =~ /\A(Mocha|Spec|BasicObject)/}
+    modules_to_ignore = [
+      # pollution from testing libraries
+      'Mocha', 'Spec',
+      # RSpec adds this under ruby 1.8.6
+      'InstanceExecHelper',
+      # only in ruby 1.9
+      'BasicObject',
+    ]
+    modules.reject{|m| m =~ /\A(#{modules_to_ignore.join('|')})/}
   end
 
   it "should contain each module in the object's lookup path" do
@@ -152,7 +162,8 @@ describe Looksee::LookupPath do
     object.singleton_class
     lookup_path = Looksee::LookupPath.new(object)
     modules = predictable_modules(lookup_path)
-    modules.should == %W"[#<Derived:#{'%#x' % (object.__id__ << 1)}>] Derived Mod2 Mod1 Base Object Kernel"
+    modules.shift.should =~ /\A\[\#<Derived:0x[\da-f]+>\]\z/
+    modules.should == %W"Derived Mod2 Mod1 Base Object Kernel"
   end
 
   it "should contain singleton classes of all ancestors for class objects" do
@@ -167,7 +178,7 @@ describe Looksee::LookupPath do
     end
 
     def first_lines(string, num)
-      string.lines.first(num).join
+      string.scan(/.*\n/).first(num).join
     end
 
     describe "contents" do
