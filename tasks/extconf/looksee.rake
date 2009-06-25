@@ -17,7 +17,7 @@ namespace :extconf do
     if Dir.glob("**/#{extension}.{o,so,dll}").length == 0
       STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       STDERR.puts "Gem actually failed to build.  Your system is"
-      STDERR.puts "NOT configured properly to build #{GEM_NAME}."
+      STDERR.puts "NOT configured properly to build looksee."
       STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       exit(1)
     end
