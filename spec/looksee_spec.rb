@@ -148,8 +148,10 @@ describe Looksee::LookupPath do
       'InstanceExecHelper',
       # only in ruby 1.9
       'BasicObject',
+      # something pulls this in under ruby 1.9
+      'PP',
     ]
-    modules.reject{|m| m =~ /\A(#{modules_to_ignore.join('|')})/}
+    modules.reject{|m| m =~ /\A\[*(#{modules_to_ignore.join('|')})/}
   end
 
   it "should contain each module in the object's lookup path" do
