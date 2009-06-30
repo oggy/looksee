@@ -1,24 +1,5 @@
 require 'spec_helper'
 
-class Object
-  #
-  # Return this object's singleton class.
-  #
-  def singleton_class
-    class << self; self; end
-  end
-end
-
-class String
-  #
-  # Remove a left margin delimited by '|'-characters.  Useful for
-  # heredocs:
-  #
-  def demargin
-    gsub(/^ *\|/, '')
-  end
-end
-
 class Base
   public
   def base_public; end
@@ -299,4 +280,3 @@ describe Looksee::LookupPath do
     end
   end
 end
-
