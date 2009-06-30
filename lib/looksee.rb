@@ -158,6 +158,20 @@ module Looksee
     #       }
     #
     attr_accessor :styles
+
+    #
+    # Return the chain of classes and modules which comprise the
+    # object's method lookup path.
+    #
+    def lookup_modules(object)
+      modules = []
+      klass = Looksee.internal_class(object)
+      while klass
+        modules << Looksee.internal_class_to_module(klass)
+        klass = Looksee.internal_superclass(klass)
+      end
+      modules
+    end
   end
 
   self.default_lookup_path_options = {:public => true, :protected => true, :overridden => true}
@@ -187,7 +201,7 @@ module Looksee
     def initialize(object, options={})
       @entries = []
       seen = {}
-      find_modules(object).each do |mod|
+      Looksee.lookup_modules(object).each do |mod|
         entry = Entry.new(mod, seen, options)
         entry.methods.each{|m| seen[m] = true}
         @entries << entry
@@ -200,16 +214,6 @@ module Looksee
     end
 
     private  # -------------------------------------------------------
-
-    def find_modules(object)
-      modules = []
-      klass = Looksee.internal_class(object)
-      while klass
-        modules << Looksee.internal_class_to_module(klass)
-        klass = Looksee.internal_superclass(klass)
-      end
-      modules
-    end
 
     def normalize_inspect_options(options)
       options[:width] ||= ENV['COLUMNS'].to_i.nonzero? || Looksee.default_width

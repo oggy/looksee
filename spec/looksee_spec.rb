@@ -1,7 +1,67 @@
 require 'spec_helper'
 
 describe Looksee do
-  describe ".looksee" do
+  include TemporaryClasses
+
+  describe ".lookup_modules" do
+    #
+    # Wrapper for the method under test.
+    #
+    # Filter out modules which are hard to test against, and returns
+    # the list of module names.  #inspect strings are used for names
+    # of singleton classes, since they have no name.
+    #
+    def filtered_lookup_modules(object)
+      result = Looksee.lookup_modules(object).select{|mod| deterministic_module?(mod)}
+      # Singleton classes have no name - use the inspect string instead.
+      result.map{|mod| mod.name.empty? ? mod.inspect : mod.name}
+    end
+
+    #
+    # Return true if the given module is something we can test for.
+    #
+    # This excludes ruby version dependent modules, and modules tossed
+    # into the hierarchy by testing frameworks.
+    #
+    def deterministic_module?(mod)
+      junk_patterns = [
+        # pollution from testing libraries
+        'Mocha', 'Spec',
+        # RSpec adds this under ruby 1.8.6
+        'InstanceExecHelper',
+        # only in ruby 1.9
+        'BasicObject',
+        # something pulls this in under ruby 1.9
+        'PP',
+      ]
+      mod.name !~ /\A\[*(#{junk_patterns.join('|')})/
+    end
+
+    it "should contain an entry for each module in the object's lookup path" do
+      make_module 'Mod1'
+      make_module 'Mod2'
+      make_class 'Base'
+      make_class 'Derived', :super => Base, :include => [Mod1, Mod2]
+      filtered_lookup_modules(Derived.new) == %w'Derived Mod2 Mod1 Base Object Kernel'
+    end
+
+    it "contain an entry for the object's singleton class if it exists" do
+      object = Object.new
+      object.singleton_class
+
+      result = filtered_lookup_modules(object)
+      result.shift.should =~ /\A#<Class:\#<Object:0x[\da-f]+>>\z/
+      result.should == %w"Object Kernel"
+    end
+
+    it "should contain entries for singleton classes of all ancestors for class objects" do
+      make_class 'C'
+      result = filtered_lookup_modules(C)
+      result.should == %w'#<Class:C> #<Class:Object> Class Module Object Kernel'
+    end
+  end
+
+  describe ".lookup_path" do
     it "should return a LookupPath object" do
       object = Object.new
       lookup_path = Looksee.lookup_path(object)
@@ -42,54 +102,26 @@ describe Looksee::LookupPath do
     mod.stubs(:private_instance_methods  ).returns(private)
   end
 
-  #
-  # Ditch junk in our testing environment at the end of the list.
-  #
-  def predictable_modules(lookup_path)
-    modules = lookup_path.entries.map{|entry| entry.module_name}
-    modules_to_ignore = [
-      # pollution from testing libraries
-      'Mocha', 'Spec',
-      # RSpec adds this under ruby 1.8.6
-      'InstanceExecHelper',
-      # only in ruby 1.9
-      'BasicObject',
-      # something pulls this in under ruby 1.9
-      'PP',
-    ]
-    modules.reject{|m| m =~ /\A\[*(#{modules_to_ignore.join('|')})/}
-  end
-
   include TemporaryClasses
 
-  before do
-    make_module 'Mod1'
-    make_module 'Mod2'
-    make_class 'Base'
-    make_class 'Derived', :super => Base, :include => [Mod1, Mod2]
-  end
-
-  it "should contain each module in the object's lookup path" do
-    lookup_path = Looksee::LookupPath.new(Derived.new)
-    predictable_modules(lookup_path).should == %w'Derived Mod2 Mod1 Base Object Kernel'
-  end
-
-  it "should contain the object's singleton class if it exists" do
-    object = Derived.new
-    object.singleton_class
-    lookup_path = Looksee::LookupPath.new(object)
-    modules = predictable_modules(lookup_path)
-    modules.shift.should =~ /\A\[\#<Derived:0x[\da-f]+>\]\z/
-      modules.should == %W"Derived Mod2 Mod1 Base Object Kernel"
-  end
-
-  it "should contain singleton classes of all ancestors for class objects" do
-    lookup_path = Looksee::LookupPath.new(Derived)
-    modules = predictable_modules(lookup_path)
-    modules.should == %w'[Derived] [Base] [Object] Class Module Object Kernel'
+  describe "#entries" do
+    it "should contain an entry for each module in the object's lookup path" do
+      object = Object.new
+      make_class 'C'
+      make_class 'D'
+      Looksee.stubs(:lookup_modules).with(object).returns([C, D])
+      Looksee::LookupPath.new(object).entries.map{|entry| entry.module_name}.should == %w'C D'
+    end
   end
 
   describe "#inspect" do
+    before do
+      make_module 'Mod1'
+      make_module 'Mod2'
+      make_class 'Base'
+      make_class 'Derived', :super => Base, :include => [Mod1, Mod2]
+    end
+
     before do
       Looksee.stubs(:styles).returns(Hash.new{'%s'})
     end
