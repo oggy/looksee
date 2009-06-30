@@ -1,80 +1,5 @@
 require 'spec_helper'
 
-class Base
-  public
-  def base_public; end
-  protected
-  def base_protected; end
-  private
-  def base_private; end
-
-  class << self
-    public
-    def base_singleton_public; end
-    protected
-    def base_singleton_protected; end
-    private
-    def base_singleton_private; end
-  end
-end
-
-module Mod1
-  public
-  def mod1_public; end
-  protected
-  def mod1_protected; end
-  private
-  def mod1_private; end
-
-  class << self
-    public
-    def mod1_singleton_public; end
-    protected
-    def mod1_singleton_protected; end
-    private
-    def mod1_singleton_private; end
-  end
-end
-
-module Mod2
-  public
-  def mod2_public; end
-  protected
-  def mod2_protected; end
-  private
-  def mod2_private; end
-
-  class << self
-    public
-    def mod2_singleton_public; end
-    protected
-    def mod2_singleton_protected; end
-    private
-    def mod2_singleton_private; end
-  end
-end
-
-class Derived < Base
-  include Mod1
-  include Mod2
-
-  public
-  def derived_public; end
-  protected
-  def derived_protected; end
-  private
-  def derived_private; end
-
-  class << self
-    public
-    def derived_singleton_public; end
-    protected
-    def derived_singleton_protected; end
-    private
-    def derived_singleton_private; end
-  end
-end
-
 describe Looksee do
   describe ".looksee" do
     it "should return a LookupPath object" do
@@ -135,6 +60,15 @@ describe Looksee::LookupPath do
     modules.reject{|m| m =~ /\A\[*(#{modules_to_ignore.join('|')})/}
   end
 
+  include TemporaryClasses
+
+  before do
+    make_module 'Mod1'
+    make_module 'Mod2'
+    make_class 'Base'
+    make_class 'Derived', :super => Base, :include => [Mod1, Mod2]
+  end
+
   it "should contain each module in the object's lookup path" do
     lookup_path = Looksee::LookupPath.new(Derived.new)
     predictable_modules(lookup_path).should == %w'Derived Mod2 Mod1 Base Object Kernel'
@@ -146,7 +80,7 @@ describe Looksee::LookupPath do
     lookup_path = Looksee::LookupPath.new(object)
     modules = predictable_modules(lookup_path)
     modules.shift.should =~ /\A\[\#<Derived:0x[\da-f]+>\]\z/
-    modules.should == %W"Derived Mod2 Mod1 Base Object Kernel"
+      modules.should == %W"Derived Mod2 Mod1 Base Object Kernel"
   end
 
   it "should contain singleton classes of all ancestors for class objects" do
