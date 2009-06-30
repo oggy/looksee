@@ -54,10 +54,9 @@ module TemporaryClasses
   #
   # Create a temporary class with the given superclass.
   #
-  def temporary_class(zuperclass=Object, &block)
-    klass = Class.new(zuperclass)
+  def temporary_class(superclass=Object, &block)
+    klass = Class.new(superclass, &block)
     @temporary_modules << klass
-    klass.class_eval(&block) if block
     klass
   end
 
@@ -65,9 +64,8 @@ module TemporaryClasses
   # Create a temporary module with the given name.
   #
   def temporary_module(&block)
-    mod = Module.new
+    mod = Module.new(&block)
     @temporary_modules << mod
-    mod.module_eval(&block) if block
     mod
   end
 end

@@ -99,12 +99,6 @@ describe Looksee::LookupPath do
     Looksee.default_lookup_path_options = {}
   end
 
-  def stub_methods(mod, public, protected, private)
-    mod.stubs(:public_instance_methods   ).returns(public)
-    mod.stubs(:protected_instance_methods).returns(protected)
-    mod.stubs(:private_instance_methods  ).returns(private)
-  end
-
   include TemporaryClasses
 
   describe "#entries" do
@@ -119,84 +113,83 @@ describe Looksee::LookupPath do
 
   describe "#inspect" do
     before do
-      Mod1 = temporary_module
-      Mod2 = temporary_module
-      Base = temporary_class
-      Derived = temporary_class Base do
-        include Mod1
-        include Mod2
-      end
-    end
-
-    before do
       Looksee.stubs(:styles).returns(Hash.new{'%s'})
     end
 
-    def first_lines(string, num)
-      string.scan(/.*\n/).first(num).join
+    def stub_methods(mod, public, protected, private)
+      mod.stubs(:public_instance_methods   ).returns(public)
+      mod.stubs(:protected_instance_methods).returns(protected)
+      mod.stubs(:private_instance_methods  ).returns(private)
     end
 
     describe "contents" do
       before do
-        [Derived, Mod2].each do |mod|
-          stub_methods(mod, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'])
+        M = temporary_module
+        C = temporary_class do
+          include M
         end
+        @object = Object.new
+        Looksee.stubs(:lookup_modules).with(@object).returns([C, M])
+        stub_methods(C, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'])
+        stub_methods(M, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'])
       end
 
       it "should show only public instance methods when only public methods are requested" do
-        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true, :overridden => true)
-        first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
-          |Derived
+        lookup_path = Looksee::LookupPath.new(@object, :public => true, :overridden => true)
+        lookup_path.inspect.should == <<-EOS.demargin
+          |C
           |  public1  public2
-          |Mod2
+          |M
           |  public1  public2
         EOS
       end
 
       it "should show modules and protected instance methods when only protected methods are requested" do
-        lookup_path = Looksee::LookupPath.new(Derived.new, :protected => true, :overridden => true)
-        first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
-          |Derived
+        lookup_path = Looksee::LookupPath.new(@object, :protected => true, :overridden => true)
+        lookup_path.inspect.should == <<-EOS.demargin
+          |C
           |  protected1  protected2
-          |Mod2
+          |M
           |  protected1  protected2
         EOS
       end
 
       it "should show modules and private instance methods when only private methods are requested" do
-        lookup_path = Looksee::LookupPath.new(Derived.new, :private => true, :overridden => true)
-        first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
-          |Derived
+        lookup_path = Looksee::LookupPath.new(@object, :private => true, :overridden => true)
+        lookup_path.inspect.should == <<-EOS.demargin
+          |C
           |  private1  private2
-          |Mod2
+          |M
           |  private1  private2
         EOS
       end
 
       it "should show modules with public and private instance methods when only public and private methods are requested" do
-        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true, :private => true, :overridden => true)
-        first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
-          |Derived
+        lookup_path = Looksee::LookupPath.new(@object, :public => true, :private => true, :overridden => true)
+        lookup_path.inspect.should == <<-EOS.demargin
+          |C
           |  private1  private2  public1  public2
-          |Mod2
+          |M
           |  private1  private2  public1  public2
         EOS
       end
 
       it "should show singleton classes as class names in brackets" do
-        stub_methods(Derived.singleton_class, ['public1', 'public2'], [], [])
-        lookup_path = Looksee::LookupPath.new(Derived, :public => true)
-        first_lines(lookup_path.inspect, 2).should == <<-EOS.demargin
-          |[Derived]
+        Looksee.stubs(:lookup_modules).with(C).returns([C.singleton_class])
+        stub_methods(C.singleton_class, ['public1', 'public2'], [], [])
+        lookup_path = Looksee::LookupPath.new(C, :public => true)
+        lookup_path.inspect.should == <<-EOS.demargin
+          |[C]
           |  public1  public2
         EOS
       end
 
       it "should handle singleton classes of singleton classes correctly" do
-        stub_methods(Derived.singleton_class.singleton_class, ['public1', 'public2'], [], [])
-        lookup_path = Looksee::LookupPath.new(Derived.singleton_class, :public => true)
-        first_lines(lookup_path.inspect, 2).should == <<-EOS.demargin
-          |[[Derived]]
+        Looksee.stubs(:lookup_modules).with(C.singleton_class).returns([C.singleton_class.singleton_class])
+        stub_methods(C.singleton_class.singleton_class, ['public1', 'public2'], [], [])
+        lookup_path = Looksee::LookupPath.new(C.singleton_class, :public => true)
+        lookup_path.inspect.should == <<-EOS.demargin
+          |[[C]]
           |  public1  public2
         EOS
       end
@@ -215,37 +208,41 @@ describe Looksee::LookupPath do
       end
 
       it "should delimit each word with the configured delimiters" do
-        stub_methods(Derived, ['public'], ['protected'], ['private'])
-        stub_methods(Mod2, ['public', 'foo'], [], [])
-        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true, :protected => true, :private => true, :overridden => true)
-        first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
-          |\`Derived\'
+        C = temporary_class
+        Looksee.stubs(:lookup_modules).returns([C])
+        stub_methods(C, ['public'], ['protected'], ['private'])
+        lookup_path = Looksee::LookupPath.new(Object.new, :public => true, :protected => true, :private => true, :overridden => true)
+        lookup_path.inspect.should == <<-EOS.demargin
+          |\`C\'
           |  <private>  [protected]  {public}
-          |\`Mod2\'
-          |  {foo}  (public)
         EOS
       end
     end
 
     describe "layout" do
       it "should wrap method lists at the configured number of columns, sorting vertically first, and aligning into a grid" do
-        stub_methods(Derived, %w'aa b c dd ee f g hh i', [], [])
-        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true)
-        first_lines(lookup_path.inspect(:width => 20), 3).should == <<-EOS.demargin
-          |Derived
+        C = temporary_class
+        Looksee.stubs(:lookup_modules).returns([C])
+        stub_methods(C, %w'aa b c dd ee f g hh i', [], [])
+        lookup_path = Looksee::LookupPath.new(Object.new, :public => true)
+        lookup_path.inspect(:width => 20).should == <<-EOS.demargin
+          |C
           |  aa  c   ee  g   i
           |  b   dd  f   hh
         EOS
       end
 
       it "should lay the methods of each module out independently" do
-        stub_methods(Derived, ['a', 'long_long_long_long_name'], [], [])
-        stub_methods(Mod2, ['long_long_long', 'short'], [], [])
-        lookup_path = Looksee::LookupPath.new(Derived.new, :public => true)
-        first_lines(lookup_path.inspect, 4).should == <<-EOS.demargin
-          |Derived
+        A = temporary_class
+        B = temporary_class
+        Looksee.stubs(:lookup_modules).returns([A, B])
+        stub_methods(A, ['a', 'long_long_long_long_name'], [], [])
+        stub_methods(B, ['long_long_long', 'short'], [], [])
+        lookup_path = Looksee::LookupPath.new(Object.new, :public => true)
+        lookup_path.inspect.should == <<-EOS.demargin
+          |A
           |  a  long_long_long_long_name
-          |Mod2
+          |B
           |  long_long_long  short
         EOS
       end
