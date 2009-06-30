@@ -12,18 +12,21 @@ describe Looksee do
     # of singleton classes, since they have no name.
     #
     def filtered_lookup_modules(object)
-      result = Looksee.lookup_modules(object).select{|mod| deterministic_module?(mod)}
-      # Singleton classes have no name - use the inspect string instead.
-      result.map{|mod| mod.name.empty? ? mod.inspect : mod.name}
+      result = Looksee.lookup_modules(object)
+      # Singleton classes have no name ('' in <1.9, nil in 1.9+).  Use
+      # the inspect string instead.
+      names = result.map{|mod| mod.name.to_s.empty? ? mod.inspect : mod.name}
+      names.select{|name| deterministic_module_name?(name)}
     end
 
     #
-    # Return true if the given module is something we can test for.
+    # Return true if the given module name is of a module we can test
+    # for.
     #
     # This excludes ruby version dependent modules, and modules tossed
     # into the hierarchy by testing frameworks.
     #
-    def deterministic_module?(mod)
+    def deterministic_module_name?(name)
       junk_patterns = [
         # pollution from testing libraries
         'Mocha', 'Spec',
@@ -34,14 +37,20 @@ describe Looksee do
         # something pulls this in under ruby 1.9
         'PP',
       ]
-      mod.name !~ /\A\[*(#{junk_patterns.join('|')})/
+
+      # Singleton classes of junk are junk.
+      while name =~ /\A#<Class:(.*)>\z/
+        name = $1
+      end
+
+      name !~ /\A(#{junk_patterns.join('|')})/
     end
 
     it "should contain an entry for each module in the object's lookup path" do
-      Mod1 = temporary_module
-      Mod2 = temporary_module
-      Base = temporary_class
-      Derived = temporary_class(Base) do
+      temporary_module :Mod1
+      temporary_module :Mod2
+      temporary_class :Base
+      temporary_class :Derived, Base do
         include Mod1
         include Mod2
       end
@@ -58,7 +67,7 @@ describe Looksee do
     end
 
     it "should contain entries for singleton classes of all ancestors for class objects" do
-      C = temporary_class
+      temporary_class :C
       result = filtered_lookup_modules(C)
       result.should == %w'#<Class:C> #<Class:Object> Class Module Object Kernel'
     end
@@ -104,8 +113,8 @@ describe Looksee::LookupPath do
   describe "#entries" do
     it "should contain an entry for each module in the object's lookup path" do
       object = Object.new
-      C = temporary_class
-      D = temporary_class
+      temporary_class :C
+      temporary_class :D
       Looksee.stubs(:lookup_modules).with(object).returns([C, D])
       Looksee::LookupPath.new(object).entries.map{|entry| entry.module_name}.should == %w'C D'
     end
@@ -124,8 +133,8 @@ describe Looksee::LookupPath do
 
     describe "contents" do
       before do
-        M = temporary_module
-        C = temporary_class do
+        temporary_module :M
+        temporary_class :C do
           include M
         end
         @object = Object.new
@@ -208,7 +217,7 @@ describe Looksee::LookupPath do
       end
 
       it "should delimit each word with the configured delimiters" do
-        C = temporary_class
+        temporary_class :C
         Looksee.stubs(:lookup_modules).returns([C])
         stub_methods(C, ['public'], ['protected'], ['private'])
         lookup_path = Looksee::LookupPath.new(Object.new, :public => true, :protected => true, :private => true, :overridden => true)
@@ -221,7 +230,7 @@ describe Looksee::LookupPath do
 
     describe "layout" do
       it "should wrap method lists at the configured number of columns, sorting vertically first, and aligning into a grid" do
-        C = temporary_class
+        temporary_class :C
         Looksee.stubs(:lookup_modules).returns([C])
         stub_methods(C, %w'aa b c dd ee f g hh i', [], [])
         lookup_path = Looksee::LookupPath.new(Object.new, :public => true)
@@ -233,8 +242,8 @@ describe Looksee::LookupPath do
       end
 
       it "should lay the methods of each module out independently" do
-        A = temporary_class
-        B = temporary_class
+        temporary_class :A
+        temporary_class :B
         Looksee.stubs(:lookup_modules).returns([A, B])
         stub_methods(A, ['a', 'long_long_long_long_name'], [], [])
         stub_methods(B, ['long_long_long', 'short'], [], [])

@@ -42,20 +42,18 @@ module TemporaryClasses
 
     mod.after do
       @temporary_modules.each do |mod|
-        namespace = mod.name.split(/::/)
-        basename = namespace.pop
-        namespace.inject(Object) do |_namespace, _basename|
-          _namespace.const_get(_basename)
-        end.send(:remove_const, basename)
+        Object.send :remove_const, mod.name
       end
     end
   end
 
   #
-  # Create a temporary class with the given superclass.
+  # Create a temporary class with the given name and superclass.
   #
-  def temporary_class(superclass=Object, &block)
-    klass = Class.new(superclass, &block)
+  def temporary_class(name, superclass=Object, &block)
+    klass = Class.new(superclass)
+    Object.const_set(name, klass)
+    klass.class_eval(&block) if block
     @temporary_modules << klass
     klass
   end
@@ -63,8 +61,10 @@ module TemporaryClasses
   #
   # Create a temporary module with the given name.
   #
-  def temporary_module(&block)
-    mod = Module.new(&block)
+  def temporary_module(name, &block)
+    mod = Module.new
+    Object.const_set(name, mod)
+    mod.class_eval(&block) if block
     @temporary_modules << mod
     mod
   end
