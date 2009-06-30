@@ -38,10 +38,13 @@ describe Looksee do
     end
 
     it "should contain an entry for each module in the object's lookup path" do
-      make_module 'Mod1'
-      make_module 'Mod2'
-      make_class 'Base'
-      make_class 'Derived', :super => Base, :include => [Mod1, Mod2]
+      Mod1 = temporary_module
+      Mod2 = temporary_module
+      Base = temporary_class
+      Derived = temporary_class(Base) do
+        include Mod1
+        include Mod2
+      end
       filtered_lookup_modules(Derived.new) == %w'Derived Mod2 Mod1 Base Object Kernel'
     end
 
@@ -55,7 +58,7 @@ describe Looksee do
     end
 
     it "should contain entries for singleton classes of all ancestors for class objects" do
-      make_class 'C'
+      C = temporary_class
       result = filtered_lookup_modules(C)
       result.should == %w'#<Class:C> #<Class:Object> Class Module Object Kernel'
     end
@@ -107,8 +110,8 @@ describe Looksee::LookupPath do
   describe "#entries" do
     it "should contain an entry for each module in the object's lookup path" do
       object = Object.new
-      make_class 'C'
-      make_class 'D'
+      C = temporary_class
+      D = temporary_class
       Looksee.stubs(:lookup_modules).with(object).returns([C, D])
       Looksee::LookupPath.new(object).entries.map{|entry| entry.module_name}.should == %w'C D'
     end
@@ -116,10 +119,13 @@ describe Looksee::LookupPath do
 
   describe "#inspect" do
     before do
-      make_module 'Mod1'
-      make_module 'Mod2'
-      make_class 'Base'
-      make_class 'Derived', :super => Base, :include => [Mod1, Mod2]
+      Mod1 = temporary_module
+      Mod2 = temporary_module
+      Base = temporary_class
+      Derived = temporary_class Base do
+        include Mod1
+        include Mod2
+      end
     end
 
     before do

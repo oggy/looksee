@@ -37,61 +37,37 @@ end
 module TemporaryClasses
   def self.included(mod)
     mod.before do
-      @temporary_names = []
+      @temporary_modules = []
     end
 
     mod.after do
-      @temporary_names.each{|name| Object.send(:remove_const, name)}
+      @temporary_modules.each do |mod|
+        namespace = mod.name.split(/::/)
+        basename = namespace.pop
+        namespace.inject(Object) do |_namespace, _basename|
+          _namespace.const_get(_basename)
+        end.send(:remove_const, basename)
+      end
     end
   end
 
   #
-  # Create a temporary class with the given name.
+  # Create a temporary class with the given superclass.
   #
-  # If a :super option is given (a class), that class is set as the
-  # superclass.
-  #
-  # If an :include option is given (an Array of Modules), those
-  # modules are included.
-  #
-  # If :public, :protected, or :private options are given (Arrays of
-  # Symbols), empty methods are defined with the corresponding
-  # visibility.
-  #
-  def make_class(name, options={})
-    klass = Class.new(options[:super] || Object)
-    set_temporary_module(name, klass, options)
+  def temporary_class(zuperclass=Object, &block)
+    klass = Class.new(zuperclass)
+    @temporary_modules << klass
+    klass.class_eval(&block) if block
+    klass
   end
 
   #
   # Create a temporary module with the given name.
   #
-  # If an :include option is given (an Array of Modules), those
-  # modules are included, one at a time, in that order.
-  #
-  # If :public, :protected, or :private options are given (Arrays of
-  # Symbols), empty methods are defined with the corresponding
-  # visibility.
-  #
-  def make_module(name, options={})
+  def temporary_module(&block)
     mod = Module.new
-    set_temporary_module(name, mod, options)
-  end
-
-  def set_temporary_module(name, mod, options={})
-    [:public, :protected, :private].each do |visibility|
-      options[visibility] or
-        next
-      method_names = options[visibility]
-      method_names.each{ |n| mod.define_method(n){} }
-      mod.send(visibility, *method_names)
-    end
-    if options[:include]
-      options[:include].each do |included|
-        mod.send :include, included
-      end
-    end
-    @temporary_names << name
-    Object.const_set(name, mod)
+    @temporary_modules << mod
+    mod.module_eval(&block) if block
+    mod
   end
 end
