@@ -5,6 +5,7 @@ README.rdoc
 Rakefile
 ext/looksee/extconf.rb
 ext/looksee/looksee.c
+ext/looksee/node-1.9.h
 lib/looksee.rb
 lib/looksee/shortcuts.rb
 lib/looksee/version.rb
