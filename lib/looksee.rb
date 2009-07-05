@@ -39,12 +39,12 @@ require "looksee/version"
 #
 #     lpi Array
 #     some_object.lookup_path
-#     foo.bar.screw.you.demeter.dump_lookup_path.etc
+#     foo.bar.baz.dump_lookup_path.and.more
 #
 # If you're being namespace-clean, you'll need to do:
 #
 #     require 'looksee'
-#     Looksee.lookup_path(some_object, :private)
+#     Looksee.lookup_path(thing)  # like "lp thing"
 #
 # == Configuration
 #
@@ -69,44 +69,6 @@ module Looksee
     # * +:overridden+ - include methods overridden by subclasses
     #
     # The default (if options is nil or omitted) is [:public].
-    #
-    # Here's how ruby lookup works:
-    #
-    #        class: ++++>
-    #   superclass: ---->
-    #
-    #             +--------+
-    #             | Kernel |
-    #             +--------+
-    #                 ^              +--------------+
-    #                 |              |              |
-    #             +--------+    +----------+        |
-    #             | Object |+++>| <Object> |++++    |
-    #             +--------+    +----------+   +    |
-    #                 ^              ^         +    |
-    #                 |              |         +    |
-    #             +--------+    +----------+   +    |
-    #             | Module |+++>| <Module> |++++    |
-    #             +--------+    +----------+   +    |
-    #                 ^              ^         +    |
-    #                 |              |         +    |
-    #             +--------+    +----------+   +    |
-    #     +------>| Class  |+++>| <Class>  |++++    |
-    #     |   +==>+--------+    +----------+   +    |
-    #     |   +       ^              ^         +    |
-    #     |   +       |              |         +    |
-    #     |   +   +--------+    +----------+   +    |
-    #     |   +   |   C    |+++>|   <C>    |++++    |
-    #     |   +   +--------+    +----------+   +    |
-    #     |   +                                +    |
-    #     |   ++++++++++++++++++++++++++++++++++    |
-    #     |                                         |
-    #     +-----------------------------------------+
-    #
-    # Adapted from:
-    #   * http://phrogz.net/RubyLibs/RubyMethodLookupFlow.png
-    #   * http://www.hokstad.com/ruby-object-model.html
-    #   * The rdoc for the Object class.
     #
     def lookup_path(object, *options)
       normalized_options = Looksee.default_lookup_path_options.dup
