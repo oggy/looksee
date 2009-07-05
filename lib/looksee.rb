@@ -234,9 +234,9 @@ module Looksee
         @module = mod
         @methods = []
         @visibilities = {}
-        add_methods(mod.public_instance_methods(false)   , :public   , seen) if options[:public   ]
-        add_methods(mod.protected_instance_methods(false), :protected, seen) if options[:protected]
-        add_methods(mod.private_instance_methods(false)  , :private  , seen) if options[:private  ]
+        add_methods(Looksee.internal_public_instance_methods(mod).map{|sym| sym.to_s}   , :public   , seen) if options[:public   ]
+        add_methods(Looksee.internal_protected_instance_methods(mod).map{|sym| sym.to_s}, :protected, seen) if options[:protected]
+        add_methods(Looksee.internal_private_instance_methods(mod).map{|sym| sym.to_s}  , :private  , seen) if options[:private  ]
         @methods.sort!
       end
 

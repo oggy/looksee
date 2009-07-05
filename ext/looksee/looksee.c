@@ -1,5 +1,13 @@
 #include "ruby.h"
 
+#if RUBY_VERSION >= 190
+#  include "node-1.9.h"
+#  include "ruby/st.h"
+#else
+#  include "node.h"
+#  include "st.h"
+#endif
+
 #if RUBY_VERSION < 187
 #  define RCLASS_IV_TBL(c) (RCLASS(c)->iv_tbl)
 #  define RCLASS_M_TBL(c) (RCLASS(c)->m_tbl)
@@ -50,9 +58,69 @@ VALUE Looksee_internal_class_to_module(VALUE self, VALUE internal_class) {
   rb_raise(rb_eArgError, "not an internal class: %s", RSTRING_PTR(rb_inspect(internal_class)));
 }
 
+typedef struct add_method_if_matching_arg {
+  VALUE names;
+  int visibility;
+} add_method_if_matching_arg_t;
+
+#if RUBY_VERSION < 190
+#  define VISIBILITY(node) ((node)->nd_noex & NOEX_MASK)
+#else
+#  define VISIBILITY(node) ((node)->nd_body->nd_noex & NOEX_MASK)
+#endif
+
+static int add_method_if_matching(ID method_name, NODE *body, add_method_if_matching_arg_t *arg) {
+  /* This entry is for the internal allocator function. */
+  if (method_name == ID_ALLOCATOR)
+    return ST_CONTINUE;
+
+  /* Module#undef_method sets body->nd_body to NULL. */
+  if (!body || !body->nd_body)
+    return ST_CONTINUE;
+
+  if (VISIBILITY(body) == arg->visibility)
+    rb_ary_push(arg->names, ID2SYM(method_name));
+  return ST_CONTINUE;
+}
+
+static VALUE internal_instance_methods(VALUE klass, long visibility) {
+  add_method_if_matching_arg_t arg;
+  arg.names = rb_ary_new();
+  arg.visibility = visibility;
+  st_foreach(RCLASS_M_TBL(klass), add_method_if_matching, (st_data_t)&arg);
+  return arg.names;
+}
+
+/*
+ * Return the list of public instance methods (as Symbols) of the
+ * given internal class.
+ */
+VALUE Looksee_internal_public_instance_methods(VALUE self, VALUE klass) {
+  return internal_instance_methods(klass, NOEX_PUBLIC);
+}
+
+/*
+ * Return the list of protected instance methods (as Symbols) of the
+ * given internal class.
+ */
+VALUE Looksee_internal_protected_instance_methods(VALUE self, VALUE klass) {
+  return internal_instance_methods(klass, NOEX_PROTECTED);
+}
+
+/*
+ * Return the list of private instance methods (as Symbols) of the
+ * given internal class.
+ */
+VALUE Looksee_internal_private_instance_methods(VALUE self, VALUE klass) {
+  return internal_instance_methods(klass, NOEX_PRIVATE);
+}
+
 void Init_looksee(void) {
   VALUE mLooksee = rb_define_module("Looksee");
   rb_define_singleton_method(mLooksee, "internal_superclass", Looksee_internal_superclass, 1);
   rb_define_singleton_method(mLooksee, "internal_class", Looksee_internal_class, 1);
   rb_define_singleton_method(mLooksee, "internal_class_to_module", Looksee_internal_class_to_module, 1);
+  rb_define_singleton_method(mLooksee, "internal_public_instance_methods", Looksee_internal_public_instance_methods, 1);
+  rb_define_singleton_method(mLooksee, "internal_protected_instance_methods", Looksee_internal_protected_instance_methods, 1);
+  rb_define_singleton_method(mLooksee, "internal_private_instance_methods", Looksee_internal_private_instance_methods, 1);
 }

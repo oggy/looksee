@@ -2,6 +2,8 @@ require 'spec'
 require 'mocha'
 require 'looksee'
 
+require 'set'
+
 Spec::Runner.configure do |config|
   config.mock_with :mocha
 end
@@ -12,6 +14,13 @@ class Object
   #
   def singleton_class
     class << self; self; end
+  end
+
+  #
+  # Return true if the given object include?-s this object.
+  #
+  def in?(object)
+    object.include?(self)
   end
 end
 
