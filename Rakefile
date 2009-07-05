@@ -1,25 +1,26 @@
-%w[rubygems rake rake/clean fileutils newgem rubigen].each { |f| require f }
-require File.dirname(__FILE__) + '/lib/looksee/version'
+require 'rubygems'
+gem 'hoe', '>= 2.1.0'
+require 'hoe'
+require 'fileutils'
 
-$hoe = Hoe.new('looksee', Looksee::VERSION) do |p|
-  p.developer('George Ogata', 'george.ogata@gmail.com')
-  p.changes              = p.paragraphs_of("History.txt", 0..1).join("\n\n")
-  #p.post_install_message = 'PostInstall.txt'
-  p.rubyforge_name       = p.name
-  #p.extra_deps           = [['gemname', 'version']]
-  p.extra_dev_deps = [
+require './lib/looksee/version'
+
+Hoe.plugin :newgem
+Hoe.plugin :cucumberfeatures
+
+$hoe = Hoe.spec 'looksee' do
+  self.developer 'George Ogata', 'george.ogata@gmail.com'
+  self.rubyforge_name       = self.name # TODO this is default value
+  # self.extra_deps         = [['activesupport','>= 2.0.2']]
+  self.extra_dev_deps = [
     ['newgem', ">= #{::Newgem::VERSION}"],
     ['rspec', '>= 1.2.7'],
     ['mocha', '>= 0.9.5'],
   ]
-
-  p.clean_globs |= %w[**/.DS_Store tmp *.log]
-  path = (p.rubyforge_name == p.name) ? p.rubyforge_name : "\#{p.rubyforge_name}/\#{p.name}"
-  p.remote_rdoc_dir = File.join(path.gsub(/^#{p.rubyforge_name}\/?/,''), 'rdoc')
-  p.rsync_args = '-av --delete --ignore-errors'
 end
 
 # Configure the clean and clobber tasks.
+require 'rake/clean'
 require 'rbconfig'
 CLEAN.include('**/*.o')
 CLOBBER.include("ext/looksee/looksee.#{Config::CONFIG['DLEXT']}")
@@ -27,12 +28,10 @@ CLOBBER.include("ext/looksee/looksee.#{Config::CONFIG['DLEXT']}")
 require 'newgem/tasks' # loads /tasks/*.rake
 Dir['tasks/**/*.rake'].each { |t| load t }
 
-task :default => :spec
-
-require 'spec/rake/spectask'
-Spec::Rake::SpecTask.new(:spec => :compile) do |t|
-  t.libs << 'lib' << 'spec'
-end
-
 desc "Rebuild the gem from scratch."
 task :regem => [:clobber, :gem]
+
+# Force build before running specs.
+Rake::Task['spec'].prerequisites << 'extconf:compile'
+
+task :default => :spec
