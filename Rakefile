@@ -11,7 +11,6 @@ Hoe.plugin :cucumberfeatures
 $hoe = Hoe.spec 'looksee' do
   self.developer 'George Ogata', 'george.ogata@gmail.com'
   self.rubyforge_name       = self.name # TODO this is default value
-  self.description_sections = %w'description synopsis'
   # self.extra_deps         = [['activesupport','>= 2.0.2']]
   self.extra_dev_deps = [
     ['newgem', ">= #{::Newgem::VERSION}"],
