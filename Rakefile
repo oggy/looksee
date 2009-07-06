@@ -6,7 +6,7 @@ require 'fileutils'
 require './lib/looksee/version'
 
 Hoe.plugin :newgem
-Hoe.plugin :cucumberfeatures
+Hoe.plugin :email  # from seattlerb - configure via ~/.hoerc
 
 $hoe = Hoe.spec 'looksee' do
   self.developer 'George Ogata', 'george.ogata@gmail.com'
