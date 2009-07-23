@@ -77,7 +77,7 @@ module Looksee
         normalized_options[option] = true
       end
       normalized_options.update(hash_options)
-      LookupPath.new(object, normalized_options)
+      LookupPath.for(object, normalized_options)
     end
 
     #
@@ -149,6 +149,10 @@ module Looksee
   class LookupPath
     attr_reader :entries
 
+    def initialize(entries)
+      @entries = entries
+    end
+
     #
     # Create a LookupPath for the given object.
     #
@@ -160,14 +164,9 @@ module Looksee
     #   :private
     #   :overridden
     #
-    def initialize(object, options={})
-      @entries = []
-      seen = {}
-      Looksee.lookup_modules(object).each do |mod|
-        entry = Entry.new(mod, seen, options)
-        entry.methods.each{|m| seen[m] = true}
-        @entries << entry
-      end
+    def self.for(object, options={})
+      entries = entries_for(object, options)
+      new(entries)
     end
 
     def inspect(options={})
@@ -176,6 +175,15 @@ module Looksee
     end
 
     private  # -------------------------------------------------------
+
+    def self.entries_for(object, options)
+      seen = {}
+      Looksee.lookup_modules(object).map do |mod|
+        entry = Entry.new(mod, seen, options)
+        entry.methods.each{|m| seen[m] = true}
+        entry
+      end
+    end
 
     def normalize_inspect_options(options)
       options[:width] ||= ENV['COLUMNS'].to_i.nonzero? || Looksee.default_width
