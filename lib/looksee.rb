@@ -305,6 +305,8 @@ module Looksee
       # sequences.
       #
       def columnize(strings, width)
+        return '' if strings.empty?
+
         num_columns = 1
         layout = [strings]
         loop do

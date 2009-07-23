@@ -297,6 +297,16 @@ describe Looksee::LookupPath do
           |  public1  public2
         EOS
       end
+
+      it "should not show any blank lines if a module has no methods" do
+        stub_methods(C, [], [], [])
+        lookup_path = Looksee::LookupPath.for(@object, :public => true, :overridden => true)
+        lookup_path.inspect.should == <<-EOS.demargin
+          |C
+          |M
+          |  public1  public2
+        EOS
+      end
     end
 
     describe "styles" do
