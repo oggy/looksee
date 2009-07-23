@@ -169,6 +169,17 @@ module Looksee
       new(entries)
     end
 
+    #
+    # Return a new LookupPath which only contains names matching the
+    # given pattern.
+    #
+    def grep(pattern)
+      entries = self.entries.map do |entry|
+        entry.grep(pattern)
+      end
+      self.class.new(entries)
+    end
+
     def inspect(options={})
       options = normalize_inspect_options(options)
       entries.map{|e| e.inspect(options)}.join
@@ -179,7 +190,7 @@ module Looksee
     def self.entries_for(object, options)
       seen = {}
       Looksee.lookup_modules(object).map do |mod|
-        entry = Entry.new(mod, seen, options)
+        entry = Entry.for(mod, seen, options)
         entry.methods.each{|m| seen[m] = true}
         entry
       end
@@ -197,20 +208,38 @@ module Looksee
     # information (public, private, etc.).
     #
     class Entry
-      #
-      # Don't call me, silly.  I'm just part of a LookupPath.
-      #
-      def initialize(mod, seen, options)
+      def initialize(mod, methods=[], visibilities={})
         @module = mod
-        @methods = []
-        @visibilities = {}
-        add_methods(Looksee.internal_public_instance_methods(mod).map{|sym| sym.to_s}   , :public   , seen) if options[:public   ]
-        add_methods(Looksee.internal_protected_instance_methods(mod).map{|sym| sym.to_s}, :protected, seen) if options[:protected]
-        add_methods(Looksee.internal_private_instance_methods(mod).map{|sym| sym.to_s}  , :private  , seen) if options[:private  ]
-        @methods.sort!
+        @methods = methods
+        @visibilities = visibilities
+      end
+
+      def self.for(mod, seen, options)
+        entry = new(mod)
+        entry.initialize_for(seen, options)
+        entry
       end
 
       attr_reader :module, :methods
+
+      def initialize_for(seen, options)
+        add_methods(Looksee.internal_public_instance_methods(@module).map{|sym| sym.to_s}   , :public   , seen) if options[:public   ]
+        add_methods(Looksee.internal_protected_instance_methods(@module).map{|sym| sym.to_s}, :protected, seen) if options[:protected]
+        add_methods(Looksee.internal_private_instance_methods(@module).map{|sym| sym.to_s}  , :private  , seen) if options[:private  ]
+        @methods.sort!
+      end
+
+      def grep(pattern)
+        methods = []
+        visibilities = {}
+        @methods.each do |name|
+          if name[pattern]
+            methods << name
+            visibilities[name] = @visibilities[name]
+          end
+        end
+        self.class.new(@module, methods, visibilities)
+      end
 
       #
       # Return the name of the class or module.

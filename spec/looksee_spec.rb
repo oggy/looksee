@@ -171,11 +171,13 @@ describe Looksee do
 end
 
 describe Looksee::LookupPath do
-  before do
-    Looksee.default_lookup_path_options = {}
-  end
-
   include TemporaryClasses
+
+  def stub_methods(mod, public, protected, private)
+    Looksee.stubs(:internal_public_instance_methods   ).with(mod).returns(public)
+    Looksee.stubs(:internal_protected_instance_methods).with(mod).returns(protected)
+    Looksee.stubs(:internal_private_instance_methods  ).with(mod).returns(private)
+  end
 
   describe "#entries" do
     it "should contain an entry for each module in the object's lookup path" do
@@ -187,15 +189,41 @@ describe Looksee::LookupPath do
     end
   end
 
-  describe "#inspect" do
-    before do
-      Looksee.stubs(:styles).returns(Hash.new{'%s'})
+  describe "grep" do
+    it "should only include methods matching the given regexp" do
+      temporary_class :C
+      temporary_class :D
+      stub_methods(C, ['axbyc', 'xy'], [], [])
+      stub_methods(D, ['axbyc', 'xdy'], [], [])
+      object = Object.new
+      Looksee.stubs(:lookup_modules).with(object).returns([C, D])
+      lookup_path = Looksee::LookupPath.for(object, :public => true, :overridden => true).grep(/x.y/)
+      lookup_path.entries.map{|entry| entry.module_name}.should == %w'C D'
+      lookup_path.entries[0].methods.to_set.should == Set['axbyc']
+      lookup_path.entries[1].methods.to_set.should == Set['axbyc', 'xdy']
     end
 
-    def stub_methods(mod, public, protected, private)
-      Looksee.stubs(:internal_public_instance_methods   ).with(mod).returns(public)
-      Looksee.stubs(:internal_protected_instance_methods).with(mod).returns(protected)
-      Looksee.stubs(:internal_private_instance_methods  ).with(mod).returns(private)
+    it "should only include methods including the given string" do
+      temporary_class :C
+      temporary_class :D
+      stub_methods(C, ['axxa', 'axa'], [], [])
+      stub_methods(D, ['bxxb', 'axxa'], [], [])
+      object = Object.new
+      Looksee.stubs(:lookup_modules).with(object).returns([C, D])
+      lookup_path = Looksee::LookupPath.for(object, :public => true, :overridden => true).grep('xx')
+      lookup_path.entries.map{|entry| entry.module_name}.should == %w'C D'
+      lookup_path.entries[0].methods.to_set.should == Set['axxa']
+      lookup_path.entries[1].methods.to_set.should == Set['axxa', 'bxxb']
+    end
+  end
+
+  describe "#inspect" do
+    before do
+      Looksee.stubs(:default_lookup_path_options).returns({})
+    end
+
+    before do
+      Looksee.stubs(:styles).returns(Hash.new{'%s'})
     end
 
     describe "contents" do
