@@ -50,7 +50,7 @@ describe Looksee do
       temporary_module :Mod1
       temporary_module :Mod2
       temporary_class :Base
-      temporary_class :Derived, Base do
+      temporary_class :Derived, :superclass => Base do
         include Mod1
         include Mod2
       end
@@ -103,47 +103,6 @@ describe Looksee do
   end
 
   describe "internal instance methods:" do
-    #
-    # Remove all methods defined exactly on the given module.  As Ruby's
-    # reflection on singleton classes of classes isn't quite adequate,
-    # you need to provide a :class_singleton option when such a class is
-    # given.
-    #
-    def remove_methods(mod, opts={})
-      names = all_instance_methods(mod)
-
-      # all_instance_methods can't get just the methods on a class
-      # singleton class.  Filter out superclass methods here.
-      if opts[:class_singleton]
-        klass = ObjectSpace.each_object(mod){|klass| break klass}
-        names -= all_instance_methods(klass.superclass.singleton_class)
-      end
-
-      names.sort_by{|name| name.in?([:remove_method, :send]) ? 1 : 0}.flatten
-      names.each do |name|
-        mod.send :remove_method, name
-      end
-    end
-
-    def define_methods(mod, opts)
-      mod.module_eval do
-        [:public, :protected, :private].each do |visibility|
-          Array(opts[visibility]).each do |name|
-            define_method(name){}
-            send visibility, name
-          end
-        end
-      end
-    end
-
-    def all_instance_methods(mod)
-      names =
-        mod.public_instance_methods(false) +
-        mod.protected_instance_methods(false) +
-        mod.private_instance_methods(false)
-      names.map{|name| name.to_sym}  # they're strings in ruby <1.9
-    end
-
     def self.target_method(name)
       define_method(:target_method){name}
     end
@@ -151,38 +110,33 @@ describe Looksee do
     def self.it_should_list_methods_with_visibility(visibility)
       it "should return the list of #{visibility} instance methods defined directly on a class" do
         temporary_class :C
-        remove_methods C
-        define_methods C, visibility => [:one, :two]
+        replace_methods C, visibility => [:one, :two]
         Looksee.send(target_method, C).to_set.should == Set[:one, :two]
       end
 
       it "should return the list of #{visibility} instance methods defined directly on a module" do
         temporary_module :M
-        remove_methods M
-        define_methods M, visibility => [:one, :two]
+        replace_methods M, visibility => [:one, :two]
         Looksee.send(target_method, M).to_set.should == Set[:one, :two]
       end
 
       it "should return the list of #{visibility} instance methods defined directly on a singleton class" do
         temporary_class :C
         c = C.new
-        remove_methods c.singleton_class
-        define_methods c.singleton_class, visibility => [:one, :two]
+        replace_methods c.singleton_class, visibility => [:one, :two]
         Looksee.send(target_method, c.singleton_class).to_set.should == Set[:one, :two]
       end
 
       it "should return the list of #{visibility} instance methods defined directly on a class' singleton class" do
         temporary_class :C
-        remove_methods C.singleton_class, :class_singleton => true
-        define_methods C.singleton_class, visibility => [:one, :two]
+        replace_methods C.singleton_class, visibility => [:one, :two], :class_singleton => true
         Looksee.send(target_method, C.singleton_class).to_set.should == Set[:one, :two]
       end
 
       # Worth checking as ruby keeps undef'd methods in method tables.
       it "should not return undefined methods" do
         temporary_class :C
-        remove_methods C
-        define_methods C, visibility => [:removed]
+        replace_methods C, visibility => [:removed]
         C.send(:undef_method, :removed)
         Looksee.send(target_method, C).to_set.should == Set[]
       end
@@ -191,8 +145,7 @@ describe Looksee do
     def self.it_should_not_list_methods_with_visibility(visibility1, visibility2)
       it "should not return any #{visibility1} or #{visibility2} instance methods" do
         temporary_class :C
-        remove_methods C
-        define_methods C, {visibility1 => [:a], visibility2 => [:b]}
+        replace_methods C, {visibility1 => [:a], visibility2 => [:b]}
         Looksee.send(target_method, C).to_set.should == Set[]
       end
     end
