@@ -369,3 +369,5 @@ module Looksee
     end
   end
 end
+
+require 'looksee/wirble_compatibility'

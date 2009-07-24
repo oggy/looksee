@@ -2,6 +2,7 @@ require 'spec'
 require 'mocha'
 require 'looksee'
 
+require 'rbconfig'
 require 'set'
 
 Spec::Runner.configure do |config|
