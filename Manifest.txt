@@ -9,10 +9,13 @@ ext/looksee/node-1.9.h
 lib/looksee.rb
 lib/looksee/shortcuts.rb
 lib/looksee/version.rb
+lib/looksee/wirble_compatibility.rb
+looksee.gemspec
 script/console
 script/destroy
 script/generate
 spec/looksee_spec.rb
 spec/spec_helper.rb
+spec/wirble_compatibility_spec.rb
 tasks/extconf.rake
 tasks/extconf/looksee.rake
