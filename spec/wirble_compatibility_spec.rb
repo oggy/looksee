@@ -54,7 +54,6 @@ describe Looksee::WirbleCompatibility do
       output.should == <<-EOS.demargin
         |C
         |  \e[1;32ma\e[0m
-        |
       EOS
     end
 
@@ -67,7 +66,6 @@ describe Looksee::WirbleCompatibility do
       output.should == <<-EOS.demargin
         |C
         |  \e[1;32ma\e[0m
-        |
       EOS
     end
 
@@ -81,7 +79,6 @@ describe Looksee::WirbleCompatibility do
       output.should == <<-EOS.demargin
         |C
         |  \e[1;32ma\e[0m
-        |
       EOS
     end
 
@@ -96,7 +93,6 @@ describe Looksee::WirbleCompatibility do
       output.should == <<-EOS.demargin
         |C
         |  \e[1;32ma\e[0m
-        |
       EOS
     end
   end

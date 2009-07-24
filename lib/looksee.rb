@@ -182,7 +182,7 @@ module Looksee
 
     def inspect(options={})
       options = normalize_inspect_options(options)
-      entries.map{|e| e.inspect(options)}.join
+      entries.map{|e| e.inspect(options)}.join("\n")
     end
 
     private  # -------------------------------------------------------
@@ -273,7 +273,8 @@ module Looksee
       # columns.  Pass a :width option to control the output width.
       #
       def inspect(options={})
-        styled_module_name << "\n" << Columnizer.columnize(styled_methods, options[:width])
+        string = styled_module_name << "\n" << Columnizer.columnize(styled_methods, options[:width])
+        string.chomp
       end
 
       private  # -----------------------------------------------------

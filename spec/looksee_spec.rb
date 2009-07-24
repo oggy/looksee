@@ -240,7 +240,7 @@ describe Looksee::LookupPath do
 
       it "should show only public instance methods when only public methods are requested" do
         lookup_path = Looksee::LookupPath.for(@object, :public => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |  public1  public2
           |M
@@ -250,7 +250,7 @@ describe Looksee::LookupPath do
 
       it "should show modules and protected instance methods when only protected methods are requested" do
         lookup_path = Looksee::LookupPath.for(@object, :protected => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |  protected1  protected2
           |M
@@ -260,7 +260,7 @@ describe Looksee::LookupPath do
 
       it "should show modules and private instance methods when only private methods are requested" do
         lookup_path = Looksee::LookupPath.for(@object, :private => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |  private1  private2
           |M
@@ -270,7 +270,7 @@ describe Looksee::LookupPath do
 
       it "should show modules with public and private instance methods when only public and private methods are requested" do
         lookup_path = Looksee::LookupPath.for(@object, :public => true, :private => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |  private1  private2  public1  public2
           |M
@@ -282,7 +282,7 @@ describe Looksee::LookupPath do
         Looksee.stubs(:lookup_modules).with(C).returns([C.singleton_class])
         stub_methods(C.singleton_class, ['public1', 'public2'], [], [])
         lookup_path = Looksee::LookupPath.for(C, :public => true)
-        lookup_path.inspect.should == <<-EOS.demargin
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
           |[C]
           |  public1  public2
         EOS
@@ -292,7 +292,7 @@ describe Looksee::LookupPath do
         Looksee.stubs(:lookup_modules).with(C.singleton_class).returns([C.singleton_class.singleton_class])
         stub_methods(C.singleton_class.singleton_class, ['public1', 'public2'], [], [])
         lookup_path = Looksee::LookupPath.for(C.singleton_class, :public => true)
-        lookup_path.inspect.should == <<-EOS.demargin
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
           |[[C]]
           |  public1  public2
         EOS
@@ -301,7 +301,7 @@ describe Looksee::LookupPath do
       it "should not show any blank lines if a module has no methods" do
         stub_methods(C, [], [], [])
         lookup_path = Looksee::LookupPath.for(@object, :public => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |M
           |  public1  public2
@@ -326,7 +326,7 @@ describe Looksee::LookupPath do
         Looksee.stubs(:lookup_modules).returns([C])
         stub_methods(C, ['public'], ['protected'], ['private'])
         lookup_path = Looksee::LookupPath.for(Object.new, :public => true, :protected => true, :private => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
           |\`C\'
           |  <private>  [protected]  {public}
         EOS
@@ -339,7 +339,7 @@ describe Looksee::LookupPath do
         Looksee.stubs(:lookup_modules).returns([C])
         stub_methods(C, %w'aa b c dd ee f g hh i', [], [])
         lookup_path = Looksee::LookupPath.for(Object.new, :public => true)
-        lookup_path.inspect(:width => 20).should == <<-EOS.demargin
+        lookup_path.inspect(:width => 20).should == <<-EOS.demargin.chomp
           |C
           |  aa  c   ee  g   i
           |  b   dd  f   hh
@@ -353,7 +353,7 @@ describe Looksee::LookupPath do
         stub_methods(A, ['a', 'long_long_long_long_name'], [], [])
         stub_methods(B, ['long_long_long', 'short'], [], [])
         lookup_path = Looksee::LookupPath.for(Object.new, :public => true)
-        lookup_path.inspect.should == <<-EOS.demargin
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
           |A
           |  a  long_long_long_long_name
           |B
