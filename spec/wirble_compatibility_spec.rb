@@ -100,5 +100,20 @@ describe Looksee::WirbleCompatibility do
         |  \e[1;32ma\e[0m
       EOS
     end
+
+    it "should work if wirble colorizing is enabled twice" do
+      output = init_irb_with(<<-EOS.demargin)
+        |require 'irb'
+        |require 'looksee/shortcuts'
+        |require 'wirble'
+        |Wirble.init
+        |Wirble.colorize
+        |Wirble.colorize
+      EOS
+      output.should == <<-EOS.demargin
+        |C
+        |  \e[1;32ma\e[0m
+      EOS
+    end
   end
 end

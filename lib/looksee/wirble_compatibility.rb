@@ -21,6 +21,11 @@ module Looksee
       def hook_into_wirble_colorize
         class << Wirble
           def colorize_with_looksee(*args)
+            # If this gets called twice, Wirble will fuck up the
+            # aliases.  Disable colorizing first to reset them.
+            if WirbleCompatibility.hooked_into_irb_output_value?
+              Wirble::Colorize.disable
+            end
             colorize_without_looksee(*args)
             WirbleCompatibility.hook_into_irb_output_value
           end
@@ -43,6 +48,10 @@ module Looksee
           alias output_value_without_looksee output_value
           alias output_value output_value_with_looksee
         end
+      end
+
+      def hooked_into_irb_output_value?
+        IRB::Irb.method_defined?(:output_value_with_looksee)
       end
 
       def init
