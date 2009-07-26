@@ -6,7 +6,7 @@ describe Looksee::WirbleCompatibility do
     #
     # Run the given ruby string, and return the standard output.
     #
-    def run_in_irb(code)
+    def init_irb_with(code)
       code = <<-EOS.demargin.gsub(/\n/, ';')
         |#{code}
         |#{stubbing_code}
@@ -45,8 +45,8 @@ describe Looksee::WirbleCompatibility do
       EOS
     end
 
-    it "should output lookup path info correctly if wirble is not loaded" do
-      output = run_in_irb(<<-EOS.demargin)
+    it "should work if wirble is not loaded" do
+      output = init_irb_with(<<-EOS.demargin)
         |require 'irb'
         |require 'looksee/shortcuts'
         |require 'wirble'
@@ -59,8 +59,8 @@ describe Looksee::WirbleCompatibility do
       EOS
     end
 
-    it "should output lookup path info correctly if wirble is loaded, but not initialized" do
-      output = run_in_irb(<<-EOS.demargin)
+    it "should work if wirble is loaded, but not initialized" do
+      output = init_irb_with(<<-EOS.demargin)
         |require 'irb'
         |require 'wirble'
         |require 'looksee/shortcuts'
@@ -73,8 +73,8 @@ describe Looksee::WirbleCompatibility do
       EOS
     end
 
-    it "should output lookup path info correctly if wirble is loaded and initialized, but colorizing is off" do
-      output = run_in_irb(<<-EOS.demargin)
+    it "should work if wirble is loaded and initialized, but colorizing is off" do
+      output = init_irb_with(<<-EOS.demargin)
         |require 'irb'
         |require 'wirble'
         |Wirble.init
@@ -87,8 +87,8 @@ describe Looksee::WirbleCompatibility do
       EOS
     end
 
-    it "should output lookup path info correctly if wirble is loaded, initialized, and colorizing is on" do
-      output = run_in_irb(<<-EOS.demargin)
+    it "should work if wirble is loaded, initialized, and colorizing is on" do
+      output = init_irb_with(<<-EOS.demargin)
         |require 'irb'
         |require 'wirble'
         |Wirble.init
