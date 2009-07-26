@@ -15,13 +15,13 @@ module Looksee
         unless Object.const_defined?(:Wirble)
           Object.const_set :Wirble, Module.new
         end
-        Wirble.send :include, WirbleLoadHook
+        Wirble.send :extend, WirbleLoadHook
       end
 
       def hook_into_wirble_colorize
         class << Wirble
-          def colorize_with_looksee(custom_colors)
-            colorize_without_looksee(custom_colors)
+          def colorize_with_looksee(*args)
+            colorize_without_looksee(*args)
             WirbleCompatibility.hook_into_irb_output_value
           end
 
@@ -64,8 +64,8 @@ module Looksee
     end
 
     module WirbleLoadHook
-      def method_added(name)
-        if name == :colorize && !method_defined?(:colorize_with_looksee)
+      def singleton_method_added(name)
+        if name == :colorize && !respond_to?(:colorize_with_looksee)
           WirbleCompatibility.hook_into_wirble_colorize
         end
         super

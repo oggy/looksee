@@ -50,6 +50,8 @@ describe Looksee::WirbleCompatibility do
         |require 'irb'
         |require 'looksee/shortcuts'
         |require 'wirble'
+        |Wirble.init
+        |Wirble.colorize
       EOS
       output.should == <<-EOS.demargin
         |C
@@ -62,6 +64,8 @@ describe Looksee::WirbleCompatibility do
         |require 'irb'
         |require 'wirble'
         |require 'looksee/shortcuts'
+        |Wirble.init
+        |Wirble.colorize
       EOS
       output.should == <<-EOS.demargin
         |C
@@ -75,6 +79,7 @@ describe Looksee::WirbleCompatibility do
         |require 'wirble'
         |Wirble.init
         |require 'looksee/shortcuts'
+        |Wirble.colorize
       EOS
       output.should == <<-EOS.demargin
         |C
