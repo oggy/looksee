@@ -36,7 +36,7 @@ VALUE Looksee_internal_superclass(VALUE self, VALUE internal_class) {
  * object's birth class.
  */
 VALUE Looksee_internal_class(VALUE self, VALUE object) {
-  return RBASIC(object)->klass;
+  return CLASS_OF(object);
 }
 
 /*

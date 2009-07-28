@@ -71,6 +71,10 @@ describe Looksee do
       result = filtered_lookup_modules(C)
       result.should == %w'#<Class:C> #<Class:Object> Class Module Object Kernel'
     end
+
+    it "should work for immediate objects" do
+      filtered_lookup_modules(1).first.should == 'Fixnum'
+    end
   end
 
   describe ".lookup_path" do
