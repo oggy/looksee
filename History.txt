@@ -1,3 +1,7 @@
+== 0.1.0 2009-08-20
+
+* Add methods undefined with Module#undef_method.  Blue by default.
+
 == 0.0.2 2009-07-28
 
 * Added #grep to filter methods shown: lp(object).grep(/pattern/)

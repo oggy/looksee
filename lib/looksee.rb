@@ -32,8 +32,8 @@ require "looksee/version"
 #
 # +lp+ returns a LookupPath object, which has +inspect+ defined to
 # print things out pretty.  By default, it shows public, protected,
-# and overridden methods.  They're all colored, which makes showing
-# overridden methods not such a strange idea.
+# undefined, and overridden methods.  They're all colored, which makes
+# showing overridden methods not such a strange idea.
 #
 # Some examples of the other shortcuts:
 #
@@ -66,9 +66,11 @@ module Looksee
     # * +:public+ - include public methods
     # * +:protected+ - include protected methods
     # * +:private+ - include private methods
+    # * +:undefined+ - include undefined methods (see Module#undef_method)
     # * +:overridden+ - include methods overridden by subclasses
     #
-    # The default (if options is nil or omitted) is [:public].
+    # The default (if options is nil or omitted) is given by
+    # #default_lookup_path_options.
     #
     def lookup_path(object, *options)
       normalized_options = Looksee.default_lookup_path_options.dup
@@ -83,7 +85,8 @@ module Looksee
     #
     # The default options passed to lookup_path.
     #
-    # Default: <tt>{:public => true, :protected => true, :overridden => true}</tt>
+    # Default: <tt>{:public => true, :protected => true, :undefined =>
+    # true, :overridden => true}</tt>
     #
     attr_accessor :default_lookup_path_options
 
@@ -104,6 +107,7 @@ module Looksee
     # * :public
     # * :protected
     # * :private
+    # * :undefined
     # * :overridden
     #
     # The values are format strings.  They should all contain a single
@@ -116,6 +120,7 @@ module Looksee
     #         :public     => "\e[1;32m%s\e[0m",
     #         :protected  => "\e[1;33m%s\e[0m",
     #         :private    => "\e[1;31m%s\e[0m",
+    #         :undefined  => "\e[1;34m%s\e[0m",
     #         :overridden => "\e[1;30m%s\e[0m",
     #       }
     #
@@ -136,13 +141,14 @@ module Looksee
     end
   end
 
-  self.default_lookup_path_options = {:public => true, :protected => true, :overridden => true}
+  self.default_lookup_path_options = {:public => true, :protected => true, :undefined => true, :overridden => true}
   self.default_width = 80
   self.styles = {
     :module     => "\e[1;37m%s\e[0m",
     :public     => "\e[1;32m%s\e[0m",
     :protected  => "\e[1;33m%s\e[0m",
     :private    => "\e[1;31m%s\e[0m",
+    :undefined  => "\e[1;34m%s\e[0m",
     :overridden => "\e[1;30m%s\e[0m",
   }
 
@@ -162,6 +168,7 @@ module Looksee
     #   :public
     #   :protected
     #   :private
+    #   :undefined
     #   :overridden
     #
     def self.for(object, options={})
@@ -226,6 +233,7 @@ module Looksee
         add_methods(Looksee.internal_public_instance_methods(@module).map{|sym| sym.to_s}   , :public   , seen) if options[:public   ]
         add_methods(Looksee.internal_protected_instance_methods(@module).map{|sym| sym.to_s}, :protected, seen) if options[:protected]
         add_methods(Looksee.internal_private_instance_methods(@module).map{|sym| sym.to_s}  , :private  , seen) if options[:private  ]
+        add_methods(Looksee.internal_undefined_instance_methods(@module).map{|sym| sym.to_s}, :undefined, seen) if options[:undefined]
         @methods.sort!
       end
 
@@ -256,7 +264,7 @@ module Looksee
 
       #
       # Yield each method along with its visibility (:public,
-      # :private, :protected, or :overridden).
+      # :private, :protected, :undefined, or :overridden).
       #
       def each
         @methods.each do |name|

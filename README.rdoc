@@ -65,7 +65,8 @@ This defines a method +lp+ ("lookup path") which lets you do:
       frozen?   nil?                        untaint
 
 It'll also color the methods according to whether they're public,
-protected, private, or overridden.  So pretty.  You gotta try it.
+protected, private, undefined (using Module#undef_method), or
+overridden.  So pretty.  You gotta try it.
 
 By default, it shows public and protected methods.  Add private ones
 like so:

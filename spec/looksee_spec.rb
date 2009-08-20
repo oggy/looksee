@@ -171,16 +171,61 @@ describe Looksee do
       it_should_list_methods_with_visibility :private
       it_should_not_list_methods_with_visibility :public, :protected
     end
+
+    describe ".internal_undefined_instance_methods" do
+      it "should return the list of undefined instance methods directly on a class" do
+        temporary_class :C
+        C.send(:define_method, :f){}
+        C.send(:undef_method, :f)
+        Looksee.internal_undefined_instance_methods(C).should == [:f]
+      end
+
+      it "should return the list of undefined instance methods directly on a module" do
+        temporary_module :M
+        M.send(:define_method, :f){}
+        M.send(:undef_method, :f)
+        Looksee.internal_undefined_instance_methods(M).should == [:f]
+      end
+
+      it "should return the list of undefined instance methods directly on a singleton class" do
+        temporary_class :C
+        c = C.new
+        c.singleton_class.send(:define_method, :f){}
+        c.singleton_class.send(:undef_method, :f)
+        Looksee.internal_undefined_instance_methods(c.singleton_class).should == [:f]
+      end
+
+      it "should return the list of undefined instance methods directly on a class' singleton class" do
+        temporary_class :C
+        C.singleton_class.send(:define_method, :f){}
+        C.singleton_class.send(:undef_method, :f)
+        Looksee.internal_undefined_instance_methods(C.singleton_class).should == [:f]
+      end
+
+      it "should not return defined methods" do
+        temporary_class :C
+        C.send(:define_method, :f){}
+        Looksee.internal_undefined_instance_methods(C).should == []
+      end
+
+      it "should not return removed methods" do
+        temporary_class :C
+        C.send(:define_method, :f){}
+        C.send(:remove_method, :f)
+        Looksee.internal_undefined_instance_methods(C).should == []
+      end
+    end
   end
 end
 
 describe Looksee::LookupPath do
   include TemporaryClasses
 
-  def stub_methods(mod, public, protected, private)
+  def stub_methods(mod, public, protected, private, undefined)
     Looksee.stubs(:internal_public_instance_methods   ).with(mod).returns(public)
     Looksee.stubs(:internal_protected_instance_methods).with(mod).returns(protected)
     Looksee.stubs(:internal_private_instance_methods  ).with(mod).returns(private)
+    Looksee.stubs(:internal_undefined_instance_methods).with(mod).returns(undefined)
   end
 
   describe "#entries" do
@@ -197,8 +242,8 @@ describe Looksee::LookupPath do
     it "should only include methods matching the given regexp" do
       temporary_class :C
       temporary_class :D
-      stub_methods(C, ['axbyc', 'xy'], [], [])
-      stub_methods(D, ['axbyc', 'xdy'], [], [])
+      stub_methods(C, ['axbyc', 'xy'], [], [], [])
+      stub_methods(D, ['axbyc', 'xdy'], [], [], [])
       object = Object.new
       Looksee.stubs(:lookup_modules).with(object).returns([C, D])
       lookup_path = Looksee::LookupPath.for(object, :public => true, :overridden => true).grep(/x.y/)
@@ -210,8 +255,8 @@ describe Looksee::LookupPath do
     it "should only include methods including the given string" do
       temporary_class :C
       temporary_class :D
-      stub_methods(C, ['axxa', 'axa'], [], [])
-      stub_methods(D, ['bxxb', 'axxa'], [], [])
+      stub_methods(C, ['axxa', 'axa'], [], [], [])
+      stub_methods(D, ['bxxb', 'axxa'], [], [], [])
       object = Object.new
       Looksee.stubs(:lookup_modules).with(object).returns([C, D])
       lookup_path = Looksee::LookupPath.for(object, :public => true, :overridden => true).grep('xx')
@@ -238,8 +283,8 @@ describe Looksee::LookupPath do
         end
         @object = Object.new
         Looksee.stubs(:lookup_modules).with(@object).returns([C, M])
-        stub_methods(C, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'])
-        stub_methods(M, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'])
+        stub_methods(C, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'], ['undefined1', 'undefined2'])
+        stub_methods(M, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'], ['undefined1', 'undefined2'])
       end
 
       it "should show only public instance methods when only public methods are requested" do
@@ -272,6 +317,16 @@ describe Looksee::LookupPath do
         EOS
       end
 
+      it "should show modules and undefined instance methods when only undefined methods are requested" do
+        lookup_path = Looksee::LookupPath.for(@object, :undefined => true, :overridden => true)
+        lookup_path.inspect.should == <<-EOS.demargin.chomp
+          |C
+          |  undefined1  undefined2
+          |M
+          |  undefined1  undefined2
+        EOS
+      end
+
       it "should show modules with public and private instance methods when only public and private methods are requested" do
         lookup_path = Looksee::LookupPath.for(@object, :public => true, :private => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
@@ -284,7 +339,7 @@ describe Looksee::LookupPath do
 
       it "should show singleton classes as class names in brackets" do
         Looksee.stubs(:lookup_modules).with(C).returns([C.singleton_class])
-        stub_methods(C.singleton_class, ['public1', 'public2'], [], [])
+        stub_methods(C.singleton_class, ['public1', 'public2'], [], [], [])
         lookup_path = Looksee::LookupPath.for(C, :public => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |[C]
@@ -294,7 +349,7 @@ describe Looksee::LookupPath do
 
       it "should handle singleton classes of singleton classes correctly" do
         Looksee.stubs(:lookup_modules).with(C.singleton_class).returns([C.singleton_class.singleton_class])
-        stub_methods(C.singleton_class.singleton_class, ['public1', 'public2'], [], [])
+        stub_methods(C.singleton_class.singleton_class, ['public1', 'public2'], [], [], [])
         lookup_path = Looksee::LookupPath.for(C.singleton_class, :public => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |[[C]]
@@ -303,7 +358,7 @@ describe Looksee::LookupPath do
       end
 
       it "should not show any blank lines if a module has no methods" do
-        stub_methods(C, [], [], [])
+        stub_methods(C, [], [], [], [])
         lookup_path = Looksee::LookupPath.for(@object, :public => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
@@ -320,6 +375,7 @@ describe Looksee::LookupPath do
           :public     => "{%s}",
           :protected  => "[%s]",
           :private    => "<%s>",
+          :undefined  => "~%s~",
           :overridden => "(%s)",
         }
         Looksee.stubs(:styles).returns(styles)
@@ -328,11 +384,11 @@ describe Looksee::LookupPath do
       it "should delimit each word with the configured delimiters" do
         temporary_class :C
         Looksee.stubs(:lookup_modules).returns([C])
-        stub_methods(C, ['public'], ['protected'], ['private'])
-        lookup_path = Looksee::LookupPath.for(Object.new, :public => true, :protected => true, :private => true, :overridden => true)
+        stub_methods(C, ['public'], ['protected'], ['private'], ['undefined'])
+        lookup_path = Looksee::LookupPath.for(Object.new, :public => true, :protected => true, :private => true, :undefined => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |\`C\'
-          |  <private>  [protected]  {public}
+          |  <private>  [protected]  {public}  ~undefined~
         EOS
       end
     end
@@ -341,7 +397,7 @@ describe Looksee::LookupPath do
       it "should wrap method lists at the configured number of columns, sorting vertically first, and aligning into a grid" do
         temporary_class :C
         Looksee.stubs(:lookup_modules).returns([C])
-        stub_methods(C, %w'aa b c dd ee f g hh i', [], [])
+        stub_methods(C, %w'aa b c dd ee f g hh i', [], [], [])
         lookup_path = Looksee::LookupPath.for(Object.new, :public => true)
         lookup_path.inspect(:width => 20).should == <<-EOS.demargin.chomp
           |C
@@ -354,8 +410,8 @@ describe Looksee::LookupPath do
         temporary_class :A
         temporary_class :B
         Looksee.stubs(:lookup_modules).returns([A, B])
-        stub_methods(A, ['a', 'long_long_long_long_name'], [], [])
-        stub_methods(B, ['long_long_long', 'short'], [], [])
+        stub_methods(A, ['a', 'long_long_long_long_name'], [], [], [])
+        stub_methods(B, ['long_long_long', 'short'], [], [], [])
         lookup_path = Looksee::LookupPath.for(Object.new, :public => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |A
