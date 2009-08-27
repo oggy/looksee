@@ -391,14 +391,11 @@ module Looksee
   end
 
   class Colors
+    #
+    # Show the meaning of each color.
+    #
     def inspect
-      "Looksee colors:\n" +
-        Looksee.styles[:module] % " module" +
-        Looksee.styles[:public] % " public" +
-        Looksee.styles[:protected] % " protected" +
-        Looksee.styles[:private] % " private" +
-        Looksee.styles[:undefined] % " undefined" +
-        Looksee.styles[:overridden] % " overridden"
+      "Looksee colors:\n " + Looksee.styles.map {|style,value| value % "#{style.to_s}"}.join(" ")
     end
   end
 end
