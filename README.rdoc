@@ -74,6 +74,10 @@ overridden.  So pretty.  You gotta try it.  The default colors are:
     undefined:  blue
     overridden: black
 
+To remind yourself what each looksee color means in irb:
+
+    lc
+
 By default, it shows public and protected methods.  Add private ones
 like so:
 
