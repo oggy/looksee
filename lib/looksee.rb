@@ -20,6 +20,7 @@ require "looksee/version"
 #   Object#dump_lookup_path
 #   Object#lp
 #   Object#lpi
+#   Object#lc
 #
 # See their docs.
 #
@@ -45,6 +46,10 @@ require "looksee/version"
 #
 #     require 'looksee'
 #     Looksee.lookup_path(thing)  # like "lp thing"
+#
+# If you want to remember what each color means:
+#
+#     lc  # shortcut mapping for Looksee.colors
 #
 # == Configuration
 #
@@ -116,12 +121,12 @@ module Looksee
     # Default:
     #
     #       {
-    #         :module     => "\e[1;37m%s\e[0m",
-    #         :public     => "\e[1;32m%s\e[0m",
-    #         :protected  => "\e[1;33m%s\e[0m",
-    #         :private    => "\e[1;31m%s\e[0m",
-    #         :undefined  => "\e[1;34m%s\e[0m",
-    #         :overridden => "\e[1;30m%s\e[0m",
+    #         :module     => "\e[1;37m%s\e[0m", # white
+    #         :public     => "\e[1;32m%s\e[0m", # green
+    #         :protected  => "\e[1;33m%s\e[0m", # yellow
+    #         :private    => "\e[1;31m%s\e[0m", # red
+    #         :undefined  => "\e[1;34m%s\e[0m", # blue
+    #         :overridden => "\e[1;30m%s\e[0m", # black
     #       }
     #
     attr_accessor :styles
@@ -139,17 +144,24 @@ module Looksee
       end
       modules
     end
+
+    #
+    # Return the color mappings.
+    #
+    def colors
+      Colors.new
+    end
   end
 
   self.default_lookup_path_options = {:public => true, :protected => true, :undefined => true, :overridden => true}
   self.default_width = 80
   self.styles = {
-    :module     => "\e[1;37m%s\e[0m",
-    :public     => "\e[1;32m%s\e[0m",
-    :protected  => "\e[1;33m%s\e[0m",
-    :private    => "\e[1;31m%s\e[0m",
-    :undefined  => "\e[1;34m%s\e[0m",
-    :overridden => "\e[1;30m%s\e[0m",
+    :module     => "\e[1;37m%s\e[0m", # white
+    :public     => "\e[1;32m%s\e[0m", # green
+    :protected  => "\e[1;33m%s\e[0m", # yellow
+    :private    => "\e[1;31m%s\e[0m", # red
+    :undefined  => "\e[1;34m%s\e[0m", # blue
+    :overridden => "\e[1;30m%s\e[0m", # black
   }
 
   class LookupPath
@@ -375,6 +387,18 @@ module Looksee
             column[height - 1] = nil
         end
       end
+    end
+  end
+
+  class Colors
+    def inspect
+      "Looksee colors:\n" +
+        Looksee.styles[:module] % " module" +
+        Looksee.styles[:public] % " public" +
+        Looksee.styles[:protected] % " protected" +
+        Looksee.styles[:private] % " private" +
+        Looksee.styles[:undefined] % " undefined" +
+        Looksee.styles[:overridden] % " overridden"
     end
   end
 end

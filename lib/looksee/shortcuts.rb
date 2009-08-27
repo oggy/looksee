@@ -29,6 +29,15 @@ class Object
     Looksee.lookup_path(klass.allocate, *args)
   end
 
+  #
+  # Run Looksee.colors to return the current color mappings.
+  #
+  # (Added by Looksee.)
+  #
+  def lc
+    Looksee.colors
+  end
+
   public  # ----------------------------------------------------------
 
   #

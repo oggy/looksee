@@ -66,7 +66,13 @@ This defines a method +lp+ ("lookup path") which lets you do:
 
 It'll also color the methods according to whether they're public,
 protected, private, undefined (using Module#undef_method), or
-overridden.  So pretty.  You gotta try it.
+overridden.  So pretty.  You gotta try it.  The default colors are:
+
+    public:     green
+    protected:  yellow
+    private:    red
+    undefined:  blue
+    overridden: black
 
 By default, it shows public and protected methods.  Add private ones
 like so:
