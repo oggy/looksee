@@ -38,7 +38,8 @@ module Looksee
       def hook_into_irb_output_value
         IRB::Irb.class_eval do
           def output_value_with_looksee
-            if @context.last_value.is_a?(Looksee::LookupPath)
+            case @context.last_value
+            when Looksee::LookupPath, Looksee::Help
               non_color_output_value
             else
               output_value_without_looksee
