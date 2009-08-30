@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{looksee}
-  s.version = "0.1.1"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["George Ogata"]
-  s.date = %q{2009-08-20}
+  s.date = %q{2009-08-30}
   s.description = %q{Looksee lets you examine the method lookup path of objects in ways not
 possible in plain ruby.}
   s.email = ["george.ogata@gmail.com"]
@@ -17,7 +17,7 @@ possible in plain ruby.}
   s.rdoc_options = ["--main", "README.rdoc"]
   s.require_paths = ["lib", "ext/looksee"]
   s.rubyforge_project = %q{looksee}
-  s.rubygems_version = %q{1.3.4}
+  s.rubygems_version = %q{1.3.5}
   s.summary = %q{Looksee lets you examine the method lookup path of objects in ways not possible in plain ruby.}
 
   if s.respond_to? :specification_version then
