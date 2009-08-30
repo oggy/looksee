@@ -66,17 +66,13 @@ This defines a method +lp+ ("lookup path") which lets you do:
 
 It'll also color the methods according to whether they're public,
 protected, private, undefined (using Module#undef_method), or
-overridden.  So pretty.  You gotta try it.  The default colors are:
+overridden.  So pretty.  The default colors are:
 
     public:     green
     protected:  yellow
     private:    red
     undefined:  blue
     overridden: black
-
-To remind yourself what each looksee color means in irb:
-
-    lc
 
 By default, it shows public and protected methods.  Add private ones
 like so:
@@ -92,6 +88,10 @@ There are variations too.  And you can configure things.  And you can
 use it as a library without polluting the built-in classes.  See:
 
     $ ri Looksee
+
+Or do this in IRB for a quick reference:
+
+    Looksee.help
 
 Enjoy!
 

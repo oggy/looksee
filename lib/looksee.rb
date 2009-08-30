@@ -20,7 +20,6 @@ require "looksee/version"
 #   Object#dump_lookup_path
 #   Object#lp
 #   Object#lpi
-#   Object#lc
 #
 # See their docs.
 #
@@ -47,9 +46,9 @@ require "looksee/version"
 #     require 'looksee'
 #     Looksee.lookup_path(thing)  # like "lp thing"
 #
-# If you want to remember what each color means:
+# For a quick reference:
 #
-#     lc  # shortcut mapping for Looksee.colors
+#     Looksee.help
 #
 # == Configuration
 #
@@ -143,13 +142,6 @@ module Looksee
         klass = Looksee.internal_superclass(klass)
       end
       modules
-    end
-
-    #
-    # Return the color mappings.
-    #
-    def colors
-      Colors.new
     end
   end
 
@@ -387,15 +379,6 @@ module Looksee
             column[height - 1] = nil
         end
       end
-    end
-  end
-
-  class Colors
-    #
-    # Show the meaning of each color.
-    #
-    def inspect
-      "Looksee colors:\n " + Looksee.styles.map {|style,value| value % "#{style.to_s}"}.join(" ")
     end
   end
 end
