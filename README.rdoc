@@ -68,6 +68,7 @@ It'll also color the methods according to whether they're public,
 protected, private, undefined (using Module#undef_method), or
 overridden.  So pretty.  The default colors are:
 
+    public:     white
     public:     green
     protected:  yellow
     private:    red
