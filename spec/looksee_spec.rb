@@ -392,34 +392,5 @@ describe Looksee::LookupPath do
         EOS
       end
     end
-
-    describe "layout" do
-      it "should wrap method lists at the configured number of columns, sorting vertically first, and aligning into a grid" do
-        temporary_class :C
-        Looksee.stubs(:lookup_modules).returns([C])
-        stub_methods(C, %w'aa b c dd ee f g hh i', [], [], [])
-        lookup_path = Looksee::LookupPath.for(Object.new, :public => true)
-        lookup_path.inspect(:width => 20).should == <<-EOS.demargin.chomp
-          |C
-          |  aa  c   ee  g   i
-          |  b   dd  f   hh
-        EOS
-      end
-
-      it "should lay the methods of each module out independently" do
-        temporary_class :A
-        temporary_class :B
-        Looksee.stubs(:lookup_modules).returns([A, B])
-        stub_methods(A, ['a', 'long_long_long_long_name'], [], [], [])
-        stub_methods(B, ['long_long_long', 'short'], [], [], [])
-        lookup_path = Looksee::LookupPath.for(Object.new, :public => true)
-        lookup_path.inspect.should == <<-EOS.demargin.chomp
-          |A
-          |  a  long_long_long_long_name
-          |B
-          |  long_long_long  short
-        EOS
-      end
-    end
   end
 end
