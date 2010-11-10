@@ -2,64 +2,6 @@ require "rbconfig"
 require File.dirname(__FILE__) + "/../ext/looksee/looksee.#{Config::CONFIG['DLEXT']}"
 require "looksee/version"
 
-#
-# Looksee lets you inspect the method lookup path of an object.  There
-# are two ways to use it:
-#
-# 1. Keep all methods contained in the Looksee namespace:
-#
-#     require 'looksee'
-#
-# 2. Let it all hang out:
-#
-#     require 'looksee/shortcuts'
-#
-# The latter adds the following shortcuts to the built-in classes:
-#
-#   Object#lookup_path
-#   Object#dump_lookup_path
-#   Object#lp
-#   Object#lpi
-#
-# See their docs.
-#
-# == Usage
-#
-# In irb:
-#
-#     require 'looksee/shortcuts'
-#     lp some_object
-#
-# +lp+ returns a LookupPath object, which has +inspect+ defined to
-# print things out pretty.  By default, it shows public, protected,
-# undefined, and overridden methods.  They're all colored, which makes
-# showing overridden methods not such a strange idea.
-#
-# Some examples of the other shortcuts:
-#
-#     lpi Array
-#     some_object.lookup_path
-#     foo.bar.baz.dump_lookup_path.and.more
-#
-# If you're being namespace-clean, you'll need to do:
-#
-#     require 'looksee'
-#     Looksee.lookup_path(thing)  # like "lp thing"
-#
-# For a quick reference:
-#
-#     Looksee.help
-#
-# == Configuration
-#
-# Set these:
-#
-#     Looksee.default_lookup_path_options
-#     Looksee.default_width
-#     Looksee.styles
-#
-# See their docs.
-#
 module Looksee
   class << self
     #
