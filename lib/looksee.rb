@@ -1,6 +1,5 @@
 require "rbconfig"
 require File.dirname(__FILE__) + "/../ext/looksee/looksee.#{Config::CONFIG['DLEXT']}"
-require "looksee/version"
 
 module Looksee
   class << self
@@ -100,6 +99,7 @@ module Looksee
 
   autoload :LookupPath, 'looksee/lookup_path'
   autoload :Columnizer, 'looksee/columnizer'
+  autoload :VERSION, 'looksee/version'
 end
 
 require 'looksee/wirble_compatibility'
