@@ -21,27 +21,26 @@ describe Looksee::LookupPath do
   end
 
   describe "grep" do
-    it "should only include methods matching the given regexp" do
+    before do
       temporary_class :C
       temporary_class :D
+      @object = Object.new
+      Looksee.stubs(:lookup_modules).with(@object).returns([C, D])
+    end
+
+    it "should only include methods matching the given regexp" do
       stub_methods(C, ['axbyc', 'xy'], [], [], [])
       stub_methods(D, ['axbyc', 'xdy'], [], [], [])
-      object = Object.new
-      Looksee.stubs(:lookup_modules).with(object).returns([C, D])
-      lookup_path = Looksee::LookupPath.new(object, :public => true, :overridden => true).grep(/x.y/)
+      lookup_path = Looksee::LookupPath.new(@object, :public => true, :overridden => true).grep(/x.y/)
       lookup_path.entries.map{|entry| entry.module_name}.should == %w'C D'
       lookup_path.entries[0].methods.to_set.should == Set['axbyc']
       lookup_path.entries[1].methods.to_set.should == Set['axbyc', 'xdy']
     end
 
     it "should only include methods including the given string" do
-      temporary_class :C
-      temporary_class :D
       stub_methods(C, ['axxa', 'axa'], [], [], [])
       stub_methods(D, ['bxxb', 'axxa'], [], [], [])
-      object = Object.new
-      Looksee.stubs(:lookup_modules).with(object).returns([C, D])
-      lookup_path = Looksee::LookupPath.new(object, :public => true, :overridden => true).grep('xx')
+      lookup_path = Looksee::LookupPath.new(@object, :public => true, :overridden => true).grep('xx')
       lookup_path.entries.map{|entry| entry.module_name}.should == %w'C D'
       lookup_path.entries[0].methods.to_set.should == Set['axxa']
       lookup_path.entries[1].methods.to_set.should == Set['axxa', 'bxxb']
