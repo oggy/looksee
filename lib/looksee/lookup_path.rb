@@ -126,11 +126,12 @@ module Looksee
 
       def find_methods(overridden, visibilities, filters)
         methods = []
+        include_overridden = visibilities.include?(:overridden)
         [:public, :protected, :private, :undefined].each do |visibility|
           visibilities.include?(visibility) or
             next
           Looksee.send("internal_#{visibility}_instance_methods", @module).map{|sym| sym.to_s}.each do |method|
-            if filters.all?{|f| method[f]}
+            if filters.all?{|f| method[f]} && (include_overridden || !overridden.include?(method))
               methods << method
               @visibilities[method] = overridden.include?(method) ? :overridden : visibility
             end

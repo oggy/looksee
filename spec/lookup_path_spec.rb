@@ -28,31 +28,31 @@ describe Looksee::LookupPath do
     it "should include only non-overridden public methods when public methods are requested" do
       lookup_path = Looksee::LookupPath.new(@object, :public => true)
       lookup_path.entries[0].methods.should == %w'public1 public2'
-      lookup_path.entries[1].methods.should == %w'public1 public2'
+      lookup_path.entries[1].methods.should == %w''
     end
 
     it "should include only non-overridden protected methods when protected methods are requested" do
       lookup_path = Looksee::LookupPath.new(@object, :protected => true)
       lookup_path.entries[0].methods.should == %w'protected1 protected2'
-      lookup_path.entries[1].methods.should == %w'protected1 protected2'
+      lookup_path.entries[1].methods.should == %w''
     end
 
     it "should include only non-overridden private methods when private methods are requested" do
       lookup_path = Looksee::LookupPath.new(@object, :private => true)
       lookup_path.entries[0].methods.should == %w'private1 private2'
-      lookup_path.entries[1].methods.should == %w'private1 private2'
+      lookup_path.entries[1].methods.should == %w''
     end
 
     it "should include only non-overridden undefined methods when undefined methods are requested" do
       lookup_path = Looksee::LookupPath.new(@object, :undefined => true)
       lookup_path.entries[0].methods.should == %w'undefined1 undefined2'
-      lookup_path.entries[1].methods.should == %w'undefined1 undefined2'
+      lookup_path.entries[1].methods.should == %w''
     end
 
     it "should include only non-overridden public and private methods when public and private methods are requested" do
       lookup_path = Looksee::LookupPath.new(@object, :public => true, :private => true)
       lookup_path.entries[0].methods.should == %w'private1 private2 public1 public2'
-      lookup_path.entries[1].methods.should == %w'private1 private2 public1 public2'
+      lookup_path.entries[1].methods.should == %w''
     end
 
     it "should include overridden methods, marked as overridden, when overridden methods are also requested" do
