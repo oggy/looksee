@@ -109,6 +109,26 @@ describe Looksee::LookupPath do
         stub_methods(M, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'], ['undefined1', 'undefined2'])
       end
 
+      it "should columnize each module's output to the current terminal width" do
+        original_columns = ENV['COLUMNS']
+        ENV['COLUMNS'] = '20'
+        begin
+          stub_methods(C, ['aa', 'bb', 'cc', 'dd', 'ee', 'ff', 'gg', 'hh', 'ii', 'jj'], [], [], [])
+          stub_methods(M, ['aaa', 'bbb', 'ccc', 'ddd', 'eee', 'fff', 'ggg', 'hhh'], [], [], [])
+          lookup_path = Looksee::LookupPath.new(@object, :public => true)
+          lookup_path.inspect.should == <<-EOS.demargin.chomp
+            |C
+            |  aa  cc  ee  gg  ii
+            |  bb  dd  ff  hh  jj
+            |M
+            |  aaa  ccc  eee  ggg
+            |  bbb  ddd  fff  hhh
+          EOS
+        ensure
+          ENV['COLUMNS'] = original_columns
+        end
+      end
+
       it "should show singleton classes as class names in brackets" do
         Looksee.stubs(:lookup_modules).with(C).returns([C.singleton_class])
         stub_methods(C.singleton_class, ['public1', 'public2'], [], [], [])
