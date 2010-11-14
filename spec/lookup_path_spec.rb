@@ -11,12 +11,56 @@ describe Looksee::LookupPath do
   end
 
   describe "#entries" do
+    before do
+      temporary_module :M
+      temporary_class(:C) { include M }
+      stub_methods(C, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'], ['undefined1', 'undefined2'])
+      stub_methods(M, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'], ['undefined1', 'undefined2'])
+      @object = Object.new
+      Looksee.stubs(:lookup_modules).with(@object).returns([C, M])
+      Looksee::LookupPath.stubs(:default_options).returns({})
+    end
+
     it "should contain an entry for each module in the object's lookup path" do
-      object = Object.new
-      temporary_class :C
-      temporary_class :D
-      Looksee.stubs(:lookup_modules).with(object).returns([C, D])
-      Looksee::LookupPath.new(object).entries.map{|entry| entry.module_name}.should == %w'C D'
+      Looksee::LookupPath.new(@object).entries.map{|entry| entry.module_name}.should == %w'C M'
+    end
+
+    it "should include only non-overridden public methods when public methods are requested" do
+      lookup_path = Looksee::LookupPath.new(@object, :public => true)
+      lookup_path.entries[0].methods.should == %w'public1 public2'
+      lookup_path.entries[1].methods.should == %w'public1 public2'
+    end
+
+    it "should include only non-overridden protected methods when protected methods are requested" do
+      lookup_path = Looksee::LookupPath.new(@object, :protected => true)
+      lookup_path.entries[0].methods.should == %w'protected1 protected2'
+      lookup_path.entries[1].methods.should == %w'protected1 protected2'
+    end
+
+    it "should include only non-overridden private methods when private methods are requested" do
+      lookup_path = Looksee::LookupPath.new(@object, :private => true)
+      lookup_path.entries[0].methods.should == %w'private1 private2'
+      lookup_path.entries[1].methods.should == %w'private1 private2'
+    end
+
+    it "should include only non-overridden undefined methods when undefined methods are requested" do
+      lookup_path = Looksee::LookupPath.new(@object, :undefined => true)
+      lookup_path.entries[0].methods.should == %w'undefined1 undefined2'
+      lookup_path.entries[1].methods.should == %w'undefined1 undefined2'
+    end
+
+    it "should include only non-overridden public and private methods when public and private methods are requested" do
+      lookup_path = Looksee::LookupPath.new(@object, :public => true, :private => true)
+      lookup_path.entries[0].methods.should == %w'private1 private2 public1 public2'
+      lookup_path.entries[1].methods.should == %w'private1 private2 public1 public2'
+    end
+
+    it "should include overridden methods, marked as overridden, when overridden methods are also requested" do
+      lookup_path = Looksee::LookupPath.new(@object, :public => true, :overridden => true)
+      lookup_path.entries[0].methods.should == %w'public1 public2'
+      lookup_path.entries[1].methods.should == %w'public1 public2'
+      lookup_path.entries[0].visibilities['public1'].should == :public
+      lookup_path.entries[1].visibilities['public1'].should == :overridden
     end
   end
 
@@ -63,56 +107,6 @@ describe Looksee::LookupPath do
         Looksee.stubs(:lookup_modules).with(@object).returns([C, M])
         stub_methods(C, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'], ['undefined1', 'undefined2'])
         stub_methods(M, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'], ['undefined1', 'undefined2'])
-      end
-
-      it "should show only public instance methods when only public methods are requested" do
-        lookup_path = Looksee::LookupPath.new(@object, :public => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin.chomp
-          |C
-          |  public1  public2
-          |M
-          |  public1  public2
-        EOS
-      end
-
-      it "should show modules and protected instance methods when only protected methods are requested" do
-        lookup_path = Looksee::LookupPath.new(@object, :protected => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin.chomp
-          |C
-          |  protected1  protected2
-          |M
-          |  protected1  protected2
-        EOS
-      end
-
-      it "should show modules and private instance methods when only private methods are requested" do
-        lookup_path = Looksee::LookupPath.new(@object, :private => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin.chomp
-          |C
-          |  private1  private2
-          |M
-          |  private1  private2
-        EOS
-      end
-
-      it "should show modules and undefined instance methods when only undefined methods are requested" do
-        lookup_path = Looksee::LookupPath.new(@object, :undefined => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin.chomp
-          |C
-          |  undefined1  undefined2
-          |M
-          |  undefined1  undefined2
-        EOS
-      end
-
-      it "should show modules with public and private instance methods when only public and private methods are requested" do
-        lookup_path = Looksee::LookupPath.new(@object, :public => true, :private => true, :overridden => true)
-        lookup_path.inspect.should == <<-EOS.demargin.chomp
-          |C
-          |  private1  private2  public1  public2
-          |M
-          |  private1  private2  public1  public2
-        EOS
       end
 
       it "should show singleton classes as class names in brackets" do
