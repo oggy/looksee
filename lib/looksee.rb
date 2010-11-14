@@ -24,7 +24,7 @@ module Looksee
         normalized_options[option] = true
       end
       normalized_options.update(hash_options)
-      LookupPath.for(object, normalized_options)
+      LookupPath.new(object, normalized_options)
     end
 
     #

@@ -16,7 +16,7 @@ describe Looksee::LookupPath do
       temporary_class :C
       temporary_class :D
       Looksee.stubs(:lookup_modules).with(object).returns([C, D])
-      Looksee::LookupPath.for(object).entries.map{|entry| entry.module_name}.should == %w'C D'
+      Looksee::LookupPath.new(object).entries.map{|entry| entry.module_name}.should == %w'C D'
     end
   end
 
@@ -28,7 +28,7 @@ describe Looksee::LookupPath do
       stub_methods(D, ['axbyc', 'xdy'], [], [], [])
       object = Object.new
       Looksee.stubs(:lookup_modules).with(object).returns([C, D])
-      lookup_path = Looksee::LookupPath.for(object, :public => true, :overridden => true).grep(/x.y/)
+      lookup_path = Looksee::LookupPath.new(object, :public => true, :overridden => true).grep(/x.y/)
       lookup_path.entries.map{|entry| entry.module_name}.should == %w'C D'
       lookup_path.entries[0].methods.to_set.should == Set['axbyc']
       lookup_path.entries[1].methods.to_set.should == Set['axbyc', 'xdy']
@@ -41,7 +41,7 @@ describe Looksee::LookupPath do
       stub_methods(D, ['bxxb', 'axxa'], [], [], [])
       object = Object.new
       Looksee.stubs(:lookup_modules).with(object).returns([C, D])
-      lookup_path = Looksee::LookupPath.for(object, :public => true, :overridden => true).grep('xx')
+      lookup_path = Looksee::LookupPath.new(object, :public => true, :overridden => true).grep('xx')
       lookup_path.entries.map{|entry| entry.module_name}.should == %w'C D'
       lookup_path.entries[0].methods.to_set.should == Set['axxa']
       lookup_path.entries[1].methods.to_set.should == Set['axxa', 'bxxb']
@@ -51,9 +51,6 @@ describe Looksee::LookupPath do
   describe "#inspect" do
     before do
       Looksee.stubs(:default_lookup_path_options).returns({})
-    end
-
-    before do
       Looksee.stubs(:styles).returns(Hash.new{'%s'})
     end
 
@@ -70,7 +67,7 @@ describe Looksee::LookupPath do
       end
 
       it "should show only public instance methods when only public methods are requested" do
-        lookup_path = Looksee::LookupPath.for(@object, :public => true, :overridden => true)
+        lookup_path = Looksee::LookupPath.new(@object, :public => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |  public1  public2
@@ -80,7 +77,7 @@ describe Looksee::LookupPath do
       end
 
       it "should show modules and protected instance methods when only protected methods are requested" do
-        lookup_path = Looksee::LookupPath.for(@object, :protected => true, :overridden => true)
+        lookup_path = Looksee::LookupPath.new(@object, :protected => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |  protected1  protected2
@@ -90,7 +87,7 @@ describe Looksee::LookupPath do
       end
 
       it "should show modules and private instance methods when only private methods are requested" do
-        lookup_path = Looksee::LookupPath.for(@object, :private => true, :overridden => true)
+        lookup_path = Looksee::LookupPath.new(@object, :private => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |  private1  private2
@@ -100,7 +97,7 @@ describe Looksee::LookupPath do
       end
 
       it "should show modules and undefined instance methods when only undefined methods are requested" do
-        lookup_path = Looksee::LookupPath.for(@object, :undefined => true, :overridden => true)
+        lookup_path = Looksee::LookupPath.new(@object, :undefined => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |  undefined1  undefined2
@@ -110,7 +107,7 @@ describe Looksee::LookupPath do
       end
 
       it "should show modules with public and private instance methods when only public and private methods are requested" do
-        lookup_path = Looksee::LookupPath.for(@object, :public => true, :private => true, :overridden => true)
+        lookup_path = Looksee::LookupPath.new(@object, :public => true, :private => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |  private1  private2  public1  public2
@@ -122,7 +119,7 @@ describe Looksee::LookupPath do
       it "should show singleton classes as class names in brackets" do
         Looksee.stubs(:lookup_modules).with(C).returns([C.singleton_class])
         stub_methods(C.singleton_class, ['public1', 'public2'], [], [], [])
-        lookup_path = Looksee::LookupPath.for(C, :public => true)
+        lookup_path = Looksee::LookupPath.new(C, :public => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |[C]
           |  public1  public2
@@ -132,7 +129,7 @@ describe Looksee::LookupPath do
       it "should handle singleton classes of singleton classes correctly" do
         Looksee.stubs(:lookup_modules).with(C.singleton_class).returns([C.singleton_class.singleton_class])
         stub_methods(C.singleton_class.singleton_class, ['public1', 'public2'], [], [], [])
-        lookup_path = Looksee::LookupPath.for(C.singleton_class, :public => true)
+        lookup_path = Looksee::LookupPath.new(C.singleton_class, :public => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |[[C]]
           |  public1  public2
@@ -141,7 +138,7 @@ describe Looksee::LookupPath do
 
       it "should not show any blank lines if a module has no methods" do
         stub_methods(C, [], [], [], [])
-        lookup_path = Looksee::LookupPath.for(@object, :public => true, :overridden => true)
+        lookup_path = Looksee::LookupPath.new(@object, :public => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |C
           |M
@@ -167,7 +164,7 @@ describe Looksee::LookupPath do
         temporary_class :C
         Looksee.stubs(:lookup_modules).returns([C])
         stub_methods(C, ['public'], ['protected'], ['private'], ['undefined'])
-        lookup_path = Looksee::LookupPath.for(Object.new, :public => true, :protected => true, :private => true, :undefined => true, :overridden => true)
+        lookup_path = Looksee::LookupPath.new(Object.new, :public => true, :protected => true, :private => true, :undefined => true, :overridden => true)
         lookup_path.inspect.should == <<-EOS.demargin.chomp
           |\`C\'
           |  <private>  [protected]  {public}  ~undefined~
