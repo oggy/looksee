@@ -64,7 +64,7 @@ describe Looksee::LookupPath do
     end
   end
 
-  describe "grep" do
+  describe "#grep" do
     before do
       temporary_class :C
       temporary_class :D
