@@ -8,6 +8,7 @@ module Looksee
       end
 
       def wirble_colorizing?
+        require 'irb'
         IRB::Irb.method_defined?(:non_color_output_value)
       end
 
