@@ -1,39 +1,18 @@
 require "rbconfig"
 require File.dirname(__FILE__) + "/../ext/looksee/looksee.#{Config::CONFIG['DLEXT']}"
 
+require 'set'
+require 'looksee/core_ext'
+
 module Looksee
   class << self
     #
-    # Return a collection of methods that +object+ responds to,
-    # according to the options given.  The following options are
-    # recognized:
+    # The default options passed to #ls.
     #
-    # * +:public+ - include public methods
-    # * +:protected+ - include protected methods
-    # * +:private+ - include private methods
-    # * +:undefined+ - include undefined methods (see Module#undef_method)
-    # * +:overridden+ - include methods overridden by subclasses
+    # Default: <tt>[:public, :protected, :private, :undefined,
+    # :overridden]</tt>
     #
-    # The default (if options is nil or omitted) is given by
-    # #default_lookup_path_options.
-    #
-    def lookup_path(object, *options)
-      normalized_options = Looksee.default_lookup_path_options.dup
-      hash_options = options.last.is_a?(Hash) ? options.pop : {}
-      options.each do |option|
-        normalized_options[option] = true
-      end
-      normalized_options.update(hash_options)
-      LookupPath.new(object, normalized_options)
-    end
-
-    #
-    # The default options passed to lookup_path.
-    #
-    # Default: <tt>{:public => true, :protected => true, :undefined =>
-    # true, :overridden => true}</tt>
-    #
-    attr_accessor :default_lookup_path_options
+    attr_accessor :default_specifiers
 
     #
     # The width to use for displaying output, when not available in
@@ -86,7 +65,7 @@ module Looksee
     end
   end
 
-  self.default_lookup_path_options = {:public => true, :protected => true, :undefined => true, :overridden => true}
+  self.default_specifiers = [:public, :protected, :undefined, :overridden]
   self.default_width = 80
   self.styles = {
     :module     => "\e[1;37m%s\e[0m", # white

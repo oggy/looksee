@@ -36,6 +36,8 @@ describe Looksee do
         'BasicObject',
         # something pulls this in under ruby 1.9
         'PP',
+        # our own pollution,
+        'Looksee::Object',
       ]
 
       # Singleton classes of junk are junk.
@@ -74,35 +76,6 @@ describe Looksee do
 
     it "should work for immediate objects" do
       filtered_lookup_modules(1).first.should == 'Fixnum'
-    end
-  end
-
-  describe ".lookup_path" do
-    it "should return a LookupPath object" do
-      object = Object.new
-      lookup_path = Looksee.lookup_path(object)
-      lookup_path.should be_a(Looksee::LookupPath)
-    end
-
-    it "should return a LookupPath object for the given object" do
-      object = Object.new
-      Looksee.stubs(:default_lookup_path_options).returns({})
-      Looksee::LookupPath.expects(:new).with(object, {})
-      lookup_path = Looksee.lookup_path(object)
-    end
-
-    it "should allow symbol arguments as shortcuts for true options" do
-      object = Object.new
-      Looksee.stubs(:default_lookup_path_options).returns({})
-      Looksee::LookupPath.expects(:new).with(object, {:public => true, :overridden => true})
-      Looksee.lookup_path(object, :public, :overridden)
-    end
-
-    it "should merge the default options, with the symbols, and the options hash" do
-      object = Object.new
-      Looksee.stubs(:default_lookup_path_options).returns({:public => false, :protected => false, :private => false})
-      Looksee::LookupPath.expects(:new).with(object, {:public => false, :protected => true, :private => false})
-      Looksee.lookup_path(object, :protected, :private, :private => false)
     end
   end
 

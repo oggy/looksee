@@ -10,7 +10,7 @@ describe Looksee::WirbleCompatibility do
       code = <<-EOS.demargin.gsub(/\n/, ';')
         |#{code}
         |#{stubbing_code}
-        |lp Object.new
+        |Object.new.ls
       EOS
       irb = File.join Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name'].sub(/ruby/, 'irb')
       lib_dir = File.expand_path('lib')
@@ -48,7 +48,7 @@ describe Looksee::WirbleCompatibility do
     it "should work if wirble is not loaded" do
       output = init_irb_with(<<-EOS.demargin)
         |require 'irb'
-        |require 'looksee/shortcuts'
+        |require 'looksee'
         |require 'wirble'
         |Wirble.init
         |Wirble.colorize
@@ -63,7 +63,7 @@ describe Looksee::WirbleCompatibility do
       output = init_irb_with(<<-EOS.demargin)
         |require 'irb'
         |require 'wirble'
-        |require 'looksee/shortcuts'
+        |require 'looksee'
         |Wirble.init
         |Wirble.colorize
       EOS
@@ -78,7 +78,7 @@ describe Looksee::WirbleCompatibility do
         |require 'irb'
         |require 'wirble'
         |Wirble.init
-        |require 'looksee/shortcuts'
+        |require 'looksee'
         |Wirble.colorize
       EOS
       output.should == <<-EOS.demargin
@@ -93,7 +93,7 @@ describe Looksee::WirbleCompatibility do
         |require 'wirble'
         |Wirble.init
         |Wirble.colorize
-        |require 'looksee/shortcuts'
+        |require 'looksee'
       EOS
       output.should == <<-EOS.demargin
         |C
@@ -104,7 +104,7 @@ describe Looksee::WirbleCompatibility do
     it "should work if wirble colorizing is enabled twice" do
       output = init_irb_with(<<-EOS.demargin)
         |require 'irb'
-        |require 'looksee/shortcuts'
+        |require 'looksee'
         |require 'wirble'
         |Wirble.init
         |Wirble.colorize

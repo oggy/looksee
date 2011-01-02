@@ -2,22 +2,10 @@ require 'set'
 
 module Looksee
   class LookupPath
-    #
-    # Create a LookupPath for the given object.
-    #
-    # Options may be given to restrict which visibilities are
-    # included.
-    #
-    #   :public
-    #   :protected
-    #   :private
-    #   :undefined
-    #   :overridden
-    #
     def initialize(object, options={})
       @object = object
-      @visibilities = create_visibilities(options)
-      @filters = []
+      @visibilities = (vs = options[:visibilities]) ? vs.to_set : Set[]
+      @filters = (fs = options[:filters]) ? fs.to_set : Set[]
       @entries = create_entries
     end
 
@@ -31,6 +19,16 @@ module Looksee
     # lookup path.
     #
     attr_reader :entries
+
+    #
+    # Set of visibilities to display.
+    #
+    attr_reader :visibilities
+
+    #
+    # Set of filters to use on method lists (Strings or Regexps).
+    #
+    attr_reader :filters
 
     #
     # Return a new LookupPath which only contains names matching the
@@ -50,14 +48,6 @@ module Looksee
     def add_filter(pattern)
       @filters += [pattern]
       @entries = create_entries
-    end
-
-    def create_visibilities(options)
-      visibilities = Set[]
-      [:public, :protected, :private, :overridden, :undefined].each do |visibility|
-        visibilities << visibility if options[visibility]
-      end
-      visibilities
     end
 
     def create_entries

@@ -78,12 +78,11 @@ overridden.  So pretty.  The default colors are:
 By default, it shows public and protected methods.  Add private ones
 like so:
 
-    lp [], :private => true
-    lp [], :private          # shortcut
+    [].ls :private
 
 Or if you don't want protected:
 
-    lp [], :protected => false
+    [].ls :noprotected
 
 There are variations too.  And you can configure things.  And you can
 use it as a library without polluting the built-in classes.  See:

@@ -1,0 +1,8 @@
+== LATEST
+
+ * New API.
+   * old: lp(object, :private => true, :undefined => false).grep(/blah/)
+   * new: object.ls :private, :noundefined, /blah/
+ * Configuration has changed accordingly.
+   * old: Looksee.default_lookup_path_options = {:private => true, :undefined => false}
+   * new: Looksee.default_specifiers = [:private, :noundefined]
