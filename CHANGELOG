@@ -8,3 +8,4 @@
    * new: Looksee.default_specifiers = [:private, :noundefined]
  * Require 'looksee' instead of 'looksee/shortcuts'. For
    non-pollutiness, use "require 'looksee/clean'".
+ * All methods are now listed by default.

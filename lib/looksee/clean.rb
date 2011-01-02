@@ -71,7 +71,7 @@ module Looksee
     end
   end
 
-  self.default_specifiers = [:public, :protected, :undefined, :overridden]
+  self.default_specifiers = [:public, :protected, :private, :undefined, :overridden]
   self.default_width = 80
   self.styles = {
     :module     => "\e[1;37m%s\e[0m", # white
