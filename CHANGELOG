@@ -6,3 +6,5 @@
  * Configuration has changed accordingly.
    * old: Looksee.default_lookup_path_options = {:private => true, :undefined => false}
    * new: Looksee.default_specifiers = [:private, :noundefined]
+ * Require 'looksee' instead of 'looksee/shortcuts'. For
+   non-pollutiness, use "require 'looksee/clean'".
