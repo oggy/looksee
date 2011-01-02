@@ -1,21 +1,21 @@
-= Looksee
+# Looksee
 
-* http://github.com/oggy/looksee
+Shows you the method lookup path of objects in ways not possible in
+plain ruby.
 
-== DESCRIPTION
+## How
 
-Looksee lets you examine the method lookup path of objects in ways not
-possible in plain ruby.
+Install me:
 
-== SYNOPSIS
+    gem install looksee
 
-Pop this in your .irbrc :
+Pop this in your `.irbrc`:
 
-    require 'looksee/shortcuts'
+    require 'looksee'
 
-This defines a method +lp+ ("lookup path") which lets you do:
+Now each object has a method `ls`, which shows you all its methods.
 
-    irb(main):001:0> lp []
+    irb(main):001:0> [].ls
     => Array
       &            concat      frozen?      push          taguri
       *            count       hash         rassoc        taguri=
@@ -66,7 +66,7 @@ This defines a method +lp+ ("lookup path") which lets you do:
 
 It'll also color the methods according to whether they're public,
 protected, private, undefined (using Module#undef_method), or
-overridden.  So pretty.  The default colors are:
+overridden. So pretty! By default:
 
     public:     white
     public:     green
@@ -75,7 +75,7 @@ overridden.  So pretty.  The default colors are:
     undefined:  blue
     overridden: black
 
-By default, it shows public and protected methods.  Add private ones
+By default, it shows public and protected methods. Add private ones
 like so:
 
     [].ls :private
@@ -84,8 +84,8 @@ Or if you don't want protected:
 
     [].ls :noprotected
 
-There are variations too.  And you can configure things.  And you can
-use it as a library without polluting the built-in classes.  See:
+There are variations too. And you can configure things. And you can
+use it as a library without polluting the built-in classes. See:
 
     $ ri Looksee
 
@@ -95,35 +95,18 @@ Or do this in IRB for a quick reference:
 
 Enjoy!
 
-== INSTALL
+## Caveats
 
-  gem install looksee
+Currently only does MRI 1.8, 1.9.
 
-== FEATURES/PROBLEMS
+## Contributing
 
-* Currently only does MRI 1.8, 1.9.
+ * [Bug reports here.](https://github.com/oggy/looksee/issues)
+ * [Source here.](https://github.com/oggy/looksee)
+ * Patches: Fork on Github, send pull request.
+   * Ensure patch includes tests.
+   * Leave the version alone, or bump it in a separate commit.
 
-== LICENSE
+## Copyright
 
-(The MIT License)
-
-Copyright (c) 2009 George Ogata
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Copyright (c) George Ogata. See LICENSE for details.
