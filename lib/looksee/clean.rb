@@ -83,6 +83,7 @@ module Looksee
   }
 
   autoload :LookupPath, 'looksee/lookup_path'
+  autoload :Inspector, 'looksee/inspector'
   autoload :Columnizer, 'looksee/columnizer'
   autoload :Help, 'looksee/help'
   autoload :VERSION, 'looksee/version'

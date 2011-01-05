@@ -43,7 +43,6 @@ describe Looksee::Columnizer do
     end
 
     it "should pad out strings that are shorter than their column" do
-      strings = 
       columnize(['aa', 'b', 'c', 'dd'], 8).should == <<-EOS.gsub(/^ *\|/, '')
         |  aa  c 
         |  b   dd

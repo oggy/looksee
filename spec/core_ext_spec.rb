@@ -7,10 +7,10 @@ describe Looksee::ObjectMixin do
       Looksee.stubs(:default_specifiers).returns([:public, :overridden])
     end
 
-    it "should return a LookupPath for the object" do
+    it "should return an Inspector for the object's lookup path" do
       result = @object.ls
-      result.should be_a(Looksee::LookupPath)
-      result.object.should.equal?(@object)
+      result.should be_a(Looksee::Inspector)
+      result.lookup_path.object.should.equal?(@object)
     end
 
     it "should use Looksee.default_specifiers if no args are given" do

@@ -38,7 +38,8 @@ module Looksee
           raise ArgumentError, "invalid specifier: #{arg.inspect}"
         end
       end
-      LookupPath.new(self, options)
+      lookup_path = LookupPath.new(self)
+      Inspector.new(lookup_path, options)
     end
   end
 

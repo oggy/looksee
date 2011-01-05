@@ -40,7 +40,7 @@ module Looksee
         IRB::Irb.class_eval do
           def output_value_with_looksee
             case @context.last_value
-            when Looksee::LookupPath, Looksee::Help
+            when Looksee::Inspector, Looksee::Help
               non_color_output_value
             else
               output_value_without_looksee
