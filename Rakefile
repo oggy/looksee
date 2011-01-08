@@ -6,7 +6,6 @@ require 'fileutils'
 require './lib/looksee/version'
 
 Hoe.plugin :newgem
-Hoe.plugin :email  # from seattlerb - configure via ~/.hoerc
 
 $hoe = Hoe.spec 'looksee' do
   self.developer 'George Ogata', 'george.ogata@gmail.com'
@@ -23,7 +22,7 @@ end
 require 'rake/clean'
 require 'rbconfig'
 CLEAN.include('**/*.o')
-CLOBBER.include("ext/looksee/looksee.#{Config::CONFIG['DLEXT']}")
+CLOBBER.include("ext/mri/mri.#{Config::CONFIG['DLEXT']}")
 
 require 'newgem/tasks' # loads /tasks/*.rake
 Dir['tasks/**/*.rake'].each { |t| load t }
