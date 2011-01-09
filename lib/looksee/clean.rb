@@ -1,9 +1,16 @@
 require "rbconfig"
-require File.dirname(__FILE__) + "/../../ext/looksee/looksee.#{Config::CONFIG['DLEXT']}"
 
 require 'set'
 
 module Looksee
+  autoload :VERSION, 'looksee/version'
+  autoload :Adapter, 'looksee/adapter'
+  autoload :Columnizer, 'looksee/columnizer'
+  autoload :Help, 'looksee/help'
+  autoload :Inspector, 'looksee/inspector'
+  autoload :LookupPath, 'looksee/lookup_path'
+  autoload :WirbleCompatibility, 'looksee/wirble_compatibility'
+
   class << self
     #
     # The default options passed to #ls.
@@ -50,24 +57,17 @@ module Looksee
     attr_accessor :styles
 
     #
+    # The interpreter adapter.
+    #
+    # Encapsulates the interpreter-specific functionality.
+    #
+    attr_accessor :adapter
+
+    #
     # Show a quick reference.
     #
     def help
       Help.new
-    end
-
-    #
-    # Return the chain of classes and modules which comprise the
-    # object's method lookup path.
-    #
-    def lookup_modules(object)
-      modules = []
-      klass = Looksee.internal_class(object)
-      while klass
-        modules << Looksee.internal_class_to_module(klass)
-        klass = Looksee.internal_superclass(klass)
-      end
-      modules
     end
   end
 
@@ -82,11 +82,5 @@ module Looksee
     :overridden => "\e[1;30m%s\e[0m", # black
   }
 
-  autoload :LookupPath, 'looksee/lookup_path'
-  autoload :Inspector, 'looksee/inspector'
-  autoload :Columnizer, 'looksee/columnizer'
-  autoload :Help, 'looksee/help'
-  autoload :VERSION, 'looksee/version'
+  self.adapter = Adapter::MRI.new
 end
-
-require 'looksee/wirble_compatibility'

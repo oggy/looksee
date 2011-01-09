@@ -31,7 +31,7 @@ module Looksee
 
     def create_entries
       seen = Set.new
-      Looksee.lookup_modules(object).map do |mod|
+      Looksee.adapter.lookup_modules(object).map do |mod|
         entry = Entry.new(mod, seen)
         seen += entry.methods.keys
         entry
@@ -70,7 +70,7 @@ module Looksee
       def find_methods
         methods = {}
         [:public, :protected, :private, :undefined].each do |visibility|
-          Looksee.send("internal_#{visibility}_instance_methods", @module).each do |method|
+          Looksee.adapter.send("internal_#{visibility}_instance_methods", @module).each do |method|
             methods[method.to_s] = visibility
           end
         end

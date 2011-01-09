@@ -9,8 +9,8 @@ describe Looksee::WirbleCompatibility do
     def init_irb_with(code)
       code = <<-EOS.demargin.gsub(/\n/, ';')
         |#{code}
-        |#{stubbing_code}
-        |Object.new.ls
+        |#{setup_code}
+        |c.ls
       EOS
       irb = File.join Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name'].sub(/ruby/, 'irb')
       lib_dir = File.expand_path('lib')
@@ -23,25 +23,18 @@ describe Looksee::WirbleCompatibility do
       end
     end
 
-    def stubbing_code
+    def setup_code
       <<-EOS.demargin
         |C = Class.new
+        |c = C.new
+        |#{File.read('spec/support/test_adapter.rb')}
         |
         |Looksee.styles = Hash.new{'%s'}
         |Looksee.styles[:public] = "\\e[1;32m%s\\e[0m"
+        |Looksee.adapter = TestAdapter.new
         |
-        |def Looksee.lookup_modules(object)
-        |  [C]
-        |end
-        |def Looksee.internal_public_instance_methods(mod)
-        |  [:a]
-        |end
-        |def Looksee.internal_protected_instance_methods(mod)
-        |  []
-        |end
-        |def Looksee.internal_private_instance_methods(mod)
-        |  []
-        |end
+        |Looksee.adapter.ancestors[c] = [C]
+        |Looksee.adapter.public_methods[C] = [:a]
       EOS
     end
 

@@ -1,8 +1,8 @@
-/ext/looksee/Makefile
-/ext/looksee/*.o
-/ext/looksee/*.bundle
-/ext/looksee/*.so
-/ext/looksee/*.dll
+/ext/mri/Makefile
+/ext/mri/*.o
+/ext/mri/*.bundle
+/ext/mri/*.so
+/ext/mri/*.dll
 /pkg
 /doc
 /tmp

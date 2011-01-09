@@ -84,5 +84,3 @@ module Looksee
     end
   end
 end
-
-Looksee::WirbleCompatibility.init

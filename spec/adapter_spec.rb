@@ -1,21 +1,23 @@
 require 'spec_helper'
 
-describe Looksee do
+shared_examples_for 'all adapters' do
   include TemporaryClasses
 
-  describe ".lookup_modules" do
-    #
-    # Wrapper for the method under test.
+  before do
+    @adapter = described_class.new
+  end
+
+  describe "#lookup_modules" do
     #
     # Filter out modules which are hard to test against, and returns
     # the list of module names.  #inspect strings are used for names
     # of singleton classes, since they have no name.
     #
     def filtered_lookup_modules(object)
-      result = Looksee.lookup_modules(object)
+      result = @adapter.lookup_modules(object)
       # Singleton classes have no name ('' in <1.9, nil in 1.9+).  Use
       # the inspect string instead.
-      names = result.map{|mod| mod.name.to_s.empty? ? mod.inspect : mod.name}
+      names = result.map{|mod| mod.name.nil? || mod.name.empty? ? mod.inspect : mod.name}
       names.select{|name| deterministic_module_name?(name)}
     end
 
@@ -65,7 +67,7 @@ describe Looksee do
 
       result = filtered_lookup_modules(object)
       result.shift.should =~ /\A#<Class:\#<Object:0x[\da-f]+>>\z/
-      result.should == %w"Object Kernel"
+        result.should == %w"Object Kernel"
     end
 
     it "should contain entries for singleton classes of all ancestors for class objects" do
@@ -88,26 +90,26 @@ describe Looksee do
       it "should return the list of #{visibility} instance methods defined directly on a class" do
         temporary_class :C
         replace_methods C, visibility => [:one, :two]
-        Looksee.send(target_method, C).to_set.should == Set[:one, :two]
+        @adapter.send(target_method, C).to_set.should == Set[:one, :two]
       end
 
       it "should return the list of #{visibility} instance methods defined directly on a module" do
         temporary_module :M
         replace_methods M, visibility => [:one, :two]
-        Looksee.send(target_method, M).to_set.should == Set[:one, :two]
+        @adapter.send(target_method, M).to_set.should == Set[:one, :two]
       end
 
       it "should return the list of #{visibility} instance methods defined directly on a singleton class" do
         temporary_class :C
         c = C.new
         replace_methods c.singleton_class, visibility => [:one, :two]
-        Looksee.send(target_method, c.singleton_class).to_set.should == Set[:one, :two]
+        @adapter.send(target_method, c.singleton_class).to_set.should == Set[:one, :two]
       end
 
       it "should return the list of #{visibility} instance methods defined directly on a class' singleton class" do
         temporary_class :C
         replace_methods C.singleton_class, visibility => [:one, :two], :class_singleton => true
-        Looksee.send(target_method, C.singleton_class).to_set.should == Set[:one, :two]
+        @adapter.send(target_method, C.singleton_class).to_set.should == Set[:one, :two]
       end
 
       # Worth checking as ruby keeps undef'd methods in method tables.
@@ -115,7 +117,7 @@ describe Looksee do
         temporary_class :C
         replace_methods C, visibility => [:removed]
         C.send(:undef_method, :removed)
-        Looksee.send(target_method, C).to_set.should == Set[]
+        @adapter.send(target_method, C).to_set.should == Set[]
       end
     end
 
@@ -123,7 +125,7 @@ describe Looksee do
       it "should not return any #{visibility1} or #{visibility2} instance methods" do
         temporary_class :C
         replace_methods C, {visibility1 => [:a], visibility2 => [:b]}
-        Looksee.send(target_method, C).to_set.should == Set[]
+        @adapter.send(target_method, C).to_set.should == Set[]
       end
     end
 
@@ -150,14 +152,14 @@ describe Looksee do
         temporary_class :C
         C.send(:define_method, :f){}
         C.send(:undef_method, :f)
-        Looksee.internal_undefined_instance_methods(C).should == [:f]
+        @adapter.internal_undefined_instance_methods(C).should == [:f]
       end
 
       it "should return the list of undefined instance methods directly on a module" do
         temporary_module :M
         M.send(:define_method, :f){}
         M.send(:undef_method, :f)
-        Looksee.internal_undefined_instance_methods(M).should == [:f]
+        @adapter.internal_undefined_instance_methods(M).should == [:f]
       end
 
       it "should return the list of undefined instance methods directly on a singleton class" do
@@ -165,28 +167,32 @@ describe Looksee do
         c = C.new
         c.singleton_class.send(:define_method, :f){}
         c.singleton_class.send(:undef_method, :f)
-        Looksee.internal_undefined_instance_methods(c.singleton_class).should == [:f]
+        @adapter.internal_undefined_instance_methods(c.singleton_class).should == [:f]
       end
 
       it "should return the list of undefined instance methods directly on a class' singleton class" do
         temporary_class :C
         C.singleton_class.send(:define_method, :f){}
         C.singleton_class.send(:undef_method, :f)
-        Looksee.internal_undefined_instance_methods(C.singleton_class).should == [:f]
+        @adapter.internal_undefined_instance_methods(C.singleton_class).should == [:f]
       end
 
       it "should not return defined methods" do
         temporary_class :C
         C.send(:define_method, :f){}
-        Looksee.internal_undefined_instance_methods(C).should == []
+        @adapter.internal_undefined_instance_methods(C).should == []
       end
 
       it "should not return removed methods" do
         temporary_class :C
         C.send(:define_method, :f){}
         C.send(:remove_method, :f)
-        Looksee.internal_undefined_instance_methods(C).should == []
+        @adapter.internal_undefined_instance_methods(C).should == []
       end
     end
   end
+end
+
+describe Looksee::Adapter::MRI do
+  it_should_behave_like 'all adapters'
 end

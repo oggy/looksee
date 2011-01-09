@@ -3,21 +3,14 @@ require 'spec_helper'
 describe Looksee::LookupPath do
   include TemporaryClasses
 
-  def stub_methods(mod, public, protected, private, undefined)
-    Looksee.stubs(:internal_public_instance_methods   ).with(mod).returns(public)
-    Looksee.stubs(:internal_protected_instance_methods).with(mod).returns(protected)
-    Looksee.stubs(:internal_private_instance_methods  ).with(mod).returns(private)
-    Looksee.stubs(:internal_undefined_instance_methods).with(mod).returns(undefined)
-  end
-
   describe "#entries" do
     before do
       temporary_module :M
       temporary_class(:C) { include M }
-      stub_methods(C, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'], ['undefined1', 'undefined2'])
-      stub_methods(M, ['public1', 'public2'], ['protected1', 'protected2'], ['private1', 'private2'], ['undefined1', 'undefined2'])
       @object = Object.new
-      Looksee.stubs(:lookup_modules).with(@object).returns([C, M])
+      Looksee.adapter.ancestors[@object] = [C, M]
+      Looksee.adapter.set_methods(M, [:public1, :public2], [:protected1, :protected2], [:private1, :private2], [:undefined1, :undefined2]) 
+      Looksee.adapter.set_methods(C, [:public1, :public2], [:protected1, :protected2], [:private1, :private2], [:undefined1, :undefined2]) 
       @lookup_path = Looksee::LookupPath.new(@object)
     end
 
@@ -49,9 +42,9 @@ describe Looksee::LookupPath do
   describe Looksee::LookupPath::Entry do
     it "should iterate over methods in alphabetical order" do
       temporary_class(:C)
-      stub_methods(C, ['a', 'c', 'b'], [], [], [])
       @object = Object.new
-      Looksee.stubs(:lookup_modules).with(@object).returns([C])
+      Looksee.adapter.public_methods[C] = [:a, :c, :b]
+      Looksee.adapter.ancestors[@object] = [C]
       @lookup_path = Looksee::LookupPath.new(@object)
       @lookup_path.entries.size.should == 1
       @lookup_path.entries.first.map{|name, visibility| name}.should == ['a', 'b', 'c']

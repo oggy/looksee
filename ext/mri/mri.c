@@ -132,13 +132,16 @@ VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
   return names;
 }
 
-void Init_looksee(void) {
-  VALUE mLooksee = rb_define_module("Looksee");
-  rb_define_singleton_method(mLooksee, "internal_superclass", Looksee_internal_superclass, 1);
-  rb_define_singleton_method(mLooksee, "internal_class", Looksee_internal_class, 1);
-  rb_define_singleton_method(mLooksee, "internal_class_to_module", Looksee_internal_class_to_module, 1);
-  rb_define_singleton_method(mLooksee, "internal_public_instance_methods", Looksee_internal_public_instance_methods, 1);
-  rb_define_singleton_method(mLooksee, "internal_protected_instance_methods", Looksee_internal_protected_instance_methods, 1);
-  rb_define_singleton_method(mLooksee, "internal_private_instance_methods", Looksee_internal_private_instance_methods, 1);
-  rb_define_singleton_method(mLooksee, "internal_undefined_instance_methods", Looksee_internal_undefined_instance_methods, 1);
+void Init_mri(void) {
+  VALUE mLooksee = rb_const_get(rb_cObject, rb_intern("Looksee"));
+  VALUE mAdapter = rb_const_get(mLooksee, rb_intern("Adapter"));
+  VALUE mBase = rb_const_get(mAdapter, rb_intern("Base"));
+  VALUE mMRI = rb_define_class_under(mAdapter, "MRI", mBase);
+  rb_define_method(mMRI, "internal_superclass", Looksee_internal_superclass, 1);
+  rb_define_method(mMRI, "internal_class", Looksee_internal_class, 1);
+  rb_define_method(mMRI, "internal_class_to_module", Looksee_internal_class_to_module, 1);
+  rb_define_method(mMRI, "internal_public_instance_methods", Looksee_internal_public_instance_methods, 1);
+  rb_define_method(mMRI, "internal_protected_instance_methods", Looksee_internal_protected_instance_methods, 1);
+  rb_define_method(mMRI, "internal_private_instance_methods", Looksee_internal_private_instance_methods, 1);
+  rb_define_method(mMRI, "internal_undefined_instance_methods", Looksee_internal_undefined_instance_methods, 1);
 }
