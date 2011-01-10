@@ -3,6 +3,8 @@
 /ext/mri/*.bundle
 /ext/mri/*.so
 /ext/mri/*.dll
+/ext/jruby/**/*.class
+/lib/looksee/looksee.jar
 /pkg
 /doc
 /tmp

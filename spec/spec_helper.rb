@@ -13,3 +13,8 @@ Spec::Runner.configure do |config|
   config.mock_with :mocha
   config.before { Looksee.adapter = TestAdapter.new }
 end
+
+if RUBY_PLATFORM == 'java'
+  require 'jruby'
+  JRuby.objectspace = true
+end

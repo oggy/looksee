@@ -82,5 +82,10 @@ module Looksee
     :overridden => "\e[1;30m%s\e[0m", # black
   }
 
-  self.adapter = Adapter::MRI.new
+  case RUBY_PLATFORM
+  when 'java'
+    self.adapter = Adapter::JRuby.new
+  else
+    self.adapter = Adapter::MRI.new
+  end
 end

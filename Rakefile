@@ -21,7 +21,7 @@ end
 # Configure the clean and clobber tasks.
 require 'rake/clean'
 require 'rbconfig'
-CLEAN.include('**/*.o')
+CLEAN.include('**/*.{o,class}')
 CLOBBER.include("ext/mri/mri.#{Config::CONFIG['DLEXT']}")
 
 require 'newgem/tasks' # loads /tasks/*.rake
@@ -31,6 +31,26 @@ desc "Rebuild the gem from scratch."
 task :regem => [:clobber, :gem]
 
 # Force build before running specs.
-Rake::Task['spec'].prerequisites << 'extconf:compile'
+Rake::Task['spec'].prerequisites << "ext:build"
 
 task :default => :spec
+
+namespace :ext do
+  case RUBY_PLATFORM
+  when 'java'
+    task :build => "ext:jruby"
+  else
+    task :build => "extconf:compile"
+  end
+
+  JRUBY_EXT = 'lib/looksee/looksee.jar'
+  task :jruby do
+    class_path = "#{Config::CONFIG['prefix']}/lib/jruby.jar"
+    sh "javac -g -classpath #{class_path} ext/jruby/looksee/*.java"
+    cd 'ext/jruby' do
+      sh "jar cf ../../#{JRUBY_EXT} looksee/*.class"
+    end
+  end
+
+  CLOBBER.include(JRUBY_EXT)
+end

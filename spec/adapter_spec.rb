@@ -193,6 +193,13 @@ shared_examples_for 'all adapters' do
   end
 end
 
-describe Looksee::Adapter::MRI do
-  it_should_behave_like 'all adapters'
+case RUBY_PLATFORM
+when 'java'
+  describe Looksee::Adapter::JRuby do
+    it_should_behave_like 'all adapters'
+  end
+else
+  describe Looksee::Adapter::MRI do
+    it_should_behave_like 'all adapters'
+  end
 end
