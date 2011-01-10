@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-shared_examples_for 'all adapters' do
+describe "Looksee.adapter" do
   include TemporaryClasses
 
   before do
-    @adapter = described_class.new
+    @adapter = NATIVE_ADAPTER
   end
 
   describe "#lookup_modules" do
@@ -190,16 +190,5 @@ shared_examples_for 'all adapters' do
         @adapter.internal_undefined_instance_methods(C).should == []
       end
     end
-  end
-end
-
-case RUBY_PLATFORM
-when 'java'
-  describe Looksee::Adapter::JRuby do
-    it_should_behave_like 'all adapters'
-  end
-else
-  describe Looksee::Adapter::MRI do
-    it_should_behave_like 'all adapters'
   end
 end

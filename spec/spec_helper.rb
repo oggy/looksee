@@ -9,6 +9,8 @@ Dir['spec/support/*'].each do |path|
   require path
 end
 
+NATIVE_ADAPTER = Looksee.adapter
+
 Spec::Runner.configure do |config|
   config.mock_with :mocha
   config.before { Looksee.adapter = TestAdapter.new }
