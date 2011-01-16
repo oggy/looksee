@@ -1,31 +1,18 @@
 require 'rubygems'
-gem 'hoe', '>= 2.1.0'
-require 'hoe'
 require 'fileutils'
 
-require './lib/looksee/version'
-
-Hoe.plugin :newgem
-
-$hoe = Hoe.spec 'looksee' do
-  self.developer 'George Ogata', 'george.ogata@gmail.com'
-  self.rubyforge_name       = self.name # TODO this is default value
-  # self.extra_deps         = [['activesupport','>= 2.0.2']]
-  self.extra_dev_deps = [
-    ['newgem', ">= #{::Newgem::VERSION}"],
-    ['rspec', '>= 1.2.7'],
-    ['mocha', '>= 0.9.5'],
-  ]
-end
+$: << 'lib'
+require 'looksee/version'
 
 # Configure the clean and clobber tasks.
 require 'rake/clean'
 require 'rbconfig'
 CLEAN.include('**/*.{o,class}')
-CLOBBER.include("ext/mri/mri.#{Config::CONFIG['DLEXT']}")
+CLOBBER.include('*.gem')
 
-require 'newgem/tasks' # loads /tasks/*.rake
-Dir['tasks/**/*.rake'].each { |t| load t }
+task :gem => ['ext:build_for_gem', 'clean'] do
+  sh "gem build looksee.gemspec"
+end
 
 desc "Rebuild the gem from scratch."
 task :regem => [:clobber, :gem]
@@ -36,21 +23,37 @@ Rake::Task['spec'].prerequisites << "ext:build"
 task :default => :spec
 
 namespace :ext do
+  MRI_EXT = "lib/looksee/mri.#{Config::CONFIG['DLEXT']}"
+  JRUBY_EXT = 'lib/looksee/looksee.jar'
+
   case RUBY_PLATFORM
   when 'java'
-    task :build => "ext:jruby"
+    task :build => JRUBY_EXT
+    task :build_for_gem => :build
   else
-    task :build => "extconf:compile"
+    task :build => MRI_EXT
+    task :build_for_gem
   end
 
-  JRUBY_EXT = 'lib/looksee/looksee.jar'
-  task :jruby do
+  CLOBBER.include(MRI_EXT, JRUBY_EXT)
+end
+
+namespace :mri do
+  file MRI_EXT do
+    Dir.chdir 'ext/mri' do
+      ruby 'extconf.rb'
+      sh(RUBY_PLATFORM =~ /win32/ ? 'nmake' : 'make')
+      sh "cp #{File.basename(MRI_EXT)} ../../#{MRI_EXT}"
+    end
+  end
+end
+
+namespace :jruby do
+  file JRUBY_EXT do
     class_path = "#{Config::CONFIG['prefix']}/lib/jruby.jar"
     sh "javac -g -classpath #{class_path} ext/jruby/looksee/*.java"
     cd 'ext/jruby' do
       sh "jar cf ../../#{JRUBY_EXT} looksee/*.class"
     end
   end
-
-  CLOBBER.include(JRUBY_EXT)
 end

@@ -1,44 +1,24 @@
-# -*- encoding: utf-8 -*-
+$:.unshift File.expand_path('lib', File.dirname(__FILE__))
+require 'looksee/version'
 
 Gem::Specification.new do |s|
-  s.name = %q{looksee}
-  s.version = "0.2.1"
-
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.name = 'looksee'
+  s.version = Looksee::VERSION
   s.authors = ["George Ogata"]
-  s.date = %q{2009-08-30}
-  s.description = %q{Looksee lets you examine the method lookup path of objects in ways not
-possible in plain ruby.}
   s.email = ["george.ogata@gmail.com"]
-  s.extensions = ["ext/looksee/extconf.rb"]
-  s.extra_rdoc_files = ["History.txt", "Manifest.txt"]
-  s.files = [".autotest", "History.txt", "Manifest.txt", "README.rdoc", "Rakefile", "ext/looksee/extconf.rb", "ext/looksee/looksee.c", "ext/looksee/node-1.9.h", "lib/looksee.rb", "lib/looksee/shortcuts.rb", "lib/looksee/version.rb", "lib/looksee/wirble_compatibility.rb", "looksee.gemspec", "script/console", "script/destroy", "script/generate", "spec/looksee_spec.rb", "spec/spec_helper.rb", "spec/wirble_compatibility_spec.rb", "tasks/extconf.rake", "tasks/extconf/looksee.rake"]
-  s.homepage = %q{http://github.com/oggy/looksee}
-  s.rdoc_options = ["--main", "README.rdoc"]
-  s.require_paths = ["lib", "ext/looksee"]
-  s.rubyforge_project = %q{looksee}
-  s.rubygems_version = %q{1.3.5}
-  s.summary = %q{Looksee lets you examine the method lookup path of objects in ways not possible in plain ruby.}
+  s.date = Date.today.strftime('%Y-%m-%d')
+  s.summary = "Inspect method lookup paths in ways not possible in plain ruby."
+  s.description = "Inspect method lookup paths in ways not possible in plain ruby."
+  s.homepage = 'http://github.com/oggy/looksee'
+  s.platform = Gem::Platform::CURRENT if RUBY_PLATFORM == 'java'
 
-  if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
-    s.specification_version = 3
+  s.extensions = ["ext/mri/extconf.rb"] unless RUBY_PLATFORM == 'java'
+  s.extra_rdoc_files = ['CHANGELOG', 'LICENSE', 'README.markdown']
+  s.files = Dir["{doc,ext,lib}/**/*", 'CHANGELOG', 'LICENSE', 'Rakefile', 'README.markdown']
+  s.test_files = Dir["spec/**/*"]
+  s.require_path = 'lib'
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<newgem>, [">= 1.5.2"])
-      s.add_development_dependency(%q<rspec>, [">= 1.2.7"])
-      s.add_development_dependency(%q<mocha>, [">= 0.9.5"])
-      s.add_development_dependency(%q<hoe>, [">= 2.3.2"])
-    else
-      s.add_dependency(%q<newgem>, [">= 1.5.2"])
-      s.add_dependency(%q<rspec>, [">= 1.2.7"])
-      s.add_dependency(%q<mocha>, [">= 0.9.5"])
-      s.add_dependency(%q<hoe>, [">= 2.3.2"])
-    end
-  else
-    s.add_dependency(%q<newgem>, [">= 1.5.2"])
-    s.add_dependency(%q<rspec>, [">= 1.2.7"])
-    s.add_dependency(%q<mocha>, [">= 0.9.5"])
-    s.add_dependency(%q<hoe>, [">= 2.3.2"])
-  end
+  s.specification_version = 3
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'mocha'
 end
