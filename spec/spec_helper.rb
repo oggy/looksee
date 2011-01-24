@@ -1,4 +1,4 @@
-require 'spec'
+require 'rspec'
 require 'mocha'
 require 'looksee'
 
@@ -11,7 +11,7 @@ end
 
 NATIVE_ADAPTER = Looksee.adapter
 
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
   config.mock_with :mocha
   config.before { Looksee.adapter = TestAdapter.new }
 end

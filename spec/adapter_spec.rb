@@ -34,6 +34,8 @@ describe "Looksee.adapter" do
         'Mocha', 'Spec',
         # RSpec adds this under ruby 1.8.6
         'InstanceExecHelper',
+        # RSpec 2
+        'RSpec::',
         # only in ruby 1.9
         'BasicObject',
         # something pulls this in under ruby 1.9
