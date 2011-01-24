@@ -16,7 +16,7 @@ Spec::Runner.configure do |config|
   config.before { Looksee.adapter = TestAdapter.new }
 end
 
-if RUBY_PLATFORM == 'java'
+if RUBY_ENGINE == 'jruby'
   require 'jruby'
   JRuby.objectspace = true
 end

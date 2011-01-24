@@ -12,7 +12,7 @@ describe Looksee::WirbleCompatibility do
         |#{setup_code}
         |c.ls
       EOS
-      irb = File.join Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name'].sub(/ruby/, 'irb')
+      irb = File.join Config::CONFIG['bindir'], 'irb'
       lib_dir = File.expand_path('lib')
       # irb hangs when using readline without a tty
       output = IO.popen("#{irb} -f --noreadline --noprompt --noverbose -I#{lib_dir} 2>&1", 'r+') do |io|

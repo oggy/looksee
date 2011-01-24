@@ -24,12 +24,16 @@ task :default => :spec
 
 namespace :ext do
   MRI_EXT = "lib/looksee/mri.#{Config::CONFIG['DLEXT']}"
+  RBX_EXT = "lib/looksee/rbx.#{Config::CONFIG['DLEXT']}"
   JRUBY_EXT = 'lib/looksee/looksee.jar'
 
-  case RUBY_PLATFORM
-  when 'java'
+  case RUBY_ENGINE
+  when 'jruby'
     task :build => JRUBY_EXT
     task :build_for_gem => :build
+  when 'rbx'
+    task :build => RBX_EXT
+    task :build_for_gem
   else
     task :build => MRI_EXT
     task :build_for_gem
@@ -44,6 +48,16 @@ namespace :mri do
       ruby 'extconf.rb'
       sh(RUBY_PLATFORM =~ /win32/ ? 'nmake' : 'make')
       sh "cp #{File.basename(MRI_EXT)} ../../#{MRI_EXT}"
+    end
+  end
+end
+
+namespace :rbx do
+  file RBX_EXT do
+    Dir.chdir 'ext/rbx' do
+      ruby 'extconf.rb'
+      sh(RUBY_PLATFORM =~ /win32/ ? 'nmake' : 'make')
+      sh "cp #{File.basename(RBX_EXT)} ../../#{RBX_EXT}"
     end
   end
 end
