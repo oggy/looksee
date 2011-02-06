@@ -116,8 +116,11 @@ VALUE Looksee_internal_private_instance_methods(VALUE self, VALUE klass) {
 }
 
 static int add_method_if_undefined(ID method_name, NODE *body, VALUE *names) {
-  /* Module#undef_method sets body->nd_body to NULL. */
-  if (body && !body->nd_body)
+  /* Module#undef_method:
+   *   * sets body->nd_body to NULL in ruby <= 1.8
+   *   * sets body to NULL in ruby >= 1.9
+   */
+  if (!body || !body->nd_body)
     rb_ary_push(*names, ID2SYM(method_name));
   return ST_CONTINUE;
 }
