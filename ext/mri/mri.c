@@ -1,6 +1,10 @@
 #include "ruby.h"
 
-#if RUBY_VERSION >= 190
+#if RUBY_VERSION >= 192
+#  include "vm_core.h"
+#  include "method.h"
+#  include "ruby/st.h"
+#elif RUBY_VERSION >= 190
 #  include "node-1.9.h"
 #  include "ruby/st.h"
 #else
@@ -58,23 +62,58 @@ VALUE Looksee_internal_class_to_module(VALUE self, VALUE internal_class) {
   rb_raise(rb_eArgError, "not an internal class: %s", RSTRING_PTR(rb_inspect(internal_class)));
 }
 
+#if RUBY_VERSION >= 192
+
+#  define VISIBILITY_TYPE rb_method_flag_t
+
 typedef struct add_method_if_matching_arg {
   VALUE names;
-  int visibility;
+  VISIBILITY_TYPE visibility;
 } add_method_if_matching_arg_t;
 
-#if RUBY_VERSION < 190
-#  define VISIBILITY(node) ((node)->nd_noex & NOEX_MASK)
+static int add_method_if_matching(ID method_name, rb_method_entry_t *me, add_method_if_matching_arg_t *arg) {
+  if (method_name == ID_ALLOCATOR)
+    return ST_CONTINUE;
+
+  if (UNDEFINED_METHOD_ENTRY_P(me))
+    return ST_CONTINUE;
+
+  if ((me->flag & NOEX_MASK) == arg->visibility)
+    rb_ary_push(arg->names, ID2SYM(method_name));
+
+  return ST_CONTINUE;
+}
+
+static int add_method_if_undefined(ID method_name, rb_method_entry_t *me, VALUE *names) {
+  if (UNDEFINED_METHOD_ENTRY_P(me))
+    rb_ary_push(*names, ID2SYM(method_name));
+  return ST_CONTINUE;
+}
+
 #else
-#  define VISIBILITY(node) ((node)->nd_body->nd_noex & NOEX_MASK)
-#endif
+
+#  if RUBY_VERSION >= 190
+#    define VISIBILITY(node) ((node)->nd_body->nd_noex & NOEX_MASK)
+#  else
+#    define VISIBILITY(node) ((node)->nd_noex & NOEX_MASK)
+#  endif
+
+#  define VISIBILITY_TYPE unsigned long
+
+typedef struct add_method_if_matching_arg {
+  VALUE names;
+  VISIBILITY_TYPE visibility;
+} add_method_if_matching_arg_t;
 
 static int add_method_if_matching(ID method_name, NODE *body, add_method_if_matching_arg_t *arg) {
   /* This entry is for the internal allocator function. */
   if (method_name == ID_ALLOCATOR)
     return ST_CONTINUE;
 
-  /* Module#undef_method sets body->nd_body to NULL. */
+  /* Module#undef_method:
+   *   * sets body->nd_body to NULL in ruby <= 1.8
+   *   * sets body to NULL in ruby >= 1.9
+   */
   if (!body || !body->nd_body)
     return ST_CONTINUE;
 
@@ -83,7 +122,15 @@ static int add_method_if_matching(ID method_name, NODE *body, add_method_if_matc
   return ST_CONTINUE;
 }
 
-static VALUE internal_instance_methods(VALUE klass, long visibility) {
+static int add_method_if_undefined(ID method_name, NODE *body, VALUE *names) {
+  if (!body || !body->nd_body)
+    rb_ary_push(*names, ID2SYM(method_name));
+  return ST_CONTINUE;
+}
+
+#endif
+
+static VALUE internal_instance_methods(VALUE klass, VISIBILITY_TYPE visibility) {
   add_method_if_matching_arg_t arg;
   arg.names = rb_ary_new();
   arg.visibility = visibility;
@@ -113,16 +160,6 @@ VALUE Looksee_internal_protected_instance_methods(VALUE self, VALUE klass) {
  */
 VALUE Looksee_internal_private_instance_methods(VALUE self, VALUE klass) {
   return internal_instance_methods(klass, NOEX_PRIVATE);
-}
-
-static int add_method_if_undefined(ID method_name, NODE *body, VALUE *names) {
-  /* Module#undef_method:
-   *   * sets body->nd_body to NULL in ruby <= 1.8
-   *   * sets body to NULL in ruby >= 1.9
-   */
-  if (!body || !body->nd_body)
-    rb_ary_push(*names, ID2SYM(method_name));
-  return ST_CONTINUE;
 }
 
 /*
