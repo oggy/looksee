@@ -7,11 +7,12 @@ describe Looksee::WirbleCompatibility do
     # Run the given ruby string, and return the standard output.
     #
     def init_irb_with(code)
-      code = <<-EOS.demargin.gsub(/\n/, ';')
+      code = <<-EOS.demargin
         |#{code}
         |#{setup_code}
         |c.ls
       EOS
+      code = code.chomp.gsub(/\n/, ';') # only print value of last line
       irb = File.join Config::CONFIG['bindir'], 'irb'
       lib_dir = File.expand_path('lib')
       # irb hangs when using readline without a tty
@@ -21,6 +22,9 @@ describe Looksee::WirbleCompatibility do
         io.close_write
         io.read
       end
+      # Ruby 1.9.2 prints an extra newline on exit.
+      output.chomp! if RUBY_VERSION >= '1.9.2'
+      output
     end
 
     def setup_code
