@@ -43,7 +43,7 @@ module Looksee
         raise NotImplementedError, "abstract"
       end
 
-      if RUBY_VERSION >= '1.9.0'
+      if RUBY_VERSION >= '1.9.0' || RUBY_ENGINE == 'rbx'
         def source_location(method)
           method.is_a?(UnboundMethod) or
             raise TypeError, "expected UnboundMethod, got #{method.class}"
