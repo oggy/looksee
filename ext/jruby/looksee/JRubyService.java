@@ -6,7 +6,7 @@ import org.jruby.RubyModule;
 import org.jruby.RubyClass;
 import org.jruby.runtime.load.BasicLibraryService;
 
-public class LookseeService implements BasicLibraryService {
+public class JRubyService implements BasicLibraryService {
   public boolean basicLoad(Ruby runtime) {
     RubyModule mAdapter = (RubyModule)runtime.getClassFromPath("Looksee::Adapter");
     RubyClass cBase = (RubyClass)runtime.getClassFromPath("Looksee::Adapter::Base");
