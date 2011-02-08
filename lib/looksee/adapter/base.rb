@@ -42,6 +42,18 @@ module Looksee
       def internal_undefined_instance_methods(mod)
         raise NotImplementedError, "abstract"
       end
+
+      if RUBY_VERSION >= '1.9.0'
+        def source_location(method)
+          method.is_a?(UnboundMethod) or
+            raise TypeError, "expected UnboundMethod, got #{method.class}"
+          method.source_location
+        end
+      else
+        def source_location(method)
+          raise NotImplementedError, 'abstract'
+        end
+      end
     end
   end
 end

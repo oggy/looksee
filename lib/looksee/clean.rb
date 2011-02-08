@@ -6,6 +6,7 @@ module Looksee
   autoload :VERSION, 'looksee/version'
   autoload :Adapter, 'looksee/adapter'
   autoload :Columnizer, 'looksee/columnizer'
+  autoload :Editor, 'looksee/editor'
   autoload :Help, 'looksee/help'
   autoload :Inspector, 'looksee/inspector'
   autoload :LookupPath, 'looksee/lookup_path'
@@ -57,6 +58,22 @@ module Looksee
     attr_accessor :styles
 
     #
+    # The editor command, used for Object#edit.
+    #
+    # This string should contain a "%f", which is replaced with the
+    # file name, and/or "%l" which is replaced with the line number. A
+    # "%%" is replaced with "%".
+    #
+    # If the LOOKSEE_EDITOR environment variable is set, it is used as
+    # the default. Otherwise, we use the following heuristic:
+    #
+    # If EDITOR is set, we use that. If it looks like vi, emacs, or
+    # textmate, we also append options to position the cursor on the
+    # appropriate line. If EDITOR is not set, we use "vi +%l %f".
+    #
+    attr_accessor :editor
+
+    #
     # The interpreter adapter.
     #
     # Encapsulates the interpreter-specific functionality.
@@ -81,6 +98,7 @@ module Looksee
     :undefined  => "\e[1;34m%s\e[0m", # blue
     :overridden => "\e[1;30m%s\e[0m", # black
   }
+  self.editor = ENV['LOOKSEE_EDITOR'] || ENV['EDITOR'] || 'vi'
 
   case RUBY_ENGINE
   when 'jruby'

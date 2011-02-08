@@ -20,6 +20,20 @@ module Looksee
     #
     attr_reader :entries
 
+    def find(name)
+      entries.each do |entry|
+        visibility = entry.methods[name] or
+          next
+
+        if visibility == :undefined
+          return nil
+        else
+          return entry.module.instance_method(name)
+        end
+      end
+      nil
+    end
+
     #
     # Return a string showing the object's lookup path.
     #

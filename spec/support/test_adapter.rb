@@ -26,6 +26,14 @@ class TestAdapter < Looksee::Adapter::Base
     self.undefined_methods[mod] = undefined
   end
 
+  def source_location(method)
+    source_locations[[method.owner.name.to_s, method.name.to_s]]
+  end
+
+  def set_source_location(mod, method, location)
+    source_locations[[mod.name.to_s, method.to_s]] = location
+  end
+
   def ancestors
     @ancestors ||= Hash.new { |h, k| h[k] = [] }
   end
@@ -44,5 +52,9 @@ class TestAdapter < Looksee::Adapter::Base
 
   def undefined_methods
     @undefined_methods ||= Hash.new { |h, k| h[k] = [] }
+  end
+
+  def source_locations
+    @source_locations ||= {}
   end
 end

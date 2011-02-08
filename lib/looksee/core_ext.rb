@@ -41,6 +41,18 @@ module Looksee
       lookup_path = LookupPath.new(self)
       Inspector.new(lookup_path, options)
     end
+
+    #
+    # Open an editor at the named method's definition.
+    #
+    # Uses Looksee.editor to determine the editor command to run.
+    #
+    # Only works for methods for which file and line numbers are
+    # accessible.
+    #
+    def edit(name)
+      Editor.new(Looksee.editor).edit(self, name)
+    end
   end
 
   Object.send :include, ObjectMixin

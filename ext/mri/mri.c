@@ -172,6 +172,29 @@ VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
   return names;
 }
 
+#if RUBY_VERSION < 190
+/* Return the source file and line number of the given object and method. */
+VALUE Looksee_source_location(VALUE self, VALUE unbound_method) {
+  if (!rb_obj_is_kind_of(unbound_method, rb_cUnboundMethod))
+    rb_raise(rb_eTypeError, "expected UnboundMethod, got %s", rb_obj_classname(unbound_method));
+
+  VALUE klass = rb_funcall(unbound_method, rb_intern("owner"), 0);
+  VALUE name = rb_funcall(unbound_method, rb_intern("name"), 0);
+  ID method_id = rb_intern(RSTRING_PTR(name));
+  NODE *body;
+  if (!st_lookup(RCLASS_M_TBL(klass), method_id, (st_data_t *)&body))
+    return Qnil;
+  if (!body || !body->nd_body)
+    return Qnil;
+  VALUE file = rb_str_new2(body->nd_file);
+  VALUE line = INT2NUM(nd_line(body));
+  VALUE location = rb_ary_new2(2);
+  rb_ary_store(location, 0, file);
+  rb_ary_store(location, 1, line);
+  return location;
+}
+#endif
+
 void Init_mri(void) {
   VALUE mLooksee = rb_const_get(rb_cObject, rb_intern("Looksee"));
   VALUE mAdapter = rb_const_get(mLooksee, rb_intern("Adapter"));
@@ -184,4 +207,7 @@ void Init_mri(void) {
   rb_define_method(mMRI, "internal_protected_instance_methods", Looksee_internal_protected_instance_methods, 1);
   rb_define_method(mMRI, "internal_private_instance_methods", Looksee_internal_private_instance_methods, 1);
   rb_define_method(mMRI, "internal_undefined_instance_methods", Looksee_internal_undefined_instance_methods, 1);
+#if RUBY_VERSION < 190
+  rb_define_method(mMRI, "source_location", Looksee_source_location, 1);
+#endif
 }

@@ -36,8 +36,7 @@ module Looksee
       pattern = filter_pattern
       show_overridden = @visibilities.include?(:overridden)
       entry.map do |name, visibility|
-        next if !@visibilities.include?(visibility)
-        next if name !~ filter_pattern
+        next if !selected?(name, visibility)
         style = entry.overridden?(name) ? :overridden : visibility
         next if style == :overridden && !show_overridden
         Looksee.styles[style] % name
@@ -50,6 +49,10 @@ module Looksee
       string_patterns = strings.map{|s| Regexp.escape(s)}
       regexp_patterns = regexps.map{|s| s.source}
       /#{(string_patterns + regexp_patterns).join('|')}/
+    end
+
+    def selected?(name, visibility)
+      @visibilities.include?(visibility) && name =~ filter_pattern
     end
   end
 end

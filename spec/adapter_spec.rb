@@ -197,4 +197,38 @@ describe "Looksee.adapter" do
       end
     end
   end
+
+  describe "#source_location" do
+    before do
+      @tmp = "#{ROOT}/spec/tmp"
+      FileUtils.mkdir_p @tmp
+      @source_path = "#@tmp/c.rb"
+      open(@source_path, 'w') { |f| f.puts <<-EOS.demargin }
+        |class C
+        |  def f
+        |  end
+        |end
+      EOS
+    end
+
+    after do
+      FileUtils.rm_rf @tmp
+    end
+
+    it "should return the file and line number the given method was defined on" do
+      load @source_path
+      begin
+        method = C.instance_method(:f)
+        @adapter.source_location(method).should == [@source_path, 2]
+      ensure
+        Object.send :remove_const, :C
+      end
+    end
+
+    it "should raise a TypeError if the argument is not an UnboundMethod" do
+      lambda do
+        @adapter.source_location(nil)
+      end.should raise_error(TypeError)
+    end
+  end
 end

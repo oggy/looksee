@@ -9,8 +9,8 @@ describe Looksee::LookupPath do
       temporary_class(:C) { include M }
       @object = Object.new
       Looksee.adapter.ancestors[@object] = [C, M]
-      Looksee.adapter.set_methods(M, [:public1, :public2], [:protected1, :protected2], [:private1, :private2], [:undefined1, :undefined2]) 
-      Looksee.adapter.set_methods(C, [:public1, :public2], [:protected1, :protected2], [:private1, :private2], [:undefined1, :undefined2]) 
+      Looksee.adapter.set_methods(M, [:public1, :public2], [:protected1, :protected2], [:private1, :private2], [:undefined1, :undefined2])
+      Looksee.adapter.set_methods(C, [:public1, :public2], [:protected1, :protected2], [:private1, :private2], [:undefined1, :undefined2])
       @lookup_path = Looksee::LookupPath.new(@object)
     end
 
@@ -36,6 +36,37 @@ describe Looksee::LookupPath do
     it "should know which methods have been overridden" do
       @lookup_path.entries[0].overridden?('public1').should be_false
       @lookup_path.entries[1].overridden?('public1').should be_true
+    end
+  end
+
+  describe "#find" do
+    before do
+      temporary_module(:M) { def f; end }
+      temporary_class(:C) { include M; def f; end }
+      @object = Object.new
+      Looksee.adapter.ancestors[@object] = [C, M]
+      Looksee.adapter.set_methods(M, [:f], [], [], [])
+      Looksee.adapter.set_methods(C, [:f], [], [], [])
+    end
+
+    it "should return the unoverridden UnboundMethod for the given method name" do
+      lookup_path = Looksee::LookupPath.new(@object)
+      method = lookup_path.find('f')
+      method.owner.should == C
+      method.name.should == (RUBY_VERSION < "1.9.0" ? 'f' : :f)
+    end
+
+    it "should return nil if the method does not exist" do
+      lookup_path = Looksee::LookupPath.new(@object)
+      lookup_path.find('g').should be_nil
+    end
+
+    it "should return nil if the method has been undefined" do
+      C.send(:undef_method, :f)
+      Looksee.adapter.public_methods[C].delete(:f)
+      Looksee.adapter.undefined_methods[C] << :f
+      lookup_path = Looksee::LookupPath.new(@object)
+      lookup_path.find('f').should be_nil
     end
   end
 
