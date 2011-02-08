@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
 
   s.specification_version = 3
+  s.add_development_dependency 'ritual', '>= 0.2.0'
   s.add_development_dependency 'rspec', '>= 2.0.0'
   s.add_development_dependency 'mocha'
 end
