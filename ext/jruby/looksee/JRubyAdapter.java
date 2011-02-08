@@ -6,9 +6,14 @@ import org.jruby.RubyObject;
 import org.jruby.RubyModule;
 import org.jruby.RubyClass;
 import org.jruby.RubyArray;
+import org.jruby.RubyString;
+import org.jruby.RubyFixnum;
+import org.jruby.RubyMethod;
+import org.jruby.RubyUnboundMethod;
 import org.jruby.IncludedModuleWrapper;
 import org.jruby.anno.JRubyClass;
 import org.jruby.anno.JRubyMethod;
+import org.jruby.runtime.PositionAware;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.Visibility;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -70,6 +75,26 @@ public class JRubyAdapter extends RubyObject {
       if (entry.getValue().isUndefined())
         result.add(runtime.newSymbol(entry.getKey()));
     }
+    return result;
+  }
+
+  @JRubyMethod(name = "source_location")
+  public static IRubyObject sourceLocation(ThreadContext context, IRubyObject self, IRubyObject arg) {
+    Ruby runtime = context.getRuntime();
+    if (!(arg instanceof RubyUnboundMethod))
+      throw runtime.newTypeError("expected UnboundMethod, got " + arg.getMetaClass().getName());
+
+    // RubyUnboundMethod.method is protected - go the long way.
+    RubyString name = (RubyString)((RubyMethod)arg).name(context);
+    RubyModule owner = (RubyModule)((RubyMethod)arg).owner(context);
+    DynamicMethod method = owner.getMethods().get(name.toString());
+
+    if (!(method instanceof PositionAware))
+      return runtime.getNil();
+    PositionAware positionedMethod = (PositionAware)method;
+    RubyString file = runtime.newString(positionedMethod.getFile());
+    RubyFixnum line = runtime.newFixnum(positionedMethod.getLine() + 1);
+    RubyArray result = runtime.newArray(file, line);
     return result;
   }
 }
