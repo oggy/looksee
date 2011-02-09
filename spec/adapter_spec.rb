@@ -68,7 +68,7 @@ describe "Looksee.adapter" do
       object.singleton_class
 
       result = filtered_lookup_modules(object)
-      if RUBY_ENGINE == 'rbx'
+      if Looksee.ruby_engine == 'rbx'
         result.shift.should =~ /\A#<Class: \#<Object:\d+>>\z/
       else
         result.shift.should =~ /\A#<Class:\#<Object:0x[\da-f]+>>\z/

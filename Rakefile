@@ -1,6 +1,6 @@
 require 'ritual'
 
-case RUBY_ENGINE
+case (Object.const_defined?(:RUBY_ENGINE) ? RUBY_ENGINE : 'ruby')
 when 'ruby'
   extension :mri
 when 'rbx'
