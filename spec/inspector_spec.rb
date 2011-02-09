@@ -24,12 +24,12 @@ describe Looksee::Inspector do
       it "should columnize output to the given width, if any" do
         inspector = Looksee::Inspector.new(@lookup_path, :visibilities => [:public], :width => 20)
         inspector.inspect.should == <<-EOS.demargin.chomp
-          |C
-          |  aa  cc  ee  gg  ii
-          |  bb  dd  ff  hh  jj
           |M
           |  aaa  ccc  eee  ggg
           |  bbb  ddd  fff  hhh
+          |C
+          |  aa  cc  ee  gg  ii
+          |  bb  dd  ff  hh  jj
         EOS
       end
 
@@ -39,12 +39,12 @@ describe Looksee::Inspector do
         begin
           inspector = Looksee::Inspector.new(@lookup_path, :visibilities => [:public])
           inspector.inspect.should == <<-EOS.demargin.chomp
-            |C
-            |  aa  cc  ee  gg  ii
-            |  bb  dd  ff  hh  jj
             |M
             |  aaa  ccc  eee  ggg
             |  bbb  ddd  fff  hhh
+            |C
+            |  aa  cc  ee  gg  ii
+            |  bb  dd  ff  hh  jj
           EOS
         ensure
           ENV['COLUMNS'] = original_columns
@@ -55,12 +55,12 @@ describe Looksee::Inspector do
         Looksee.stubs(:default_width).returns(20)
         inspector = Looksee::Inspector.new(@lookup_path, :visibilities => [:public])
         inspector.inspect.should == <<-EOS.demargin.chomp
-          |C
-          |  aa  cc  ee  gg  ii
-          |  bb  dd  ff  hh  jj
           |M
           |  aaa  ccc  eee  ggg
           |  bbb  ddd  fff  hhh
+          |C
+          |  aa  cc  ee  gg  ii
+          |  bb  dd  ff  hh  jj
         EOS
       end
     end
@@ -70,9 +70,9 @@ describe Looksee::Inspector do
       lookup_path = Looksee::LookupPath.new(@object)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public])
       inspector.inspect.should == <<-EOS.demargin.chomp
-        |C
         |M
         |  public1  public2
+        |C
       EOS
     end
 
@@ -116,9 +116,9 @@ describe Looksee::Inspector do
       lookup_path = Looksee::LookupPath.new(@object)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public, :overridden])
       inspector.inspect.should == <<-EOS.demargin.chomp
-        |C
-        |  public
         |M
+        |  public
+        |C
         |  public
       EOS
     end
@@ -129,9 +129,9 @@ describe Looksee::Inspector do
       lookup_path = Looksee::LookupPath.new(@object)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public, :nooverridden])
       inspector.inspect.should == <<-EOS.demargin.chomp
+        |M
         |C
         |  public
-        |M
       EOS
     end
 
@@ -141,9 +141,9 @@ describe Looksee::Inspector do
       lookup_path = Looksee::LookupPath.new(@object)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public, :overridden], :filters => [/^a/, 'b'])
       inspector.inspect.should == <<-EOS.demargin.chomp
-        |C
-        |  ab  ax  ba
         |M
+        |  ab  ax  ba
+        |C
         |  ab  ax  ba
       EOS
     end

@@ -12,7 +12,7 @@ module Looksee
     attr_reader :filters
 
     def inspect
-      lookup_path.entries.map do |entry|
+      lookup_path.entries.reverse.map do |entry|
         inspect_entry(entry)
       end.join("\n")
     end
