@@ -81,6 +81,11 @@ module Looksee
     attr_accessor :adapter
 
     #
+    # Wrapper around RUBY_ENGINE that's always defined.
+    #
+    attr_accessor :ruby_engine
+
+    #
     # Show a quick reference.
     #
     def help
@@ -100,7 +105,13 @@ module Looksee
   }
   self.editor = ENV['LOOKSEE_EDITOR'] || ENV['EDITOR'] || 'vi'
 
-  case RUBY_ENGINE
+  if Object.const_defined?(:RUBY_ENGINE)
+    self.ruby_engine = RUBY_ENGINE
+  else
+    self.ruby_engine = 'ruby'
+  end
+
+  case ruby_engine
   when 'jruby'
     self.adapter = Adapter::JRuby.new
   when 'rbx'

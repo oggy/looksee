@@ -19,7 +19,7 @@ RSpec.configure do |config|
   config.before { Looksee.adapter = TestAdapter.new }
 end
 
-if RUBY_ENGINE == 'jruby'
+if Looksee.ruby_engine == 'jruby'
   require 'jruby'
   JRuby.objectspace = true
 end
