@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.version = Looksee::VERSION
   s.authors = ["George Ogata"]
   s.email = ["george.ogata@gmail.com"]
-  s.date = Date.today.strftime('%Y-%m-%d')
+  s.date = Time.now.strftime('%Y-%m-%d')
   s.summary = "Inspect method lookup paths in ways not possible in plain ruby."
   s.description = "Inspect method lookup paths in ways not possible in plain ruby."
   s.homepage = 'http://github.com/oggy/looksee'
