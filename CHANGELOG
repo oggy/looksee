@@ -9,5 +9,6 @@
  * Require 'looksee' instead of 'looksee/shortcuts'. For
    non-pollutiness, use "require 'looksee/clean'".
  * All methods are now listed by default.
+ * Modules are now listed root class first.
  * Support for Ruby MRI 1.9, JRuby, and Rubinius.
  * Add Object#edit(METHOD), to open Object#METHOD in your text editor.
