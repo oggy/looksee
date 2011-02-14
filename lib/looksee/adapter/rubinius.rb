@@ -35,6 +35,22 @@ module Looksee
         end
         names
       end
+
+      def singleton_class?(object)
+        object.is_a?(Class) && object.__metaclass_object__
+      end
+
+      def singleton_instance(singleton_class)
+        singleton_class?(singleton_class) or
+          raise TypeError, "expected singleton class, got #{singleton_class.class}"
+        singleton_class.__metaclass_object__
+      end
+
+      def module_name(mod)
+        mod.is_a?(Module) or
+          raise TypeError, "expected module, got #{mod.class}"
+        mod.__name__
+      end
     end
   end
 end

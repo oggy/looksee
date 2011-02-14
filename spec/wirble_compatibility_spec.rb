@@ -35,8 +35,8 @@ describe Looksee::WirbleCompatibility do
         |
         |Looksee.styles = Hash.new{'%s'}
         |Looksee.styles[:public] = "\\e[1;32m%s\\e[0m"
+        |NATIVE_ADAPTER = Looksee.adapter
         |Looksee.adapter = TestAdapter.new
-        |
         |Looksee.adapter.ancestors[c] = [C]
         |Looksee.adapter.public_methods[C] = [:a]
       EOS

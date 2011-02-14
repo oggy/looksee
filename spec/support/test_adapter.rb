@@ -19,6 +19,18 @@ class TestAdapter < Looksee::Adapter::Base
     undefined_methods[mod]
   end
 
+  def singleton_class?(object)
+    NATIVE_ADAPTER.singleton_class?(object)
+  end
+
+  def singleton_instance(object)
+    NATIVE_ADAPTER.singleton_instance(object)
+  end
+
+  def module_name(object)
+    NATIVE_ADAPTER.module_name(object)
+  end
+
   def set_methods(mod, public, protected, private, undefined)
     self.public_methods[mod] = public
     self.protected_methods[mod] = protected

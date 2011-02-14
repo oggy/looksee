@@ -198,6 +198,236 @@ describe "Looksee.adapter" do
     end
   end
 
+  describe "#singleton_class?" do
+    it "should return true if the object is a singleton class of an object" do
+      object = (class << Object.new; self; end)
+      @adapter.singleton_class?(object).should be_true
+    end
+
+    it "should return true if the object is a singleton class of a class" do
+      object = (class << Class.new; self; end)
+      @adapter.singleton_class?(object).should be_true
+    end
+
+    it "should return true if the object is a singleton class of a singleton class" do
+      object = (class << (class << Class.new; self; end); self; end)
+      @adapter.singleton_class?(object).should be_true
+    end
+
+    it "should return false if the object is just a class" do
+      object = Class.new
+      @adapter.singleton_class?(object).should be_false
+    end
+
+    it "should return false if the object is just a module" do
+      object = Module.new
+      @adapter.singleton_class?(object).should be_false
+    end
+
+    it "should return false if the object is just an object" do
+      object = Object.new
+      @adapter.singleton_class?(object).should be_false
+    end
+
+    it "should return false if the object is TrueClass" do
+      @adapter.singleton_class?(TrueClass).should be_false
+    end
+
+    it "should return false if the object is FalseClass" do
+      @adapter.singleton_class?(FalseClass).should be_false
+    end
+
+    it "should return false if the object is NilClass" do
+      @adapter.singleton_class?(NilClass).should be_false
+    end
+  end
+
+  describe "singleton_instance" do
+    it "should return the instance of the given singleton class" do
+      object = Object.new
+      @adapter.singleton_instance((class << object; self; end)).should equal(object)
+    end
+
+    it "should return the instance of the given class singleton class" do
+      klass = Class.new
+      @adapter.singleton_instance((class << klass; self; end)).should equal(klass)
+    end
+
+    it "should return the instance of the given module singleton class" do
+      mod = Module.new
+      @adapter.singleton_instance((class << mod; self; end)).should equal(mod)
+    end
+
+    it "should raise a TypeError if the given object is just a class" do
+      lambda do
+        @adapter.singleton_instance(Class.new)
+      end.should raise_error(TypeError)
+    end
+
+    it "should raise a TypeError if the given object is just a module" do
+      lambda do
+        @adapter.singleton_instance(Module.new)
+      end.should raise_error(TypeError)
+    end
+
+    it "should raise a TypeError if the given object is just a object" do
+      lambda do
+        @adapter.singleton_instance(Object.new)
+      end.should raise_error(TypeError)
+    end
+  end
+
+  describe "#module_name" do
+    it "should return the fully-qualified name of the given module" do
+      ::M = Module.new
+      M::N = Module.new
+      begin
+        @adapter.module_name(M::N).should == 'M::N'
+      ensure
+        Object.send :remove_const, :M
+      end
+    end
+
+    it "should return the fully-qualified name of the given class" do
+      ::M = Module.new
+      M::C = Class.new
+      begin
+        @adapter.module_name(M::C).should == 'M::C'
+      ensure
+        Object.send :remove_const, :M
+      end
+    end
+
+    it "should not be affected by overridding the module's #to_s or #name" do
+      begin
+        ::M = Module.new
+        ::M::C = Class.new do
+          def name
+            'overridden'
+          end
+          def to_s
+            'overridden'
+          end
+        end
+        @adapter.describe_module(M::C).should == 'M::C'
+      ensure
+        Object.send :remove_const, :M
+      end
+    end
+
+    it "should return an empty string for unnamed modules" do
+      @adapter.module_name(Module.new).should == ''
+    end
+
+    it "should return an empty string for unnamed classes" do
+      @adapter.module_name(Class.new).should == ''
+    end
+
+    it "should return an empty string for singleton classes" do
+      object = Object.new
+      @adapter.module_name((class << object; self; end)).should == ''
+    end
+
+    it "should raise a TypeError if the argumeent is not a module" do
+      lambda do
+        @adapter.module_name(Object.new)
+      end.should raise_error(TypeError)
+    end
+  end
+
+  describe "#describe_module" do
+    it "should return the fully-qualified name of a module" do
+      begin
+        ::M = Module.new
+        ::M::N = Module.new
+        @adapter.describe_module(::M::N).should == 'M::N'
+      ensure
+        Object.send :remove_const, :M
+      end
+    end
+
+    it "should not be affected by overridding the module's #to_s or #name" do
+      begin
+        ::M = Module.new
+        ::M::C = Class.new do
+          def name
+            'overridden'
+          end
+          def to_s
+            'overridden'
+          end
+        end
+        @adapter.describe_module(::M::C).should == 'M::C'
+      ensure
+        Object.send :remove_const, :M
+      end
+    end
+
+    describe "for an unnamed class" do
+      it "should describe the object as 'unnamed Class'" do
+        @adapter.describe_module(Class.new).should == 'unnamed Class'
+      end
+    end
+
+    describe "for an unnamed module" do
+      it "should describe the object as 'unnamed Module'" do
+        @adapter.describe_module(Module.new).should == 'unnamed Module'
+      end
+    end
+
+    describe "for a singleton class of an object" do
+      it "should describe the object in brackets" do
+        begin
+          ::M = Module.new
+          ::M::C = Class.new
+          object = M::C.new
+          @adapter.describe_module(object.singleton_class).should == '[M::C instance]'
+        ensure
+          Object.send :remove_const, :M
+        end
+      end
+    end
+
+    describe "for a singleton class of a named class" do
+      it "should return the class name in brackets" do
+        begin
+          ::M = Module.new
+          ::M::C = Class.new
+          @adapter.describe_module(M::C.singleton_class).should == '[M::C]'
+        ensure
+          Object.send :remove_const, :M
+        end
+      end
+    end
+
+    describe "for a singleton class of an unnamed class" do
+      it "should describe the object as '[unnamed Class]'" do
+        klass = Class.new
+        @adapter.describe_module(klass.singleton_class).should == '[unnamed Class]'
+      end
+    end
+
+    describe "for a singleton class of an unnamed module" do
+      it "should describe the object as '[unnamed Module]'" do
+        mod = Module.new
+        @adapter.describe_module(mod.singleton_class).should == '[unnamed Module]'
+      end
+    end
+
+    describe "for a singleton class of a singleton class" do
+      it "should return the object's class name in two pairs of brackets" do
+        begin
+          ::M = Module.new
+          ::M::C = Class.new
+          klass = M::C.singleton_class.singleton_class
+          @adapter.describe_module(klass).should == '[[M::C]]'
+        ensure
+          Object.send :remove_const, :M
+        end
+      end
+    end
+  end
+
   describe "#source_location" do
     before do
       @tmp = "#{ROOT}/spec/tmp"

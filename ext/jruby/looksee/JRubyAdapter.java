@@ -10,6 +10,7 @@ import org.jruby.RubyString;
 import org.jruby.RubyFixnum;
 import org.jruby.RubyMethod;
 import org.jruby.RubyUnboundMethod;
+import org.jruby.MetaClass;
 import org.jruby.IncludedModuleWrapper;
 import org.jruby.anno.JRubyClass;
 import org.jruby.anno.JRubyMethod;
@@ -76,6 +77,30 @@ public class JRubyAdapter extends RubyObject {
         result.add(runtime.newSymbol(entry.getKey()));
     }
     return result;
+  }
+
+  @JRubyMethod(name = "singleton_class?")
+  public static IRubyObject isSingletonClass(ThreadContext context, IRubyObject self, IRubyObject object) {
+    Ruby runtime = context.getRuntime();
+    return runtime.newBoolean(object instanceof MetaClass);
+  }
+
+  @JRubyMethod(name = "singleton_instance")
+  public static IRubyObject singletonInstance(ThreadContext context, IRubyObject self, IRubyObject singleton_class) {
+    Ruby runtime = context.getRuntime();
+    if (singleton_class instanceof MetaClass)
+      return ((MetaClass)singleton_class).getAttached();
+    else
+      throw runtime.newTypeError("expected singleton class, got " + singleton_class.getMetaClass().getName());
+  }
+
+  @JRubyMethod(name = "module_name")
+  public static IRubyObject moduleName(ThreadContext context, IRubyObject self, IRubyObject module) {
+    Ruby runtime = context.getRuntime();
+    if (module instanceof RubyModule)
+      return ((RubyModule)module).name();
+    else
+      throw runtime.newTypeError("expected Module, got " + module.getMetaClass().getName());
   }
 
   @JRubyMethod(name = "source_location")

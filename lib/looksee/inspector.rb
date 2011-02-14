@@ -26,10 +26,7 @@ module Looksee
     end
 
     def styled_module_name(entry)
-      # Display singleton class names in brackets.
-      name = entry.module.to_s  # #name doesn't do singleton classes right
-      nil while name.sub!(/#<Class:(.*)>/, '[\\1]')
-      Looksee.styles[:module] % name
+      Looksee.styles[:module] % Looksee.adapter.describe_module(entry.module)
     end
 
     def styled_methods(entry)

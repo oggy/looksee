@@ -172,8 +172,35 @@ VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
   return names;
 }
 
+VALUE Looksee_singleton_class_p(VALUE self, VALUE object) {
+  return BUILTIN_TYPE(object) == T_CLASS && FL_TEST(object, FL_SINGLETON) ? Qtrue : Qfalse;
+}
+
+VALUE Looksee_singleton_instance(VALUE self, VALUE singleton_class) {
+  if (BUILTIN_TYPE(singleton_class) == T_CLASS && FL_TEST(singleton_class, FL_SINGLETON)) {
+    VALUE object;
+    if (!st_lookup(RCLASS_IV_TBL(singleton_class), rb_intern("__attached__"), (st_data_t *)&object))
+      rb_raise(rb_eRuntimeError, "[looksee bug] can't find singleton object");
+    return object;
+  } else {
+    rb_raise(rb_eTypeError, "expected singleton class, got %s", rb_obj_classname(singleton_class));
+  }
+}
+
+VALUE Looksee_module_name(VALUE self, VALUE module) {
+  if (BUILTIN_TYPE(module) == T_CLASS || BUILTIN_TYPE(module) == T_MODULE) {
+    VALUE name = rb_mod_name(module);
+    return name == Qnil ? rb_str_new2("") : name;
+  } else {
+    rb_raise(rb_eTypeError, "expected module, got %s", rb_obj_classname(module));
+  }
+}
+
 #if RUBY_VERSION < 190
-/* Return the source file and line number of the given object and method. */
+
+/*
+ * Return the source file and line number of the given object and method.
+ */
 VALUE Looksee_source_location(VALUE self, VALUE unbound_method) {
   if (!rb_obj_is_kind_of(unbound_method, rb_cUnboundMethod))
     rb_raise(rb_eTypeError, "expected UnboundMethod, got %s", rb_obj_classname(unbound_method));
@@ -193,6 +220,7 @@ VALUE Looksee_source_location(VALUE self, VALUE unbound_method) {
   rb_ary_store(location, 1, line);
   return location;
 }
+
 #endif
 
 void Init_mri(void) {
@@ -207,6 +235,9 @@ void Init_mri(void) {
   rb_define_method(mMRI, "internal_protected_instance_methods", Looksee_internal_protected_instance_methods, 1);
   rb_define_method(mMRI, "internal_private_instance_methods", Looksee_internal_private_instance_methods, 1);
   rb_define_method(mMRI, "internal_undefined_instance_methods", Looksee_internal_undefined_instance_methods, 1);
+  rb_define_method(mMRI, "singleton_class?", Looksee_singleton_class_p, 1);
+  rb_define_method(mMRI, "singleton_instance", Looksee_singleton_instance, 1);
+  rb_define_method(mMRI, "module_name", Looksee_module_name, 1);
 #if RUBY_VERSION < 190
   rb_define_method(mMRI, "source_location", Looksee_source_location, 1);
 #endif

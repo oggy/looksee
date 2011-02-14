@@ -15,6 +15,35 @@ module Looksee
         modules
       end
 
+      #
+      # Return a description of the given module.
+      #
+      # This is used for the module labels in the Inspector output.
+      #
+      def describe_module(mod)
+        num_brackets = 0
+        object = mod
+        while singleton_class?(object)
+          num_brackets += 1
+          object = singleton_instance(object)
+        end
+
+        if object.is_a?(Module)
+          description = module_name(object)
+          if description.empty?
+            description = "unnamed #{object.is_a?(Class) ? 'Class' : 'Module'}"
+          end
+        else
+          description = "#{module_name(object.class)} instance"
+        end
+
+        if num_brackets == 0
+          description
+        else
+          "#{'['*num_brackets}#{description}#{']'*num_brackets}"
+        end
+      end
+
       def internal_superclass(klass)
         raise NotImplementedError, "abstract"
       end
@@ -40,6 +69,18 @@ module Looksee
       end
 
       def internal_undefined_instance_methods(mod)
+        raise NotImplementedError, "abstract"
+      end
+
+      def singleton_class?(object)
+        raise NotImplementedError, "abstract"
+      end
+
+      def singleton_instance(singleton_class)
+        raise NotImplementedError, "abstract"
+      end
+
+      def module_name(mod)
         raise NotImplementedError, "abstract"
       end
 
