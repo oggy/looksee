@@ -213,8 +213,8 @@ VALUE Looksee_source_location(VALUE self, VALUE unbound_method) {
     return Qnil;
   if (!body || !body->nd_body)
     return Qnil;
-  VALUE file = rb_str_new2(body->nd_file);
-  VALUE line = INT2NUM(nd_line(body));
+  VALUE file = rb_str_new2(body->nd_body->nd_defn->nd_file);
+  VALUE line = INT2NUM(nd_line(body->nd_body->nd_defn));
   VALUE location = rb_ary_new2(2);
   rb_ary_store(location, 0, file);
   rb_ary_store(location, 1, line);
