@@ -1,3 +1,7 @@
+== LATEST
+
+ * Fix JRuby extension name for case-sensitive filesystems.
+
 == 1.0.1 2011-03-15
 
  * Fix bug exception when trying to edit a primitive method on MRI.
