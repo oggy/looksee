@@ -429,33 +429,115 @@ describe "Looksee.adapter" do
   end
 
   describe "#source_location" do
-    before do
+    def load_source(source)
       @tmp = "#{ROOT}/spec/tmp"
-      FileUtils.mkdir_p @tmp
       @source_path = "#@tmp/c.rb"
-      open(@source_path, 'w') { |f| f.puts <<-EOS.demargin }
+      FileUtils.mkdir_p @tmp
+      open(@source_path, 'w') { |f| f.print source }
+      load @source_path
+      @source_path
+    end
+
+    after do
+      FileUtils.rm_rf @tmp
+      Object.send(:remove_const, :C) if Object.const_defined?(:C)
+    end
+
+    it "should return the file and line number the given method was defined on" do
+      path = load_source <<-EOS.demargin
         |class C
         |  def f
         |  end
         |end
       EOS
+      method = C.instance_method(:f)
+      @adapter.source_location(method).should == [path, 2]
     end
 
-    after do
-      FileUtils.rm_rf @tmp
+    it "should work for methods defined via a block (MRI BMETHOD)" do
+      path = load_source <<-EOS.demargin
+        |class C
+        |  define_method :f do
+        |  end
+        |end
+      EOS
+      method = C.instance_method(:f)
+      @adapter.source_location(method).should == [path, 2]
     end
 
-    it "should return the file and line number the given method was defined on" do
-      load @source_path
+    it "should work for methods defined via a proc (MRI BMETHOD)" do
+      path = load_source <<-EOS.demargin
+        |class C
+        |  f = lambda do
+        |  end
+        |  define_method :f, f
+        |end
+      EOS
+      method = C.instance_method(:f)
+      @adapter.source_location(method).should == [path, 2]
+    end
+
+    it "should work for methods defined via a UnboundMethod (MRI DMETHOD)" do
+      path = load_source <<-EOS.demargin
+        |class C
+        |  def f
+        |  end
+        |  define_method :g, instance_method(:f)
+        |end
+      EOS
+      method = C.instance_method(:g)
+      @adapter.source_location(method).should == [path, 2]
+    end
+
+    it "should work for methods defined via a BoundMethod (MRI DMETHOD)" do
+      path = load_source <<-EOS.demargin
+        |class C
+        |  def f
+        |  end
+        |  define_method :g, new.method(:f)
+        |end
+      EOS
+      method = C.instance_method(:g)
+      @adapter.source_location(method).should == [path, 2]
+    end
+
+    it "should work for methods whose visibility is overridden in a subclass (MRI ZSUPER)" do
+      path = load_source <<-EOS.demargin
+        |class C
+        |  def f
+        |  end
+        |end
+        |class D < C
+        |  private :f
+        |end
+      EOS
       begin
-        method = C.instance_method(:f)
-        @adapter.source_location(method).should == [@source_path, 2]
+        method = D.instance_method(:f)
+        @adapter.source_location(method).should == [path, 2]
       ensure
-        Object.send :remove_const, :C
+        Object.send(:remove_const, :D)
       end
     end
 
+    it "should work for aliases (MRI FBODY)" do
+      path = load_source <<-EOS.demargin
+        |class C
+        |  def f
+        |  end
+        |  alias g f
+        |end
+      EOS
+      method = C.instance_method(:g)
+      @adapter.source_location(method).should == [path, 2]
+    end
+
     it "should raise a TypeError if the argument is not an UnboundMethod" do
+      path = load_source <<-EOS.demargin
+        |class C
+        |  def f
+        |  end
+        |end
+      EOS
       lambda do
         @adapter.source_location(nil)
       end.should raise_error(TypeError)

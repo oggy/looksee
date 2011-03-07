@@ -198,6 +198,9 @@ VALUE Looksee_module_name(VALUE self, VALUE module) {
 
 #if RUBY_VERSION < 190
 
+#include "env-1.8.h"
+#include "eval_c-1.8.h"
+
 /*
  * Return the source file and line number of the given object and method.
  */
@@ -205,16 +208,38 @@ VALUE Looksee_source_location(VALUE self, VALUE unbound_method) {
   if (!rb_obj_is_kind_of(unbound_method, rb_cUnboundMethod))
     rb_raise(rb_eTypeError, "expected UnboundMethod, got %s", rb_obj_classname(unbound_method));
 
-  VALUE klass = rb_funcall(unbound_method, rb_intern("owner"), 0);
-  VALUE name = rb_funcall(unbound_method, rb_intern("name"), 0);
-  ID method_id = rb_intern(RSTRING_PTR(name));
-  NODE *body;
-  if (!st_lookup(RCLASS_M_TBL(klass), method_id, (st_data_t *)&body))
-    return Qnil;
-  if (!body || !body->nd_body)
-    return Qnil;
-  VALUE file = rb_str_new2(body->nd_body->nd_defn->nd_file);
-  VALUE line = INT2NUM(nd_line(body->nd_body->nd_defn));
+  struct METHOD *method;
+  Data_Get_Struct(unbound_method, struct METHOD, method);
+
+  NODE *node;
+  switch (nd_type(method->body)) {
+    // Can't be a FBODY or ZSUPER.
+  case NODE_SCOPE:
+    node = method->body->nd_defn;
+    break;
+  case NODE_BMETHOD:
+    {
+      struct BLOCK *block;
+      Data_Get_Struct(method->body->nd_orig, struct BLOCK, block);
+      (node = block->frame.node) || (node = block->body);
+      // Proc#to_s suggests this may be NULL sometimes.
+      if (!node)
+        return Qnil;
+    }
+    break;
+  case NODE_DMETHOD:
+    {
+      struct METHOD *original_method;
+      NODE *body = method->body;
+      Data_Get_Struct(body->nd_orig, struct METHOD, original_method);
+      node = original_method->body->nd_defn;
+    }
+    break;
+  default:
+    rb_raise(rb_eRuntimeError, "[LOOKSEE BUG] unexpected NODE type: %d", nd_type(method->body));
+  }
+  VALUE file = rb_str_new2(node->nd_file);
+  VALUE line = INT2NUM(nd_line(node));
   VALUE location = rb_ary_new2(2);
   rb_ary_store(location, 0, file);
   rb_ary_store(location, 1, line);
