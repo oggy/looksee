@@ -1,24 +1,31 @@
 package looksee;
 
+import java.lang.reflect.Field;
 import java.util.Map;
+import org.jruby.MetaClass;
 import org.jruby.Ruby;
-import org.jruby.RubyObject;
-import org.jruby.RubyModule;
-import org.jruby.RubyClass;
 import org.jruby.RubyArray;
-import org.jruby.RubyString;
+import org.jruby.RubyClass;
 import org.jruby.RubyFixnum;
 import org.jruby.RubyMethod;
+import org.jruby.RubyModule;
+import org.jruby.RubyObject;
+import org.jruby.RubyProc;
+import org.jruby.RubyString;
 import org.jruby.RubyUnboundMethod;
-import org.jruby.MetaClass;
 import org.jruby.IncludedModuleWrapper;
 import org.jruby.anno.JRubyClass;
 import org.jruby.anno.JRubyMethod;
+import org.jruby.internal.runtime.methods.AliasMethod;
+import org.jruby.internal.runtime.methods.DynamicMethod;
+import org.jruby.internal.runtime.methods.MethodMethod;
+import org.jruby.internal.runtime.methods.ProcMethod;
+import org.jruby.internal.runtime.methods.WrapperMethod;
+import org.jruby.lexer.yacc.ISourcePosition;
 import org.jruby.runtime.PositionAware;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.Visibility;
 import org.jruby.runtime.builtin.IRubyObject;
-import org.jruby.internal.runtime.methods.DynamicMethod;
 
 @JRubyClass(name = "Looksee::Adapter::JRuby")
 public class JRubyAdapter extends RubyObject {
@@ -109,17 +116,64 @@ public class JRubyAdapter extends RubyObject {
     if (!(arg instanceof RubyUnboundMethod))
       throw runtime.newTypeError("expected UnboundMethod, got " + arg.getMetaClass().getName());
 
-    // RubyUnboundMethod.method is protected - go the long way.
-    RubyString name = (RubyString)((RubyMethod)arg).name(context);
-    RubyModule owner = (RubyModule)((RubyMethod)arg).owner(context);
-    DynamicMethod method = owner.getMethods().get(name.toString());
+    IRubyObject sourceLocation = ((RubyUnboundMethod)arg).source_location(context);
+    if (!sourceLocation.isNil())
+      return sourceLocation;
 
-    if (!(method instanceof PositionAware))
-      return runtime.getNil();
-    PositionAware positionedMethod = (PositionAware)method;
-    RubyString file = runtime.newString(positionedMethod.getFile());
-    RubyFixnum line = runtime.newFixnum(positionedMethod.getLine() + 1);
-    RubyArray result = runtime.newArray(file, line);
-    return result;
+    // source_location doesn't always work. If it returns nil, try a little harder.
+    DynamicMethod method = (DynamicMethod)getPrivateField(runtime, RubyMethod.class, "method", arg);
+    return methodSourceLocation(runtime, method);
+  }
+
+  public static IRubyObject methodSourceLocation(Ruby runtime, DynamicMethod method) {
+    if (method instanceof PositionAware) {
+      PositionAware positionAware = (PositionAware)method;
+      return runtime.newArray(runtime.newString(positionAware.getFile()),
+                              runtime.newFixnum(positionAware.getLine() + 1));
+    } else if (method instanceof ProcMethod) {
+      RubyProc proc = (RubyProc)getPrivateField(runtime, ProcMethod.class, "proc", method);
+      String file = (String)getPrivateField(runtime, RubyProc.class, "file", proc);
+      int line = getPrivateIntField(runtime, RubyProc.class, "line", proc);
+      RubyString rubyFile = runtime.newString(file);
+      RubyFixnum rubyLine = runtime.newFixnum(line + 1);
+      return runtime.newArray(rubyFile, rubyLine);
+    } else if (method instanceof AliasMethod) {
+      method = method.getRealMethod();
+      return methodSourceLocation(runtime, method);
+    } else if (method instanceof MethodMethod) {
+      // MethodMethod.getRealMethod and RubyMethod.getMethod are JRuby >= 1.6 only.
+      RubyUnboundMethod unboundMethod = (RubyUnboundMethod)getPrivateField(runtime, MethodMethod.class, "method", method);
+      DynamicMethod realMethod = (DynamicMethod)getPrivateField(runtime, RubyMethod.class, "method", unboundMethod);
+      return methodSourceLocation(runtime, realMethod);
+    } else if (method instanceof WrapperMethod) {
+      method = (DynamicMethod)getPrivateField(runtime, WrapperMethod.class, "method", method);
+      return methodSourceLocation(runtime, method);
+    }
+    return runtime.getNil();
+  }
+
+  // Yes, we are evil.
+  private static Object getPrivateField(Ruby runtime, Class klass, String name, Object receiver) {
+    try {
+      Field field = klass.getDeclaredField(name);
+      field.setAccessible(true);
+      return field.get(receiver);
+    } catch (IllegalAccessException e) {
+      throw runtime.newTypeError("[LOOKSEE BUG] unexpected exception: " + e.getClass().getName() + ": " + e.getMessage() + " (klass = " + klass.getName() + ")");
+    } catch (NoSuchFieldException e) {
+      throw runtime.newTypeError("[LOOKSEE BUG] unexpected exception: " + e.getClass().getName() + ": " + e.getMessage() + " (klass = " + klass.getName() + ")");
+    }
+  }
+
+  private static int getPrivateIntField(Ruby runtime, Class klass, String name, Object receiver) {
+    try {
+      Field field = klass.getDeclaredField(name);
+      field.setAccessible(true);
+      return field.getInt(receiver);
+    } catch (IllegalAccessException e) {
+      throw runtime.newTypeError("[LOOKSEE BUG] unexpected exception: " + e.getClass().getName() + ": " + e.getMessage() + " (klass = " + klass.getName() + ")");
+    } catch (NoSuchFieldException e) {
+      throw runtime.newTypeError("[LOOKSEE BUG] unexpected exception: " + e.getClass().getName() + ": " + e.getMessage() + " (klass = " + klass.getName() + ")");
+    }
   }
 }
