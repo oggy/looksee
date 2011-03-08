@@ -95,16 +95,16 @@ Or do this in IRB for a quick reference:
 
 Enjoy!
 
-## Caveats
+## Support
 
-Currently only does MRI 1.8, 1.9.
+Looksee works with MRI/REE, JRuby, and Rubinius.
 
 ## Contributing
 
- * [Bug reports here.](https://github.com/oggy/looksee/issues)
- * [Source here.](https://github.com/oggy/looksee)
+ * [Bug reports](https://github.com/oggy/looksee/issues)
+ * [Source](https://github.com/oggy/looksee)
  * Patches: Fork on Github, send pull request.
-   * Ensure patch includes tests.
+   * Include tests where practical.
    * Leave the version alone, or bump it in a separate commit.
 
 ## Copyright
