@@ -8,7 +8,7 @@ require 'fileutils'
 
 ROOT = File.dirname(File.dirname(__FILE__))
 
-Dir['spec/support/*'].each do |path|
+Dir['spec/support/*.rb'].each do |path|
   require path
 end
 
