@@ -4,6 +4,10 @@ module Looksee
       <<-EOS.gsub(/^ *\|/, '')
         |== Looksee Quick Reference
         |
+        |  object.edit(method)
+        |    Jump to the source of the given method of \`object'. Set
+        |    your editor by setting Looksee.editor.
+        |
         |  object.ls(specifiers)
         |    Print the method lookup path of \`object\'
         |
