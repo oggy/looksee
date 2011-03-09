@@ -7,8 +7,7 @@ Gem::Specification.new do |s|
   s.authors = ["George Ogata"]
   s.email = ["george.ogata@gmail.com"]
   s.date = Time.now.strftime('%Y-%m-%d')
-  s.summary = "Inspect method lookup paths in ways not possible in plain ruby."
-  s.description = "Inspect method lookup paths in ways not possible in plain ruby."
+  s.summary = "Supercharged method introspection in IRB."
   s.homepage = 'http://github.com/oggy/looksee'
   s.platform = Gem::Platform::CURRENT if RUBY_PLATFORM == 'java'
 
