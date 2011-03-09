@@ -9,13 +9,15 @@ Gem::Specification.new do |s|
   s.date = Time.now.strftime('%Y-%m-%d')
   s.summary = "Supercharged method introspection in IRB."
   s.homepage = 'http://github.com/oggy/looksee'
-  s.platform = Gem::Platform::CURRENT if RUBY_PLATFORM == 'java'
 
-  ruby_engine = Object.const_defined?(:RUBY_ENGINE) ? RUBY_ENGINE : 'mri'
-  extension = ruby_engine == 'ruby' ? 'mri' : ruby_engine
-  s.extensions = ["ext/#{extension}/extconf.rb"] unless extension == 'jruby'
+  if RUBY_PLATFORM == 'java'
+    s.platform = Gem::Platform::CURRENT
+  else
+    s.extensions = ["ext/extconf.rb"]
+  end
+
   s.extra_rdoc_files = ['CHANGELOG', 'LICENSE', 'README.markdown']
-  s.files = Dir['lib/**/*', 'ext/**/{Makefile,*.c,*.h,*.rb}', 'CHANGELOG', 'LICENSE', 'Rakefile', 'README.markdown']
+  s.files = Dir['lib/**/*', 'ext/**/{*.c,*.h,*.rb}', 'CHANGELOG', 'LICENSE', 'Rakefile', 'README.markdown']
   s.test_files = Dir["spec/**/*.rb"]
   s.require_path = 'lib'
 
