@@ -1,4 +1,4 @@
-== LATEST
+== 1.0.0 2011-03-09
 
  * New API.
    * old: lp(object, :private => true, :undefined => false).grep(/blah/)
