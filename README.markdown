@@ -1,7 +1,7 @@
 # Looksee
 
-Shows you the method lookup path of objects in ways not possible in
-plain ruby.
+A tool for illustrating the ancestry and method lookup path of
+objects. Great for exploring unfamiliar codebases!
 
 ## How
 
@@ -15,90 +15,138 @@ Pop this in your `.irbrc`:
 
 Now each object has a method `ls`, which shows you all its methods.
 
-    irb(main):001:0> [].ls
-    => Array
-      &            concat      frozen?      push          taguri
-      *            count       hash         rassoc        taguri=
-      +            cycle       include?     reject        take
-      -            delete      index        reject!       take_while
-      <<           delete_at   indexes      replace       to_a
-      <=>          delete_if   indices      reverse       to_ary
-      ==           drop        insert       reverse!      to_s
-      []           drop_while  inspect      reverse_each  to_yaml
-      []=          each        join         rindex        transpose
-      assoc        each_index  last         select        uniq
-      at           empty?      length       shift         uniq!
-      choice       eql?        map          shuffle       unshift
-      clear        fetch       map!         shuffle!      values_at
-      collect      fill        nitems       size          yaml_initialize
-      collect!     find_index  pack         slice         zip
-      combination  first       permutation  slice!        |
-      compact      flatten     pop          sort
-      compact!     flatten!    product      sort!
-    Enumerable
-      all?        each_slice       first     min        reverse_each
-      any?        each_with_index  grep      min_by     select
-      collect     entries          group_by  minmax     sort
-      count       enum_cons        include?  minmax_by  sort_by
-      cycle       enum_slice       inject    none?      take
-      detect      enum_with_index  map       one?       take_while
-      drop        find             max       partition  to_a
-      drop_while  find_all         max_by    reduce     zip
-      each_cons   find_index       member?   reject
-    Object
-      taguri  taguri=  to_yaml  to_yaml_properties  to_yaml_style
+    irb> [].ls
+     => BasicObject
+      !   __send__    instance_eval   singleton_method_added    
+      !=  equal?      instance_exec   singleton_method_removed  
+      ==  initialize  method_missing  singleton_method_undefined
     Kernel
-      ==        hash                        object_id
-      ===       id                          private_methods
-      =~        inspect                     protected_methods
-      __id__    instance_eval               public_methods
-      __send__  instance_exec               respond_to?
-      class     instance_of?                send
-      clone     instance_variable_defined?  singleton_methods
-      display   instance_variable_get       taint
-      dup       instance_variable_set       tainted?
-      enum_for  instance_variables          tap
-      eql?      is_a?                       to_a
-      equal?    kind_of?                    to_enum
-      extend    method                      to_s
-      freeze    methods                     type
-      frozen?   nil?                        untaint
+      !~                       freeze                      puts                    
+      <=>                      frozen?                     raise                   
+      ===                      gem                         rand                    
+      =~                       gem_original_require        readline                
+      Array                    gets                        readlines               
+      Complex                  global_variables            remove_instance_variable
+      Float                    hash                        require                 
+      Integer                  initialize_clone            require_relative        
+      Rational                 initialize_copy             respond_to?             
+      String                   initialize_dup              respond_to_missing?     
+      URI                      inspect                     select                  
+      __callee__               instance_of?                send                    
+      __id__                   instance_variable_defined?  set_trace_func          
+      __method__               instance_variable_get       singleton_class         
+      `                        instance_variable_set       singleton_methods       
+      abort                    instance_variables          sleep                   
+      at_exit                  is_a?                       spawn                   
+      autoload                 iterator?                   sprintf                 
+      autoload?                kind_of?                    srand                   
+      binding                  lambda                      syscall                 
+      block_given?             load                        system                  
+      caller                   local_variables             taint                   
+      catch                    loop                        tainted?                
+      class                    method                      tap                     
+      clone                    methods                     test                    
+      define_singleton_method  nil?                        throw                   
+      display                  object_id                   to_enum                 
+      dup                      open                        to_s                    
+      enum_for                 p                           trace_var               
+      eql?                     print                       trap                    
+      eval                     printf                      trust                   
+      exec                     private_methods             untaint                 
+      exit                     proc                        untrace_var             
+      exit!                    protected_methods           untrust                 
+      extend                   public_method               untrusted?              
+      fail                     public_methods              warn                    
+      fork                     public_send                 y                       
+      format                   putc                      
+    Looksee::ObjectMixin
+      edit  ls
+    Object
+      default_src_encoding  oauth            taguri   to_yaml_properties
+      in?                   patch            taguri=  to_yaml_style     
+      irb_binding           singleton_class  timeout
+      load_if_available     syck_to_yaml     to_yaml
+    Enumerable
+      all?            drop_while        first     min           select      
+      any?            each_cons         flat_map  min_by        slice_before
+      by              each_entry        grep      minmax        sort        
+      chunk           each_slice        group_by  minmax_by     sort_by     
+      collect         each_with_index   include?  none?         take        
+      collect_concat  each_with_object  inject    one?          take_while  
+      count           entries           map       partition     to_a        
+      cycle           find              max       reduce        to_set      
+      detect          find_all          max_by    reject        zip         
+      drop            find_index        member?   reverse_each
+    Array
+      &            drop_while       map!                  size           
+      *            each             pack                  slice          
+      +            each_index       permutation           slice!         
+      -            empty?           pop                   sort           
+      <<           eql?             product               sort!          
+      <=>          fetch            push                  sort_by!       
+      ==           fill             rassoc                taguri         
+      []           find_index       reject                taguri=        
+      []=          first            reject!               take           
+      assoc        flatten          repeated_combination  take_while     
+      at           flatten!         repeated_permutation  to_a           
+      clear        frozen?          replace               to_ary         
+      collect      hash             reverse               to_s           
+      collect!     include?         reverse!              to_yaml        
+      combination  index            reverse_each          transpose      
+      compact      initialize       rindex                uniq           
+      compact!     initialize_copy  rotate                uniq!          
+      concat       insert           rotate!               unshift        
+      count        inspect          sample                values_at      
+      cycle        join             select                yaml_initialize
+      delete       keep_if          select!               zip            
+      delete_at    last             shift                 |              
+      delete_if    length           shuffle             
+      drop         map              shuffle!             
 
-It'll also color the methods according to whether they're public,
-protected, private, undefined (using Module#undef_method), or
-overridden. So pretty! By default:
+Methods are colored according to whether they're public, protected,
+private, undefined (using Module#undef_method), or overridden.
 
-    public:     white
-    public:     green
-    protected:  yellow
-    private:    red
-    undefined:  blue
-    overridden: black
+You can hide, say, private methods like this:
 
-By default, it shows public and protected methods. Add private ones
-like so:
+    irb> [].ls :noprivate
 
-    [].ls :private
+Or filter the list by Regexp:
 
-Or if you don't want protected:
+    irb> [].ls /^to_/
+     => BasicObject
+    Kernel
+      to_enum  to_s
+    Looksee::ObjectMixin
+    Object
+      to_yaml  to_yaml_properties  to_yaml_style
+    Enumerable
+      to_a  to_set
+    Array
+      to_a  to_ary  to_s  to_yaml 
 
-    [].ls :noprotected
+And if you want to know more about any of those methods, Looksee can
+take you straight to the source in your editor:
 
-There are variations too. And you can configure things. And you can
-use it as a library without polluting the built-in classes. See:
+    > [].edit('to_set')
 
-    $ ri Looksee
+By default, this uses `vi`; customize it like this:
 
-Or do this in IRB for a quick reference:
+    # %f = file, %l = line number
+    Looksee.editor = "mate -l%l %f"
 
-    Looksee.help
+See more in the quick reference:
+
+    irb> Looksee.help
 
 Enjoy!
 
 ## Support
 
-Looksee works with MRI/REE (>= 1.8.6), JRuby (>= 1.5.6), and Rubinius
-(>= 1.2.1).
+Looksee works with:
+
+ *  MRI/REE (>= 1.8.6)
+ * JRuby (>= 1.5.6)
+ * Rubinius (>= 1.2.1)
 
 ## Contributing
 
