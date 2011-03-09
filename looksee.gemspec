@@ -11,7 +11,9 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/oggy/looksee'
   s.platform = Gem::Platform::CURRENT if RUBY_PLATFORM == 'java'
 
-  s.extensions = ["ext/mri/extconf.rb"] unless RUBY_PLATFORM == 'java'
+  ruby_engine = Object.const_defined?(:RUBY_ENGINE) ? RUBY_ENGINE : 'mri'
+  extension = ruby_engine == 'ruby' ? 'mri' : ruby_engine
+  s.extensions = ["ext/#{extension}/extconf.rb"] unless extension == 'jruby'
   s.extra_rdoc_files = ['CHANGELOG', 'LICENSE', 'README.markdown']
   s.files = Dir["{doc,ext,lib}/**/*", 'CHANGELOG', 'LICENSE', 'Rakefile', 'README.markdown']
   s.test_files = Dir["spec/**/*"]
