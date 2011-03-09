@@ -1,7 +1,7 @@
 *.rbc
 lib/looksee/mri.bundle
 lib/looksee/rbx.bundle
-lib/looksee/looksee.jar
+lib/looksee/jruby.jar
 
 ext/mri/Makefile
 ext/mri/*.o
