@@ -15,8 +15,8 @@ Gem::Specification.new do |s|
   extension = ruby_engine == 'ruby' ? 'mri' : ruby_engine
   s.extensions = ["ext/#{extension}/extconf.rb"] unless extension == 'jruby'
   s.extra_rdoc_files = ['CHANGELOG', 'LICENSE', 'README.markdown']
-  s.files = Dir["{doc,ext,lib}/**/*", 'CHANGELOG', 'LICENSE', 'Rakefile', 'README.markdown']
-  s.test_files = Dir["spec/**/*"]
+  s.files = Dir['lib/**/*', 'ext/**/{Makefile,*.c,*.h,*.rb}', 'CHANGELOG', 'LICENSE', 'Rakefile', 'README.markdown']
+  s.test_files = Dir["spec/**/*.rb"]
   s.require_path = 'lib'
 
   s.specification_version = 3
