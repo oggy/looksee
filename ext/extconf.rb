@@ -1,4 +1,4 @@
-ruby_engine = Object.const_defined?(:RUBY_ENGINE) ? RUBY_ENGINE : 'mri'
+ruby_engine = Object.const_defined?(:RUBY_ENGINE) ? RUBY_ENGINE : 'ruby'
 extension = ruby_engine == 'ruby' ? 'mri' : ruby_engine
 
 require 'mkmf'
