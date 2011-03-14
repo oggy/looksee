@@ -3,17 +3,12 @@ lib/looksee/mri.bundle
 lib/looksee/rbx.bundle
 lib/looksee/jruby.jar
 
-ext/mri/Makefile
-ext/mri/*.o
-ext/mri/*.so
-ext/mri/*.bundle
-ext/mri/*.dll
+ext/Makefile
 
-ext/rbx/Makefile
-ext/rbx/*.o
-ext/rbx/*.so
-ext/rbx/*.bundle
-ext/rbx/*.dll
+ext/*.o
+ext/*.so
+ext/*.bundle
+ext/*.dll
 
 ext/jruby/**/*.class
 
