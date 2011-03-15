@@ -53,6 +53,26 @@ module Looksee
     def edit(name)
       Editor.new(Looksee.editor).edit(self, name)
     end
+
+    def self.rename(renamings)  # :nodoc:
+      renamings.each do |old_name, new_name|
+        alias_method new_name, old_name
+        remove_method old_name
+      end
+    end
+  end
+
+  #
+  # Rename the methods added to every object. Example:
+  #
+  #     rename :ls => :_ls, :edit => :_edit
+  #
+  def self.rename(renamings)
+    ObjectMixin.rename(renamings)
+  end
+
+  (ENV['LOOKSEE_METHODS'] || '').scan(/([\w_]+)=([\w_]+)/) do
+    rename $1.to_sym => $2.to_sym
   end
 
   Object.send :include, ObjectMixin

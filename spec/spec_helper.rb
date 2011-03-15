@@ -1,3 +1,5 @@
+ENV['LOOKSEE_METHODS'] = nil
+
 require 'rspec'
 require 'mocha'
 require 'looksee'
