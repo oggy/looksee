@@ -1,4 +1,4 @@
-== LATEST
+== 1.0.1 2011-03-15
 
  * Fix bug exception when trying to edit a primitive method on MRI.
  * Allow customizing the method names added to every object. Either:
