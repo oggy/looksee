@@ -236,7 +236,7 @@ VALUE Looksee_source_location(VALUE self, VALUE unbound_method) {
     }
     break;
   default:
-    rb_raise(rb_eRuntimeError, "[LOOKSEE BUG] unexpected NODE type: %d", nd_type(method->body));
+    return Qnil;
   }
   VALUE file = rb_str_new2(node->nd_file);
   VALUE line = INT2NUM(nd_line(node));

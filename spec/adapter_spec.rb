@@ -439,7 +439,7 @@ describe "Looksee.adapter" do
     end
 
     after do
-      FileUtils.rm_rf @tmp
+      FileUtils.rm_rf @tmp if @tmp
       Object.send(:remove_const, :C) if Object.const_defined?(:C)
     end
 
@@ -529,6 +529,11 @@ describe "Looksee.adapter" do
       EOS
       method = C.instance_method(:g)
       @adapter.source_location(method).should == [path, 2]
+    end
+
+    it "should return nil for primitive methods (MRI CBODY)" do
+      method = Object.instance_method(:__id__)
+      @adapter.source_location(method).should == nil
     end
 
     it "should raise a TypeError if the argument is not an UnboundMethod" do
