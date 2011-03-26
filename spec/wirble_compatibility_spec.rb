@@ -1,5 +1,4 @@
 require 'spec_helper'
-gem 'wirble'  # die if wirble unavailable
 
 describe Looksee::WirbleCompatibility do
   describe "when looksee is loaded" do
