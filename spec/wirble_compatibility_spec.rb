@@ -15,7 +15,7 @@ describe Looksee::WirbleCompatibility do
       irb = File.join Config::CONFIG['bindir'], 'irb'
       lib_dir = File.expand_path('lib')
       # irb hangs when using readline without a tty
-      output = IO.popen("#{irb} -f --noreadline --noprompt --noverbose -I#{lib_dir} 2>&1", 'r+') do |io|
+      output = IO.popen("bundle exec #{irb} -f --noreadline --noprompt --noverbose -I#{lib_dir} 2>&1", 'r+') do |io|
         io.puts code
         io.flush
         io.close_write
