@@ -532,7 +532,7 @@ describe "Looksee.adapter" do
     end
 
     it "should return nil for primitive methods (MRI CBODY)" do
-      method = Object.instance_method(:__id__)
+      method = Array.instance_method(:size)
       @adapter.source_location(method).should == nil
     end
 
