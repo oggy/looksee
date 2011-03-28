@@ -6,7 +6,7 @@
 
  * Fix bug exception when trying to edit a primitive method on MRI.
  * Allow customizing the method names added to every object. Either:
-   * Call Looksee(:ls => new_name, :edit => new_name)
+   * Call Looksee.rename(:ls => new_name, :edit => new_name)
    * Set LOOKSEE_METHODS='ls=new_name edit=new_name' in your environment.
 
 == 1.0.0 2011-03-09
