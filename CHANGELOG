@@ -1,4 +1,4 @@
-== LATEST
+== 1.0.2 2011-03-27
 
  * Fix JRuby extension name for case-sensitive filesystems.
 
