@@ -1,7 +1,7 @@
 *.rbc
 lib/looksee/mri.bundle
 lib/looksee/rbx.bundle
-lib/looksee/jruby.jar
+lib/looksee/JRuby.jar
 
 ext/Makefile
 
@@ -12,6 +12,7 @@ ext/*.dll
 
 ext/jruby/**/*.class
 
+/Gemfile.lock
 /pkg
 /doc
 /tmp
