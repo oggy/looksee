@@ -1,7 +1,0 @@
-#!/usr/bin/env ruby
-# File: script/console
-$:.unshift File.dirname(__FILE__) + '/../lib'
-require 'irb'
-puts "Loading looksee gem"
-require 'looksee/shortcuts'
-IRB.start
