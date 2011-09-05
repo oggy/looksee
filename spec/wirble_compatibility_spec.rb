@@ -12,7 +12,7 @@ describe Looksee::WirbleCompatibility do
         |c.ls
       EOS
       code = code.chomp.gsub(/\n/, ';') # only print value of last line
-      irb = File.join Config::CONFIG['bindir'], 'irb'
+      irb = File.join Looksee::Config::CONFIG['bindir'], 'irb'
       lib_dir = File.expand_path('lib')
       # irb hangs when using readline without a tty
       output = IO.popen("bundle exec #{irb} -f --noreadline --noprompt --noverbose -I#{lib_dir} 2>&1", 'r+') do |io|

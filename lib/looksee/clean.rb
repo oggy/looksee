@@ -1,8 +1,9 @@
 require "rbconfig"
-
 require 'set'
 
 module Looksee
+  Config = Object.const_defined?(:RbConfig) ? ::RbConfig : ::Config
+
   autoload :VERSION, 'looksee/version'
   autoload :Adapter, 'looksee/adapter'
   autoload :Columnizer, 'looksee/columnizer'
