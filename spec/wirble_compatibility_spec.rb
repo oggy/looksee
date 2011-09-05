@@ -21,6 +21,8 @@ describe Looksee::WirbleCompatibility do
         io.close_write
         io.read
       end
+      # Ruby 1.9.3 prints gc parameters if configured
+      nil while output.gsub!(/^(?:malloc_limit|heap_min_slots|free_min)=.*\n/, '')
       # Ruby 1.9.2 prints an extra newline on exit.
       output.chomp! if RUBY_VERSION >= '1.9.2'
       output
