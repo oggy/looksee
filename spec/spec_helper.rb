@@ -1,7 +1,6 @@
 ENV['LOOKSEE_METHODS'] = nil
 
 require 'rspec'
-require 'mocha'
 require 'looksee'
 
 require 'rbconfig'
@@ -17,7 +16,6 @@ end
 NATIVE_ADAPTER = Looksee.adapter
 
 RSpec.configure do |config|
-  config.mock_with :mocha
   config.before { Looksee.adapter = TestAdapter.new }
 end
 

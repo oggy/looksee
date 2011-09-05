@@ -5,8 +5,8 @@ describe Looksee::Inspector do
 
   describe "#inspect" do
     before do
-      Looksee.stubs(:default_lookup_path_options).returns({})
-      Looksee.stubs(:styles).returns(Hash.new{'%s'})
+      Looksee.stub(:default_lookup_path_options).and_return({})
+      Looksee.stub(:styles).and_return(Hash.new{'%s'})
 
       @object = Object.new
       temporary_module :M
@@ -52,7 +52,7 @@ describe Looksee::Inspector do
       end
 
       it "should columnize output to the configured default otherwise" do
-        Looksee.stubs(:default_width).returns(20)
+        Looksee.stub(:default_width).and_return(20)
         inspector = Looksee::Inspector.new(@lookup_path, :visibilities => [:public])
         inspector.inspect.should == <<-EOS.demargin.chomp
           |M
@@ -159,7 +159,7 @@ describe Looksee::Inspector do
         :undefined  => "~%s~",
         :overridden => "(%s)",
       }
-      Looksee.stubs(:styles).returns(styles)
+      Looksee.stub(:styles).and_return(styles)
     end
 
     it "should delimit each word with the configured delimiters" do

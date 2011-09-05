@@ -4,7 +4,7 @@ describe Looksee::ObjectMixin do
   describe "#ls" do
     before do
       @object = Object.new
-      Looksee.stubs(:default_specifiers).returns([:public, :overridden])
+      Looksee.stub(:default_specifiers).and_return([:public, :overridden])
     end
 
     it "should return an Inspector for the object's lookup path" do
