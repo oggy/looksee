@@ -1,6 +1,11 @@
 #include "ruby.h"
 
-#if RUBY_VERSION >= 192
+#if RUBY_VERSION >= 193
+#  include "internal.h"
+#  include "vm_core.h"
+#  include "method.h"
+#  include "ruby/st.h"
+#elif RUBY_VERSION >= 192
 #  include "vm_core.h"
 #  include "method.h"
 #  include "ruby/st.h"
