@@ -195,6 +195,10 @@ describe "Looksee.adapter" do
         C.send(:remove_method, :f)
         @adapter.internal_undefined_instance_methods(C).should == []
       end
+
+      it "should handle the MRI allocator being undefined (e.g. Struct)" do
+        @adapter.internal_undefined_instance_methods(Struct).should == []
+      end
     end
   end
 
