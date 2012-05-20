@@ -90,6 +90,10 @@ static int add_method_if_matching(ID method_name, rb_method_entry_t *me, add_met
 }
 
 static int add_method_if_undefined(ID method_name, rb_method_entry_t *me, VALUE *names) {
+  /* The allocator can be undefined with rb_undef_alloc_func, e.g. Struct. */
+  if (method_name == ID_ALLOCATOR)
+    return ST_CONTINUE;
+
   if (UNDEFINED_METHOD_ENTRY_P(me))
     rb_ary_push(*names, ID2SYM(method_name));
   return ST_CONTINUE;

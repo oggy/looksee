@@ -197,7 +197,8 @@ describe "Looksee.adapter" do
       end
 
       it "should handle the MRI allocator being undefined (e.g. Struct)" do
-        @adapter.internal_undefined_instance_methods(Struct).should == []
+        struct_singleton_class = (class << Struct; self; end)
+        @adapter.internal_undefined_instance_methods(struct_singleton_class).should == []
       end
     end
   end
