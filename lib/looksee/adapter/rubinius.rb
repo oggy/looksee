@@ -30,26 +30,31 @@ module Looksee
 
       def internal_undefined_instance_methods(mod)
         names = []
-        mod.method_table.each_entry do |entry|
-          names << entry.name if entry.visibility.equal?(:undef)
+        mod.method_table.entries.each do |(name, method, visibility)|
+          names << name if visibility.equal?(:undef)
         end
         names
       end
 
       def singleton_class?(object)
-        object.is_a?(Class) && object.__metaclass_object__
+        object.is_a?(Class) && !!::Rubinius::Type.singleton_class_object(object)
       end
 
       def singleton_instance(singleton_class)
         singleton_class?(singleton_class) or
           raise TypeError, "expected singleton class, got #{singleton_class.class}"
-        singleton_class.__metaclass_object__
+        ::Rubinius::Type.singleton_class_object(singleton_class)
       end
 
       def module_name(mod)
         mod.is_a?(Module) or
           raise TypeError, "expected module, got #{mod.class}"
-        mod.__name__
+
+        if ::Rubinius::Type.respond_to?(:module_name)
+          ::Rubinius::Type.module_name(mod)
+        else
+          mod.__name__
+        end
       end
 
       def source_location(method)

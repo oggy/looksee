@@ -436,7 +436,8 @@ describe "Looksee.adapter" do
   describe "#source_location" do
     def load_source(source)
       @tmp = "#{ROOT}/spec/tmp"
-      @source_path = "#@tmp/c.rb"
+      # rbx 1.2.3 caches the file content by file name - ensure file names are different.
+      @source_path = "#@tmp/c#{__id__}.rb"
       FileUtils.mkdir_p @tmp
       open(@source_path, 'w') { |f| f.print source }
       load @source_path

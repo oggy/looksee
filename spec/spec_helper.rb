@@ -7,7 +7,7 @@ require 'rbconfig'
 require 'set'
 require 'fileutils'
 
-ROOT = File.dirname(File.dirname(__FILE__))
+ROOT = File.expand_path('..', File.dirname(__FILE__))
 
 Dir['spec/support/*.rb'].each do |path|
   require path
