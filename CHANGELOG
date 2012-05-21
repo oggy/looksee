@@ -1,6 +1,7 @@
 == LATEST
 
  * Fix listing methods of a class with an undefined allocator (e.g. Struct).
+ * Updated supported rubies.
 
 == 1.0.3 2011-09-05
 

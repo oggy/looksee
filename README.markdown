@@ -142,11 +142,12 @@ Enjoy!
 
 ## Support
 
-Looksee works with:
+Looksee supports:
 
- *  MRI/REE (>= 1.8.6)
- * JRuby (>= 1.5.6)
- * Rubinius (>= 1.2.1)
+ * MRI 1.8.7, 1.9.2, 1.9.3
+ * REE 1.8.7
+ * JRuby 1.6.7
+ * Rubinius 1.2.3, 1.2.4
 
 ## Contributing
 
