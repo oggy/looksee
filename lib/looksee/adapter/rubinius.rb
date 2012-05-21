@@ -51,7 +51,7 @@ module Looksee
           raise TypeError, "expected module, got #{mod.class}"
 
         if ::Rubinius::Type.respond_to?(:module_name)
-          ::Rubinius::Type.module_name(mod)
+          ::Rubinius::Type.module_name(mod) || ''
         else
           mod.__name__
         end
