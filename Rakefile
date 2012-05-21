@@ -7,3 +7,7 @@ else
   name = ruby_engine == 'ruby' ? 'mri' : ruby_engine
   extension :build_as => "ext/#{name}", :install_as => "lib/looksee/#{name}"
 end
+
+task :default => [:clobber, :ext] do
+  sh 'bundle exec rspec -I. spec'
+end
