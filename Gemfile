@@ -9,7 +9,7 @@ group :dev do
     # Debugger is built-in.
   else
     if RUBY_VERSION >= '1.9'
-      gem 'debugger', :require => 'ruby-debug'
+      gem 'debugger', :require => 'ruby-debug' if RUBY_VERSION < '2.0'
     else
       gem 'ruby-debug'
     end
