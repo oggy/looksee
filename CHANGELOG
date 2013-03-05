@@ -1,7 +1,9 @@
 == LATEST
 
+ * Support for MRI 2.0.0.
+ * Support for MRI 1.9.3 with funnyfalcon's patches.
  * Fix listing methods of a class with an undefined allocator (e.g. Struct).
- * Updated supported rubies.
+ * Updated supported rubies in README.
 
 == 1.0.3 2011-09-05
 
