@@ -1,9 +1,9 @@
 #include "ruby.h"
 
-#if RUBY_VERSION >= 193
-#  if RUBY_VERSION >= 200
-#    include "hook.h"
-#  endif
+#if RUBY_VERSION >= 200
+#  include "method.h"
+#  include "internal.h"
+#elif RUBY_VERSION >= 193
 #  include "ruby/st.h"
 #  ifdef SA_EMPTY
 #    include "internal_falcon.h"
@@ -91,8 +91,10 @@ typedef struct add_method_if_matching_arg {
 } add_method_if_matching_arg_t;
 
 static int add_method_if_matching(ID method_name, rb_method_entry_t *me, add_method_if_matching_arg_t *arg) {
+#  ifdef ID_ALLOCATOR
   if (method_name == ID_ALLOCATOR)
     return ST_CONTINUE;
+#  endif
 
   if (UNDEFINED_METHOD_ENTRY_P(me))
     return ST_CONTINUE;
@@ -104,9 +106,11 @@ static int add_method_if_matching(ID method_name, rb_method_entry_t *me, add_met
 }
 
 static int add_method_if_undefined(ID method_name, rb_method_entry_t *me, VALUE *names) {
+#  ifdef ID_ALLOCATOR
   /* The allocator can be undefined with rb_undef_alloc_func, e.g. Struct. */
   if (method_name == ID_ALLOCATOR)
     return ST_CONTINUE;
+#  endif
 
   if (UNDEFINED_METHOD_ENTRY_P(me))
     rb_ary_push(*names, ID2SYM(method_name));
@@ -129,9 +133,11 @@ typedef struct add_method_if_matching_arg {
 } add_method_if_matching_arg_t;
 
 static int add_method_if_matching(ID method_name, NODE *body, add_method_if_matching_arg_t *arg) {
+#  ifdef ID_ALLOCATOR
   /* This entry is for the internal allocator function. */
   if (method_name == ID_ALLOCATOR)
     return ST_CONTINUE;
+#  endif
 
   /* Module#undef_method:
    *   * sets body->nd_body to NULL in ruby <= 1.8
@@ -146,9 +152,11 @@ static int add_method_if_matching(ID method_name, NODE *body, add_method_if_matc
 }
 
 static int add_method_if_undefined(ID method_name, NODE *body, VALUE *names) {
+#  ifdef ID_ALLOCATOR
   /* The allocator can be undefined with rb_undef_alloc_func, e.g. Struct. */
   if (method_name == ID_ALLOCATOR)
     return ST_CONTINUE;
+#  endif
 
   if (!body || !body->nd_body)
     rb_ary_push(*names, ID2SYM(method_name));
