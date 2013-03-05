@@ -7,6 +7,8 @@
 #  include "ruby/st.h"
 #  ifdef SA_EMPTY
 #    include "internal_falcon.h"
+#    define Looksee_method_table_foreach sa_foreach
+#    define Looksee_method_table_lookup sa_lookup
 #  else
 #    include "internal.h"
 #  endif
@@ -22,6 +24,11 @@
 #else
 #  include "node.h"
 #  include "st.h"
+#endif
+
+#ifndef Looksee_method_table_foreach
+#  define Looksee_method_table_foreach st_foreach
+#  define Looksee_method_table_lookup st_lookup
 #endif
 
 #if RUBY_VERSION < 187
@@ -155,11 +162,7 @@ static VALUE internal_instance_methods(VALUE klass, VISIBILITY_TYPE visibility) 
   arg.names = rb_ary_new();
   arg.visibility = visibility;
 
-  #ifdef SA_EMPTY
-    sa_foreach(RCLASS_M_TBL(klass), add_method_if_matching, (st_data_t)&arg);
-  #else
-    st_foreach(RCLASS_M_TBL(klass), add_method_if_matching, (st_data_t)&arg);
-  #endif
+  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_matching, (st_data_t)&arg);
   return arg.names;
 }
 
@@ -193,11 +196,7 @@ VALUE Looksee_internal_private_instance_methods(VALUE self, VALUE klass) {
  */
 VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
   VALUE names = rb_ary_new();
-  #ifdef SA_EMPTY
-    sa_foreach(RCLASS_M_TBL(klass), add_method_if_undefined, (st_data_t)&names);
-  #else
-    st_foreach(RCLASS_M_TBL(klass), add_method_if_undefined, (st_data_t)&names);
-  #endif
+  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_undefined, (st_data_t)&names);
   return names;
 }
 
@@ -208,13 +207,8 @@ VALUE Looksee_singleton_class_p(VALUE self, VALUE object) {
 VALUE Looksee_singleton_instance(VALUE self, VALUE singleton_class) {
   if (BUILTIN_TYPE(singleton_class) == T_CLASS && FL_TEST(singleton_class, FL_SINGLETON)) {
     VALUE object;
-    #ifdef SA_EMPTY
-      if (!sa_lookup(RCLASS_IV_TBL(singleton_class), rb_intern("__attached__"), (st_data_t *)&object))
-        rb_raise(rb_eRuntimeError, "[looksee bug] can't find singleton object");
-    #else
-      if (!st_lookup(RCLASS_IV_TBL(singleton_class), rb_intern("__attached__"), (st_data_t *)&object))
-        rb_raise(rb_eRuntimeError, "[looksee bug] can't find singleton object");
-    #endif
+    if (!Looksee_method_table_lookup(RCLASS_IV_TBL(singleton_class), rb_intern("__attached__"), (st_data_t *)&object))
+      rb_raise(rb_eRuntimeError, "[looksee bug] can't find singleton object");
     return object;
   } else {
     rb_raise(rb_eTypeError, "expected singleton class, got %s", rb_obj_classname(singleton_class));
