@@ -127,8 +127,8 @@ describe Looksee::Editor do
 
     it "should not remove the edit method from the inherithet methods" do
       user_controller = UserAccountController.new
-      user_controller.methods.should include(:edit)
-      user_controller.methods.should include(:ls_edit)
+      user_controller.respond_to?(:edit).should be_true
+      user_controller.respond_to?(:ls_edit).should be_true
     end
   end
 end
