@@ -92,7 +92,7 @@ describe Looksee::Editor do
         c = C.new
         Looksee.adapter.ancestors[c] = [C, Object]
         Looksee.adapter.set_source_location(C, :f, [path, 2])
-        @editor.edit(c, :f)
+        @editor.ls_edit(c, :f)
         File.read("#{TMP}/editor.out").should == "2 #{path} 2\n"
       end
     end
@@ -100,7 +100,7 @@ describe Looksee::Editor do
     it "should not run the editor if the source file does not exist" do
       with_source_file do |path|
         FileUtils.rm_f path
-        @editor.edit(C.new, :f)
+        @editor.ls_edit(C.new, :f)
         File.should_not exist("#{TMP}/editor.out")
       end
     end
@@ -113,7 +113,7 @@ describe Looksee::Editor do
         |end
       EOS
       begin
-        @editor.edit(C.new, :f)
+        @editor.ls_edit(C.new, :f)
         File.should_not exist("#{TMP}/editor.out")
       ensure
         Object.send(:remove_const, :C)
@@ -121,8 +121,29 @@ describe Looksee::Editor do
     end
 
     it "should not run the editor for primitives" do
-      @editor.edit('', :size)
+      @editor.ls_edit('', :size)
       File.should_not exist("#{TMP}/editor.out")
     end
+
+    it "should not remove the edit method from the inherithet methods" do
+      user_controller = UserAccountController.new
+      user_controller.methods.should include(:edit)
+      user_controller.methods.should include(:ls_edit)
+    end
+  end
+end
+
+# Helper module and class
+module AccountsEditor
+  def edit
+    puts "editing"
+  end
+end
+
+class UserAccountController
+  include AccountsEditor
+
+  def index
+     puts "index"
   end
 end

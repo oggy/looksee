@@ -50,7 +50,7 @@ module Looksee
     # Only works for methods for which file and line numbers are
     # accessible.
     #
-    def edit(name)
+    def ls_edit(name)
       Editor.new(Looksee.editor).edit(self, name)
     end
 
