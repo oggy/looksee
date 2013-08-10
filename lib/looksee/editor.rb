@@ -12,7 +12,7 @@ module Looksee
     #
     # Run the editor command for the +method_name+ of +object+.
     #
-    def edit(object, method_name)
+    def ls_edit(object, method_name)
       method = LookupPath.new(object).find(method_name.to_s) or
         return
       file, line = Looksee.adapter.source_location(method)
