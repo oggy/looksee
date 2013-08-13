@@ -118,7 +118,7 @@ Or filter the list by Regexp:
 And if you want to know more about any of those methods, Looksee can
 take you straight to the source in your editor:
 
-    > [].ls.edit('to_set')
+    > [].ls.edit :to_set
 
 By default, this uses `vi`; customize it like this:
 
