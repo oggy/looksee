@@ -1,3 +1,10 @@
+== LATEST
+
+ * Looksee now only adds #ls to Object. The old way would frequently conflict
+   with, e.g., Rails controller conventions.
+
+   - object.edit is now object.ls.edit.
+
 == 1.1.0 2013-03-22
 
  * Support for MRI 2.0.0.

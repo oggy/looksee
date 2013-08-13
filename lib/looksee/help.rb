@@ -40,7 +40,7 @@ module Looksee
         |          ...
         |        }
         |
-        |  object.edit(method)
+        |  object.ls.edit(method)
         |
         |    Jump to the source of the given method. Set your editor
         |    with Looksee.editor or the LOOKSEE_EDITOR environment

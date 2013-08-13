@@ -42,18 +42,6 @@ module Looksee
       Inspector.new(lookup_path, options)
     end
 
-    #
-    # Open an editor at the named method's definition.
-    #
-    # Uses Looksee.editor to determine the editor command to run.
-    #
-    # Only works for methods for which file and line numbers are
-    # accessible.
-    #
-    def edit(name)
-      Editor.new(Looksee.editor).edit(self, name)
-    end
-
     def self.rename(renamings)  # :nodoc:
       renamings.each do |old_name, new_name|
         alias_method new_name, old_name
@@ -63,11 +51,19 @@ module Looksee
   end
 
   #
-  # Rename the methods added to every object. Example:
+  # Rename the #ls method, added to every object. Example:
   #
-  #     rename :ls => :_ls, :edit => :_edit
+  #     rename :_ls
+  #
+  # This renames Looksee's #ls method to #_ls.
+  #
+  # For backward compatibility, the old-style invocation is also
+  # supported. Please note this is deprecated.
+  #
+  #     rename :ls => :_ls
   #
   def self.rename(renamings)
+    renamings = {:ls => renamings} if !renamings.is_a?(Hash)
     ObjectMixin.rename(renamings)
   end
 

@@ -11,10 +11,25 @@ module Looksee
     attr_reader :visibilities
     attr_reader :filters
 
+    #
+    # Print the method lookup path of self. See the README for details.
+    #
     def inspect
       lookup_path.entries.reverse.map do |entry|
         inspect_entry(entry)
       end.join("\n")
+    end
+
+    #
+    # Open an editor at the named method's definition.
+    #
+    # Uses Looksee.editor to determine the editor command to run.
+    #
+    # Only works for methods for which file and line numbers are
+    # accessible.
+    #
+    def edit(name)
+      Editor.new(Looksee.editor).edit(lookup_path.object, name)
     end
 
     private

@@ -16,92 +16,83 @@ Pop this in your `.irbrc`:
 Now each object has a method `ls`, which shows you all its methods.
 
     irb> [].ls
-     => BasicObject
-      !   __send__    instance_eval   singleton_method_added    
-      !=  equal?      instance_exec   singleton_method_removed  
-      ==  initialize  method_missing  singleton_method_undefined
+    => BasicObject
+      !       __send__       instance_exec             singleton_method_undefined
+      !=      equal?         method_missing
+      ==      initialize     singleton_method_added
+      __id__  instance_eval  singleton_method_removed
     Kernel
-      !~                       freeze                      puts                    
-      <=>                      frozen?                     raise                   
-      ===                      gem                         rand                    
-      =~                       gem_original_require        readline                
-      Array                    gets                        readlines               
-      Complex                  global_variables            remove_instance_variable
-      Float                    hash                        require                 
-      Integer                  initialize_clone            require_relative        
-      Rational                 initialize_copy             respond_to?             
-      String                   initialize_dup              respond_to_missing?     
-      URI                      inspect                     select                  
-      __callee__               instance_of?                send                    
-      __id__                   instance_variable_defined?  set_trace_func          
-      __method__               instance_variable_get       singleton_class         
-      `                        instance_variable_set       singleton_methods       
-      abort                    instance_variables          sleep                   
-      at_exit                  is_a?                       spawn                   
-      autoload                 iterator?                   sprintf                 
-      autoload?                kind_of?                    srand                   
-      binding                  lambda                      syscall                 
-      block_given?             load                        system                  
-      caller                   local_variables             taint                   
-      catch                    loop                        tainted?                
-      class                    method                      tap                     
-      clone                    methods                     test                    
-      define_singleton_method  nil?                        throw                   
-      display                  object_id                   to_enum                 
-      dup                      open                        to_s                    
-      enum_for                 p                           trace_var               
-      eql?                     print                       trap                    
-      eval                     printf                      trust                   
-      exec                     private_methods             untaint                 
-      exit                     proc                        untrace_var             
-      exit!                    protected_methods           untrust                 
-      extend                   public_method               untrusted?              
-      fail                     public_methods              warn                    
-      fork                     public_send                 y                       
-      format                   putc                      
+      !~                       frozen?                     puts
+      <=>                      gem                         raise
+      ===                      gem_original_require        rand
+      =~                       gets                        readline
+      Array                    global_variables            readlines
+      Complex                  hash                        remove_instance_variable
+      Float                    initialize_clone            require
+      Integer                  initialize_copy             require_relative
+      Rational                 initialize_dup              respond_to?
+      String                   inspect                     respond_to_missing?
+      __callee__               instance_of?                select
+      __method__               instance_variable_defined?  send
+      `                        instance_variable_get       set_trace_func
+      abort                    instance_variable_set       singleton_class
+      at_exit                  instance_variables          singleton_methods
+      autoload                 is_a?                       sleep
+      autoload?                iterator?                   spawn
+      binding                  kind_of?                    sprintf
+      block_given?             lambda                      srand
+      caller                   load                        syscall
+      catch                    local_variables             system
+      class                    loop                        taint
+      clone                    method                      tainted?
+      define_singleton_method  methods                     tap
+      display                  nil?                        test
+      dup                      object_id                   throw
+      enum_for                 open                        to_enum
+      eql?                     p                           to_s
+      eval                     print                       trace_var
+      exec                     printf                      trap
+      exit                     private_methods             trust
+      exit!                    proc                        untaint
+      extend                   protected_methods           untrace_var
+      fail                     public_method               untrust
+      fork                     public_methods              untrusted?
+      format                   public_send                 warn
+      freeze                   putc
     Looksee::ObjectMixin
-      edit  ls
+      ls
     Object
-      default_src_encoding  oauth            taguri   to_yaml_properties
-      in?                   patch            taguri=  to_yaml_style     
-      irb_binding           singleton_class  timeout
-      load_if_available     syck_to_yaml     to_yaml
+      default_src_encoding  irb_binding
     Enumerable
-      all?            drop_while        first     min           select      
-      any?            each_cons         flat_map  min_by        slice_before
-      by              each_entry        grep      minmax        sort        
-      chunk           each_slice        group_by  minmax_by     sort_by     
-      collect         each_with_index   include?  none?         take        
-      collect_concat  each_with_object  inject    one?          take_while  
-      count           entries           map       partition     to_a        
-      cycle           find              max       reduce        to_set      
-      detect          find_all          max_by    reject        zip         
+      all?            each_cons         flat_map  min_by        slice_before
+      any?            each_entry        grep      minmax        sort
+      chunk           each_slice        group_by  minmax_by     sort_by
+      collect         each_with_index   include?  none?         take
+      collect_concat  each_with_object  inject    one?          take_while
+      count           entries           map       partition     to_a
+      cycle           find              max       reduce        to_set
+      detect          find_all          max_by    reject        zip
       drop            find_index        member?   reverse_each
+      drop_while      first             min       select
     Array
-      &            drop_while       map!                  size           
-      *            each             pack                  slice          
-      +            each_index       permutation           slice!         
-      -            empty?           pop                   sort           
-      <<           eql?             product               sort!          
-      <=>          fetch            push                  sort_by!       
-      ==           fill             rassoc                taguri         
-      []           find_index       reject                taguri=        
-      []=          first            reject!               take           
-      assoc        flatten          repeated_combination  take_while     
-      at           flatten!         repeated_permutation  to_a           
-      clear        frozen?          replace               to_ary         
-      collect      hash             reverse               to_s           
-      collect!     include?         reverse!              to_yaml        
-      combination  index            reverse_each          transpose      
-      compact      initialize       rindex                uniq           
-      compact!     initialize_copy  rotate                uniq!          
-      concat       insert           rotate!               unshift        
-      count        inspect          sample                values_at      
-      cycle        join             select                yaml_initialize
-      delete       keep_if          select!               zip            
-      delete_at    last             shift                 |              
-      delete_if    length           shuffle             
-      drop         map              shuffle!             
+      &            count       hash             rassoc                size
+      *            cycle       include?         reject                slice
+      +            delete      index            reject!               slice!
+      -            delete_at   initialize       repeated_combination  sort
+      <<           delete_if   initialize_copy  repeated_permutation  sort!
+      <=>          drop        insert           replace               sort_by!
+      ==           drop_while  inspect          reverse               take
+      []           each        join             reverse!              take_while
+      []=          each_index  keep_if          reverse_each          to_a
+      assoc        empty?      last             rindex                to_ary
+      at           eql?        length           rotate                to_s
+      clear        fetch       map              rotate!               transpose
+      collect      fill        map!             sample                uniq
+      collect!     find_index  pack             select                uniq!
+      combination  first       permutation      select!               unshift
+      compact      flatten     pop              shift                 values_at
+      compact!     flatten!    product          shuffle               zip
+      concat       frozen?     push             shuffle!              |
 
 Methods are colored according to whether they're public, protected,
 private, undefined (using Module#undef_method), or overridden.
@@ -122,12 +113,12 @@ Or filter the list by Regexp:
     Enumerable
       to_a  to_set
     Array
-      to_a  to_ary  to_s  to_yaml 
+      to_a  to_ary  to_s  to_yaml
 
 And if you want to know more about any of those methods, Looksee can
 take you straight to the source in your editor:
 
-    > [].edit('to_set')
+    > [].ls.edit('to_set')
 
 By default, this uses `vi`; customize it like this:
 
