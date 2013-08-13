@@ -4,6 +4,9 @@
    with, e.g., Rails controller conventions.
 
    - object.edit is now object.ls.edit.
+   - Looksee.rename now just takes the new name for :ls.
+   - The LOOKSEE_METHODS env var is now LOOKSEE_METHOD, and is simply the new
+     name for :ls.
 
 == 1.1.0 2013-03-22
 

@@ -42,11 +42,10 @@ module Looksee
       Inspector.new(lookup_path, options)
     end
 
-    def self.rename(renamings)  # :nodoc:
-      renamings.each do |old_name, new_name|
-        alias_method new_name, old_name
-        remove_method old_name
-      end
+    def self.rename(name)  # :nodoc:
+      name = name[:ls] if name.is_a?(Hash)
+      alias_method name, :ls
+      remove_method :ls
     end
   end
 
@@ -62,14 +61,12 @@ module Looksee
   #
   #     rename :ls => :_ls
   #
-  def self.rename(renamings)
-    renamings = {:ls => renamings} if !renamings.is_a?(Hash)
-    ObjectMixin.rename(renamings)
+  def self.rename(name)
+    ObjectMixin.rename(name)
   end
 
-  (ENV['LOOKSEE_METHODS'] || '').scan(/([\w_]+)=([\w_]+)/) do
-    rename $1.to_sym => $2.to_sym
-  end
+  name = ENV['LOOKSEE_METHOD'] and
+    rename name
 
   Object.send :include, ObjectMixin
 end

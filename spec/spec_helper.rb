@@ -1,5 +1,5 @@
 $:.unshift File.expand_path('..', File.dirname(__FILE__))
-ENV['LOOKSEE_METHODS'] = nil
+ENV['LOOKSEE_METHOD'] = nil
 
 require 'rspec'
 require 'looksee'
