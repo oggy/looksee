@@ -23,7 +23,5 @@ Gem::Specification.new do |gem|
   gem.require_path = 'lib'
 
   gem.specification_version = 3
-  gem.add_development_dependency 'ritual', '~> 0.4.1'
-  gem.add_development_dependency 'rspec', '2.14.1'
-  gem.add_development_dependency 'wirble'
+  gem.add_development_dependency 'bundler', '~> 1.5.0'
 end

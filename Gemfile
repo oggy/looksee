@@ -1,6 +1,10 @@
 source 'https://rubygems.org/'
 gemspec
 
+gem 'ritual'
+gem 'rspec'
+gem 'wirble'
+
 group :dev do
   case (RUBY_ENGINE rescue nil)
   when 'jruby'
