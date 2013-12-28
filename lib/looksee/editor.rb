@@ -14,9 +14,15 @@ module Looksee
     #
     def edit(object, method_name)
       method = LookupPath.new(object).find(method_name.to_s) or
-        return
+        raise NoMethodError, "no method `#{method_name}' in lookup path of #{object.class} instance"
       file, line = Looksee.adapter.source_location(method)
-      run(file, line) unless line.nil?
+      if !file
+        raise NoSourceLocationError, "no source location for #{method.owner}##{method.name}"
+      elsif !File.exist?(file)
+        raise NoSourceFileError, "cannot find source file: #{file}"
+      else
+        run(file, line)
+      end
     end
 
     #

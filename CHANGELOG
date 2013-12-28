@@ -7,6 +7,8 @@
    - Looksee.rename now just takes the new name for :ls.
    - The LOOKSEE_METHODS env var is now LOOKSEE_METHOD, and is simply the new
      name for :ls.
+ * Raise informative errors when #edit fails (e.g., for methods without a source
+   location).
 
 == 1.1.0 2013-03-22
 

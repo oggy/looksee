@@ -4,6 +4,10 @@ require 'set'
 module Looksee
   Config = Object.const_defined?(:RbConfig) ? ::RbConfig : ::Config
 
+  NoMethodError = Class.new(RuntimeError)
+  NoSourceLocationError = Class.new(RuntimeError)
+  NoSourceFileError = Class.new(RuntimeError)
+
   autoload :VERSION, 'looksee/version'
   autoload :Adapter, 'looksee/adapter'
   autoload :Columnizer, 'looksee/columnizer'
