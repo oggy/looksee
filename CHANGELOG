@@ -1,5 +1,6 @@
 == LATEST
 
+ * MRI 2.1.0 support.
  * Looksee now only adds #ls to Object. The old way would frequently conflict
    with, e.g., Rails controller conventions.
 
