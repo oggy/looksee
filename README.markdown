@@ -1,7 +1,7 @@
 # Looksee  [![Build Status](https://travis-ci.org/oggy/looksee.png)](https://travis-ci.org/oggy/looksee)
 
 A tool for illustrating the ancestry and method lookup path of
-objects. Great for exploring unfamiliar codebases!
+objects. Handy for exploring unfamiliar codebases.
 
 ## How
 
