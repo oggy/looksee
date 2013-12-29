@@ -1,3 +1,4 @@
+.bundle
 *.rbc
 lib/looksee/mri.bundle
 lib/looksee/rbx.bundle
