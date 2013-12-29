@@ -95,33 +95,33 @@ describe "Looksee.adapter" do
     def self.it_should_list_methods_with_visibility(visibility)
       it "should return the list of #{visibility} instance methods defined directly on a class" do
         temporary_class :C
-        replace_methods C, visibility => [:one, :two]
+        add_methods C, visibility => [:one, :two]
         @adapter.send(target_method, C).to_set.should == Set[:one, :two]
       end
 
       it "should return the list of #{visibility} instance methods defined directly on a module" do
         temporary_module :M
-        replace_methods M, visibility => [:one, :two]
+        add_methods M, visibility => [:one, :two]
         @adapter.send(target_method, M).to_set.should == Set[:one, :two]
       end
 
       it "should return the list of #{visibility} instance methods defined directly on a singleton class" do
         temporary_class :C
         c = C.new
-        replace_methods c.singleton_class, visibility => [:one, :two]
+        add_methods c.singleton_class, visibility => [:one, :two]
         @adapter.send(target_method, c.singleton_class).to_set.should == Set[:one, :two]
       end
 
       it "should return the list of #{visibility} instance methods defined directly on a class' singleton class" do
         temporary_class :C
-        replace_methods C.singleton_class, visibility => [:one, :two], :class_singleton => true
+        add_methods C.singleton_class, visibility => [:one, :two], :class_singleton => true
         @adapter.send(target_method, C.singleton_class).to_set.should == Set[:one, :two]
       end
 
       # Worth checking as ruby keeps undef'd methods in method tables.
       it "should not return undefined methods" do
         temporary_class :C
-        replace_methods C, visibility => [:removed]
+        add_methods C, visibility => [:removed]
         C.send(:undef_method, :removed)
         @adapter.send(target_method, C).to_set.should == Set[]
       end
@@ -130,7 +130,7 @@ describe "Looksee.adapter" do
     def self.it_should_not_list_methods_with_visibility(visibility1, visibility2)
       it "should not return any #{visibility1} or #{visibility2} instance methods" do
         temporary_class :C
-        replace_methods C, {visibility1 => [:a], visibility2 => [:b]}
+        add_methods C, {visibility1 => [:a], visibility2 => [:b]}
         @adapter.send(target_method, C).to_set.should == Set[]
       end
     end

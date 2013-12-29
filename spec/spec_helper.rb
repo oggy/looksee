@@ -19,8 +19,3 @@ NATIVE_ADAPTER = Looksee.adapter
 RSpec.configure do |config|
   config.before { Looksee.adapter = TestAdapter.new }
 end
-
-if Looksee.ruby_engine == 'jruby'
-  require 'jruby'
-  JRuby.objectspace = true
-end
