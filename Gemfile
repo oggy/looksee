@@ -4,6 +4,7 @@ gemspec
 gem 'ritual'
 gem 'rspec'
 gem 'wirble'
+gem 'rubysl', platform: :rbx
 
 group :dev do
   gem 'ruby-debug', platform: :jruby
