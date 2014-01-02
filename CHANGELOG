@@ -1,6 +1,6 @@
 == LATEST
 
- * MRI 2.1.0 support.
+ * Support for MRI 2.1, JRuby 1.7, Rubinius 2.2.
  * Looksee now only adds #ls to Object. The old way would frequently conflict
    with, e.g., Rails controller conventions.
 
