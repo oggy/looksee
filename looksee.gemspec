@@ -23,5 +23,4 @@ Gem::Specification.new do |gem|
   gem.require_path = 'lib'
 
   gem.specification_version = 3
-  gem.add_development_dependency 'bundler', '~> 1.3.5'
 end
