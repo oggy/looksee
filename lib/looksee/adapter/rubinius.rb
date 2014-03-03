@@ -9,18 +9,22 @@ module Looksee
       end
 
       def internal_public_instance_methods(mod)
+        return [] if !mod.origin.equal?(mod)
         mod.method_table.public_names
       end
 
       def internal_protected_instance_methods(mod)
+        return [] if !mod.origin.equal?(mod)
         mod.method_table.protected_names
       end
 
       def internal_private_instance_methods(mod)
+        return [] if !mod.origin.equal?(mod)
         mod.method_table.private_names
       end
 
       def internal_undefined_instance_methods(mod)
+        return [] if !mod.origin.equal?(mod)
         names = []
         mod.method_table.entries.each do |(name, method, visibility)|
           names << name if visibility.equal?(:undef)
@@ -48,7 +52,7 @@ module Looksee
 
         if ::Rubinius::IncludedModule === mod
           if Class === mod.module
-            "#{module_name(mod.origin)} (origin)"
+            "#{module_name(mod.module)} (origin)"
           else
             "#{module_name(mod.module)} (included)"
           end

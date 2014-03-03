@@ -122,12 +122,26 @@ describe "Looksee.adapter" do
         @adapter.send(target_method, C.singleton_class).to_set.should == Set[:one, :two]
       end
 
-      # Worth checking as ruby keeps undef'd methods in method tables.
       it "should not return undefined methods" do
         temporary_class :C
         add_methods C, visibility => [:removed]
         C.send(:undef_method, :removed)
         @adapter.send(target_method, C).to_set.should == Set[]
+      end
+
+      if RUBY_VERSION >= '2'
+        it "should return methods only for origin classes" do
+          temporary_class :C
+          add_methods C, visibility => :one
+          temporary_module :M
+          add_methods M, visibility => :one
+          C.prepend M
+          @adapter.send(target_method, C).should be_empty
+
+          origin = @adapter.lookup_modules(C.new).
+            find { |mod| @adapter.describe_module(mod) == 'C (origin)' }
+          @adapter.send(target_method, origin).should_not be_empty
+        end
       end
     end
 
@@ -203,6 +217,24 @@ describe "Looksee.adapter" do
       it "should handle the MRI allocator being undefined (e.g. Struct)" do
         struct_singleton_class = (class << Struct; self; end)
         @adapter.internal_undefined_instance_methods(struct_singleton_class).should == []
+      end
+
+      if RUBY_VERSION >= '2'
+        it "should return an empty list for non-origin classes" do
+          temporary_class :C
+          C.send(:define_method, :f){}
+          C.send(:undef_method, :f)
+          temporary_module :M
+          M.send(:define_method, :f){}
+          M.send(:undef_method, :f)
+          C.prepend M
+
+          @adapter.internal_undefined_instance_methods(C).should be_empty
+
+          origin = @adapter.lookup_modules(C.new).
+            find { |mod| @adapter.describe_module(mod) == 'C (origin)' }
+          @adapter.internal_undefined_instance_methods(origin).should_not be_empty
+        end
       end
     end
   end
