@@ -135,7 +135,7 @@ describe "Looksee.adapter" do
           add_methods C, visibility => :one
           temporary_module :M
           add_methods M, visibility => :one
-          C.prepend M
+          C.send(:prepend, M)
           @adapter.send(target_method, C).should be_empty
 
           origin = @adapter.lookup_modules(C.new).
@@ -227,7 +227,7 @@ describe "Looksee.adapter" do
           temporary_module :M
           M.send(:define_method, :f){}
           M.send(:undef_method, :f)
-          C.prepend M
+          C.send(:prepend, M)
 
           @adapter.internal_undefined_instance_methods(C).should be_empty
 
