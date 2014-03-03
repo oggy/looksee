@@ -7,7 +7,7 @@ gem 'wirble'
 gem 'rubysl', platform: :rbx
 
 group :dev do
-  gem 'ruby-debug', platform: :jruby
-  gem 'debugger', platform: :ruby_19
-  gem 'byebug', platform: :ruby_20
+  gem 'ruby-debug-base', platform: :jruby
+  gem 'debugger', platform: :mri_19
+  gem 'byebug', platform: [:mri_20, :mri_21]
 end
