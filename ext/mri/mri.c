@@ -62,25 +62,6 @@ VALUE Looksee_internal_class(VALUE self, VALUE object) {
   return CLASS_OF(object);
 }
 
-/*
- * Return the class or module that the given internal class
- * represents.
- *
- * If a class is given, this is the class.  If an iclass is given,
- * this is the module it represents in the lookup chain.
- */
-VALUE Looksee_internal_class_to_module(VALUE self, VALUE internal_class) {
-  if (!SPECIAL_CONST_P(internal_class)) {
-    switch (BUILTIN_TYPE(internal_class)) {
-    case T_ICLASS:
-      return RBASIC(internal_class)->klass;
-    case T_CLASS:
-      return internal_class;
-    }
-  }
-  rb_raise(rb_eArgError, "not an internal class: %s", RSTRING_PTR(rb_inspect(internal_class)));
-}
-
 #if RUBY_VERSION >= 192
 
 #  define VISIBILITY_TYPE rb_method_flag_t
@@ -208,6 +189,15 @@ VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
   return names;
 }
 
+/*
+ * Return true if the given object is an included class or origin class, false
+ * otherwise.
+ */
+VALUE Looksee_included_class_p(VALUE self, VALUE object) {
+  return !SPECIAL_CONST_P(object) && BUILTIN_TYPE(object) == T_ICLASS ?
+    Qtrue : Qfalse;
+}
+
 VALUE Looksee_singleton_class_p(VALUE self, VALUE object) {
   return BUILTIN_TYPE(object) == T_CLASS && FL_TEST(object, FL_SINGLETON) ? Qtrue : Qfalse;
 }
@@ -227,6 +217,17 @@ VALUE Looksee_module_name(VALUE self, VALUE module) {
   if (BUILTIN_TYPE(module) == T_CLASS || BUILTIN_TYPE(module) == T_MODULE) {
     VALUE name = rb_mod_name(module);
     return name == Qnil ? rb_str_new2("") : name;
+  } else if (BUILTIN_TYPE(module) == T_ICLASS) {
+    VALUE wrapped = RBASIC(module)->klass;
+    VALUE name = Looksee_module_name(self, wrapped);
+    if (BUILTIN_TYPE(wrapped) == T_CLASS) {
+      name = rb_str_cat2(name, " (origin)");
+    } else if (BUILTIN_TYPE(wrapped) == T_MODULE) {
+      name = rb_str_cat2(name, " (included)");
+    } else {
+      name = rb_str_cat2(name, " (?)");
+    }
+    return name;
   } else {
     rb_raise(rb_eTypeError, "expected module, got %s", rb_obj_classname(module));
   }
@@ -291,11 +292,11 @@ void Init_mri(void) {
   VALUE mMRI = rb_define_class_under(mAdapter, "MRI", mBase);
   rb_define_method(mMRI, "internal_superclass", Looksee_internal_superclass, 1);
   rb_define_method(mMRI, "internal_class", Looksee_internal_class, 1);
-  rb_define_method(mMRI, "internal_class_to_module", Looksee_internal_class_to_module, 1);
   rb_define_method(mMRI, "internal_public_instance_methods", Looksee_internal_public_instance_methods, 1);
   rb_define_method(mMRI, "internal_protected_instance_methods", Looksee_internal_protected_instance_methods, 1);
   rb_define_method(mMRI, "internal_private_instance_methods", Looksee_internal_private_instance_methods, 1);
   rb_define_method(mMRI, "internal_undefined_instance_methods", Looksee_internal_undefined_instance_methods, 1);
+  rb_define_method(mMRI, "included_class?", Looksee_included_class_p, 1);
   rb_define_method(mMRI, "singleton_class?", Looksee_singleton_class_p, 1);
   rb_define_method(mMRI, "singleton_instance", Looksee_singleton_instance, 1);
   rb_define_method(mMRI, "module_name", Looksee_module_name, 1);

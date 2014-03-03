@@ -1,3 +1,9 @@
+== LATEST
+
+ * Fix display of origin classes (used when modules are prepended).
+ * Modules in the ancestry chain are now marked as "included" modules, to
+   reflect the true underlying implementation.
+
 == 2.0.0 2014-01-01
 
  * Support for MRI 2.1, JRuby 1.7, Rubinius 2.2.

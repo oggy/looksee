@@ -43,14 +43,6 @@ public class JRubyAdapter extends RubyObject {
     return object.getMetaClass();
   }
 
-  @JRubyMethod(name = "internal_class_to_module")
-  public static IRubyObject internalClassToModule(ThreadContext context, IRubyObject self, IRubyObject internalClass) {
-    if (internalClass instanceof IncludedModuleWrapper)
-      return ((IncludedModuleWrapper)internalClass).getNonIncludedClass();
-    else
-      return internalClass;
-  }
-
   @JRubyMethod(name = "internal_public_instance_methods")
   public static IRubyObject internalPublicInstanceMethods(ThreadContext context, IRubyObject self, IRubyObject module) {
     return findMethodsByVisibility(context.getRuntime(), module, Visibility.PUBLIC);
@@ -86,6 +78,12 @@ public class JRubyAdapter extends RubyObject {
     return result;
   }
 
+  @JRubyMethod(name = "included_class?")
+  public static IRubyObject isIncludedClass(ThreadContext context, IRubyObject self, IRubyObject object) {
+    Ruby runtime = context.getRuntime();
+    return runtime.newBoolean(object instanceof IncludedModuleWrapper);
+  }
+
   @JRubyMethod(name = "singleton_class?")
   public static IRubyObject isSingletonClass(ThreadContext context, IRubyObject self, IRubyObject object) {
     Ruby runtime = context.getRuntime();
@@ -104,6 +102,8 @@ public class JRubyAdapter extends RubyObject {
   @JRubyMethod(name = "module_name")
   public static IRubyObject moduleName(ThreadContext context, IRubyObject self, IRubyObject module) {
     Ruby runtime = context.getRuntime();
+    if (module instanceof IncludedModuleWrapper)
+      return runtime.newString(((IncludedModuleWrapper)module).getNonIncludedClass().getName() + " (included)");
     if (module instanceof RubyModule)
       return ((RubyModule)module).name();
     else

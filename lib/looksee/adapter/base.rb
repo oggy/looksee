@@ -9,7 +9,7 @@ module Looksee
         modules = []
         klass = internal_class(object)
         while klass
-          modules << internal_class_to_module(klass)
+          modules << klass
           klass = internal_superclass(klass)
         end
         modules
@@ -28,7 +28,7 @@ module Looksee
           object = singleton_instance(object)
         end
 
-        if object.is_a?(Module)
+        if included_class?(mod) || object.is_a?(Module)
           description = module_name(object)
           if description.empty?
             description = "unnamed #{object.is_a?(Class) ? 'Class' : 'Module'}"
@@ -52,7 +52,7 @@ module Looksee
         raise NotImplementedError, "abstract"
       end
 
-      def internal_class_to_module(internal_class)
+      def included_class?(object)
         raise NotImplementedError, "abstract"
       end
 

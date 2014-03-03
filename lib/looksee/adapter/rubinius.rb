@@ -8,14 +8,6 @@ module Looksee
         klass.direct_superclass
       end
 
-      def internal_class_to_module(internal_class)
-        if internal_class.is_a?(::Rubinius::IncludedModule)
-          internal_class.module
-        else
-          internal_class
-        end
-      end
-
       def internal_public_instance_methods(mod)
         mod.method_table.public_names
       end
@@ -36,6 +28,10 @@ module Looksee
         names
       end
 
+      def included_class?(object)
+        object.is_a?(::Rubinius::IncludedModule)
+      end
+
       def singleton_class?(object)
         object.is_a?(Class) && !!::Rubinius::Type.singleton_class_object(object)
       end
@@ -50,7 +46,13 @@ module Looksee
         mod.is_a?(Module) or
           raise TypeError, "expected module, got #{mod.class}"
 
-        if ::Rubinius::Type.respond_to?(:module_name)
+        if ::Rubinius::IncludedModule === mod
+          if Class === mod.module
+            "#{module_name(mod.origin)} (origin)"
+          else
+            "#{module_name(mod.module)} (included)"
+          end
+        elsif ::Rubinius::Type.respond_to?(:module_name)
           ::Rubinius::Type.module_name(mod) || ''
         else
           mod.__name__

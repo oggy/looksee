@@ -14,8 +14,9 @@ describe "Looksee.adapter" do
     # of singleton classes, since they have no name.
     #
     def filtered_lookup_modules(object)
-      result = @adapter.lookup_modules(object)
-      result.select{ |mod| deterministic_module?(mod) }
+      result = @adapter.lookup_modules(object).
+        map { |mod| @adapter.describe_module(mod) }.
+        select{ |description| deterministic_module?(description) }
     end
 
     #
@@ -25,7 +26,7 @@ describe "Looksee.adapter" do
     # This excludes ruby version dependent modules, and modules tossed
     # into the hierarchy by testing frameworks.
     #
-    def deterministic_module?(mod)
+    def deterministic_module?(description)
       junk_patterns = [
         # pollution from testing libraries
         'Mocha', 'Spec',
@@ -38,25 +39,10 @@ describe "Looksee.adapter" do
         # something pulls this in under ruby 1.9
         'PP',
         # our own pollution,
-        'Looksee::Object',
+        'Looksee::ObjectMixin',
       ]
-      pattern = /\A(#{junk_patterns.join('|')})/
-
-      # Singleton classes of junk are junk.
-      if Looksee.ruby_engine == 'rbx'
-        # Rubinius singleton class #inspect strings aren't formatted
-        # like the others.
-        while mod.respond_to?(:__metaclass_object__) && (object = mod.__metaclass_object__).is_a?(Class)
-          mod = object
-        end
-        mod.name !~ pattern
-      else
-        name = mod.to_s
-        while name =~ /\A#<Class:(.*)>\z/
-          name = $1
-        end
-        name !~ pattern
-      end
+      pattern = /\b(#{junk_patterns.join('|')})\b/
+      description !~ pattern
     end
 
     it "should contain an entry for each module in the object's lookup path" do
@@ -67,23 +53,41 @@ describe "Looksee.adapter" do
         include Mod1
         include Mod2
       end
-      filtered_lookup_modules(Derived.new) == [Derived, Mod2, Mod1, Base, Object, Kernel]
+      filtered_lookup_modules(Derived.new) == [
+        'Derived',
+        'Mod2 (included)',
+        'Mod1 (included)',
+        'Base',
+        'Object',
+        'Kernel (included)',
+      ]
     end
 
     it "should contain an entry for the object's singleton class if it exists" do
       object = Object.new
       object.singleton_class
 
-      filtered_lookup_modules(object).should == [object.singleton_class, Object, Kernel]
+      filtered_lookup_modules(object).should == [
+        '[Object instance]',
+        'Object',
+        'Kernel (included)',
+      ]
     end
 
     it "should contain entries for singleton classes of all ancestors for class objects" do
       temporary_class :C
-      filtered_lookup_modules(C).should == [C.singleton_class, Object.singleton_class, Class, Module, Object, Kernel]
+      filtered_lookup_modules(C).should == [
+        '[C]',
+        '[Object]',
+        'Class',
+        'Module',
+        'Object',
+        'Kernel (included)',
+      ]
     end
 
     it "should work for immediate objects" do
-      filtered_lookup_modules(1).first.should == Fixnum
+      filtered_lookup_modules(1).first.should == 'Fixnum'
     end
   end
 
