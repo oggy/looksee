@@ -4,7 +4,7 @@ module Looksee
       <<-EOS.gsub(/^ *\|/, '')
         |== Looksee Quick Reference
         |
-        |  object.ls(*specifiers)
+        |  object.ls(*specifiers)  or  Looksee[object, *specifiers]
         |    Print the methods of \`object\'.
         |
         |    Available specifiers:
