@@ -1,4 +1,4 @@
-== LATEST
+== 2.1.0 2014-03-05
 
  * Add alternative syntax: Looksee[object, *args]. Useful for BasicObject
    instances, and proxies which delegate #ls via method_missing.
