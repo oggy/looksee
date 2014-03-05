@@ -3,9 +3,6 @@
  * Add alternative syntax: Looksee[object, *args]. Useful for BasicObject
    instances, and proxies which delegate #ls via method_missing.
  * Fix display of origin classes (used when modules are prepended).
- * Modules in the ancestry chain are now marked as "included" modules, to
-   distinguish them from the original module. (They're different objects in the
-   underlying implementation.)
 
 == 2.0.0 2014-01-01
 

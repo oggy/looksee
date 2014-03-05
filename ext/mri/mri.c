@@ -220,13 +220,8 @@ VALUE Looksee_module_name(VALUE self, VALUE module) {
   } else if (BUILTIN_TYPE(module) == T_ICLASS) {
     VALUE wrapped = RBASIC(module)->klass;
     VALUE name = Looksee_module_name(self, wrapped);
-    if (BUILTIN_TYPE(wrapped) == T_CLASS) {
+    if (BUILTIN_TYPE(wrapped) == T_CLASS)
       name = rb_str_cat2(name, " (origin)");
-    } else if (BUILTIN_TYPE(wrapped) == T_MODULE) {
-      name = rb_str_cat2(name, " (included)");
-    } else {
-      name = rb_str_cat2(name, " (?)");
-    }
     return name;
   } else {
     rb_raise(rb_eTypeError, "expected module, got %s", rb_obj_classname(module));

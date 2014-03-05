@@ -53,37 +53,22 @@ describe "Looksee.adapter" do
         include Mod1
         include Mod2
       end
-      filtered_lookup_modules(Derived.new) == [
-        'Derived',
-        'Mod2 (included)',
-        'Mod1 (included)',
-        'Base',
-        'Object',
-        'Kernel (included)',
-      ]
+      filtered_lookup_modules(Derived.new) ==
+        ['Derived', 'Mod2', 'Mod1', 'Base', 'Object', 'Kernel']
     end
 
     it "should contain an entry for the object's singleton class if it exists" do
       object = Object.new
       object.singleton_class
 
-      filtered_lookup_modules(object).should == [
-        '[Object instance]',
-        'Object',
-        'Kernel (included)',
-      ]
+      filtered_lookup_modules(object).should ==
+        ['[Object instance]', 'Object', 'Kernel']
     end
 
     it "should contain entries for singleton classes of all ancestors for class objects" do
       temporary_class :C
-      filtered_lookup_modules(C).should == [
-        '[C]',
-        '[Object]',
-        'Class',
-        'Module',
-        'Object',
-        'Kernel (included)',
-      ]
+      filtered_lookup_modules(C).should ==
+        ['[C]', '[Object]', 'Class', 'Module', 'Object', 'Kernel']
     end
 
     it "should work for immediate objects" do

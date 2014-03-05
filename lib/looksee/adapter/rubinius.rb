@@ -54,7 +54,7 @@ module Looksee
           if Class === mod.module
             "#{module_name(mod.module)} (origin)"
           else
-            "#{module_name(mod.module)} (included)"
+            module_name(mod.module)
           end
         elsif ::Rubinius::Type.respond_to?(:module_name)
           ::Rubinius::Type.module_name(mod) || ''

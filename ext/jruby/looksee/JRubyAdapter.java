@@ -103,7 +103,7 @@ public class JRubyAdapter extends RubyObject {
   public static IRubyObject moduleName(ThreadContext context, IRubyObject self, IRubyObject module) {
     Ruby runtime = context.getRuntime();
     if (module instanceof IncludedModuleWrapper)
-      return runtime.newString(((IncludedModuleWrapper)module).getNonIncludedClass().getName() + " (included)");
+      return ((IncludedModuleWrapper)module).getNonIncludedClass().name();
     if (module instanceof RubyModule)
       return ((RubyModule)module).name();
     else
