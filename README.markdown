@@ -115,19 +115,35 @@ Or filter the list by Regexp:
     Array
       to_a  to_ary  to_s  to_yaml
 
-And if you want to know more about any of those methods, Looksee can
+## Proxy objects
+
+Objects that delegate everything via `method_missing` to some other object can
+be tricky, because they will delegate `ls` itself. To view such objects, you can
+always do:
+
+    Looksee[object]
+
+This method inspects the object via interpreter extensions, so it works for the
+most Byzantine object. It will also work for `BasicObject` instances that don't
+have an `ls` method. `Object#ls` is simply a wrapper around `Looksee.[]`.
+
+## To the source!
+
+If you want to know more about any of those methods, Looksee can
 take you straight to the source in your editor:
 
-    > [].ls.edit :to_set
+    [].ls.edit :to_set
 
 By default, this uses `vi`; customize it like this:
 
     # %f = file, %l = line number
     Looksee.editor = "mate -l%l %f"
 
-See more in the quick reference:
+## Quick Reference
 
-    irb> Looksee.help
+We've got one:
+
+    Looksee.help
 
 Enjoy!
 
