@@ -28,7 +28,7 @@ module Looksee
         if visibility == :undefined
           return nil
         else
-          return entry.module.instance_method(name)
+          return Looksee.adapter.real_module(entry.module).instance_method(name)
         end
       end
       nil

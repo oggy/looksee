@@ -44,6 +44,10 @@ module Looksee
         end
       end
 
+      def real_module(module_or_included_class)
+        module_or_included_class
+      end
+
       def internal_superclass(klass)
         raise NotImplementedError, "abstract"
       end
