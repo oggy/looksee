@@ -31,7 +31,8 @@ module Looksee
         if included_class?(mod) || object.is_a?(Module)
           description = module_name(object)
           if description.empty?
-            description = "unnamed #{object.is_a?(Class) ? 'Class' : 'Module'}"
+            is_class = real_module(object).is_a?(Class)
+            description = "unnamed #{is_class ? 'Class' : 'Module'}"
           end
         else
           description = "#{module_name(object.class)} instance"

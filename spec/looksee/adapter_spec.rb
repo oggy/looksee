@@ -401,6 +401,16 @@ describe "Looksee.adapter" do
       end
     end
 
+    describe "for an included class of an unnamed module" do
+      it "should describe the object as 'unnamed Module'" do
+        klass = Class.new do
+          include Module.new
+        end
+        mod = @adapter.lookup_modules(klass.new)[1]
+        @adapter.describe_module(mod).should == 'unnamed Module'
+      end
+    end
+
     describe "for a singleton class of an object" do
       it "should describe the object in brackets" do
         begin
