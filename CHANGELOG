@@ -1,4 +1,4 @@
-== LATEST
+== 2.1.1 2014-07-13
 
  * Fix error for objects with an unnamed module in the lookup path.
  * Fix editing for included methods.
