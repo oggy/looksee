@@ -1,5 +1,6 @@
 == LATEST
 
+ * Fix error for objects with an unnamed module in the lookup path.
  * Fix editing for included methods.
 
 == 2.1.0 2014-03-05
