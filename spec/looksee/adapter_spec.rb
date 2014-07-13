@@ -227,44 +227,44 @@ describe "Looksee.adapter" do
   describe "#singleton_class?" do
     it "should return true if the object is a singleton class of an object" do
       object = (class << Object.new; self; end)
-      @adapter.singleton_class?(object).should be_true
+      @adapter.singleton_class?(object).should == true
     end
 
     it "should return true if the object is a singleton class of a class" do
       object = (class << Class.new; self; end)
-      @adapter.singleton_class?(object).should be_true
+      @adapter.singleton_class?(object).should == true
     end
 
     it "should return true if the object is a singleton class of a singleton class" do
       object = (class << (class << Class.new; self; end); self; end)
-      @adapter.singleton_class?(object).should be_true
+      @adapter.singleton_class?(object).should == true
     end
 
     it "should return false if the object is just a class" do
       object = Class.new
-      @adapter.singleton_class?(object).should be_false
+      @adapter.singleton_class?(object).should == false
     end
 
     it "should return false if the object is just a module" do
       object = Module.new
-      @adapter.singleton_class?(object).should be_false
+      @adapter.singleton_class?(object).should == false
     end
 
     it "should return false if the object is just an object" do
       object = Object.new
-      @adapter.singleton_class?(object).should be_false
+      @adapter.singleton_class?(object).should == false
     end
 
     it "should return false if the object is TrueClass" do
-      @adapter.singleton_class?(TrueClass).should be_false
+      @adapter.singleton_class?(TrueClass).should == false
     end
 
     it "should return false if the object is FalseClass" do
-      @adapter.singleton_class?(FalseClass).should be_false
+      @adapter.singleton_class?(FalseClass).should == false
     end
 
     it "should return false if the object is NilClass" do
-      @adapter.singleton_class?(NilClass).should be_false
+      @adapter.singleton_class?(NilClass).should == false
     end
   end
 

@@ -36,8 +36,8 @@ describe Looksee::LookupPath do
     end
 
     it "should know which methods have been overridden" do
-      @lookup_path.entries[0].overridden?('public1').should be_false
-      @lookup_path.entries[1].overridden?('public1').should be_true
+      @lookup_path.entries[0].overridden?('public1').should == false
+      @lookup_path.entries[1].overridden?('public1').should == true
     end
   end
 

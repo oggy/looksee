@@ -4,7 +4,7 @@ describe Looksee do
   describe ".[]" do
     before do
       @object = Object.new
-      Looksee.stub(:default_specifiers).and_return([:public, :overridden])
+      Looksee.stub(default_specifiers: [:public, :overridden])
     end
 
     it "should return an Inspector for the object's lookup path" do
