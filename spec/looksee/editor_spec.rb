@@ -65,11 +65,8 @@ describe Looksee::Editor do
       set_up_editor
 
       file, line = *source_location
-      FileUtils.touch file
-      Object.const_set(:C, Class.new { def f; end })
-      Looksee.adapter.set_methods(C, [:f], [], [], [])
-      Looksee.adapter.set_source_location(C, :f, source_location)
-      Looksee.adapter.ancestors[object] = [C, Object]
+      open(file, 'w') { |f| f.puts "class C\n  def f\n  end\nend" }
+      load file
     end
 
     after do
@@ -102,7 +99,7 @@ describe Looksee::Editor do
     end
 
     it "should raise NoSourceLocationError and not run the editor if no source location is available" do
-      Looksee.adapter.set_source_location(C, :f, nil)
+      Looksee.adapter.stub(source_location: nil)
       expect { editor.edit(object, :f) }.to raise_error(Looksee::NoSourceLocationError)
       editor_invocation.should be_nil
     end

@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe Looksee::Inspector do
   include TemporaryClasses
+  use_test_adapter
 
   describe "#inspect" do
     before do

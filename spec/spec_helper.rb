@@ -17,5 +17,5 @@ end
 NATIVE_ADAPTER = Looksee.adapter
 
 RSpec.configure do |config|
-  config.before { Looksee.adapter = TestAdapter.new }
+  config.extend TestAdapter::Mixin
 end

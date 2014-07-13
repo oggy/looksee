@@ -1,4 +1,11 @@
 class TestAdapter < Looksee::Adapter::Base
+  module Mixin
+    def use_test_adapter
+      before { Looksee.adapter = TestAdapter.new }
+      after { Looksee.adapter = NATIVE_ADAPTER }
+    end
+  end
+
   def lookup_modules(object)
     ancestors[object]
   end

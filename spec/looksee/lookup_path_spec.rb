@@ -4,6 +4,8 @@ describe Looksee::LookupPath do
   include TemporaryClasses
 
   describe "#entries" do
+    use_test_adapter
+
     before do
       temporary_module :M
       temporary_class(:C) { include M }
@@ -43,10 +45,7 @@ describe Looksee::LookupPath do
     before do
       temporary_module(:M) { def f; end }
       temporary_class(:C) { include M; def f; end }
-      @object = Object.new
-      Looksee.adapter.ancestors[@object] = [C, M]
-      Looksee.adapter.set_methods(M, [:f], [], [], [])
-      Looksee.adapter.set_methods(C, [:f], [], [], [])
+      @object = C.new
     end
 
     it "should return the unoverridden UnboundMethod for the given method name" do
@@ -63,8 +62,6 @@ describe Looksee::LookupPath do
 
     it "should return nil if the method has been undefined" do
       C.send(:undef_method, :f)
-      Looksee.adapter.public_methods[C].delete(:f)
-      Looksee.adapter.undefined_methods[C] << :f
       lookup_path = Looksee::LookupPath.new(@object)
       lookup_path.find('f').should be_nil
     end
@@ -73,11 +70,9 @@ describe Looksee::LookupPath do
   describe Looksee::LookupPath::Entry do
     it "should iterate over methods in alphabetical order" do
       temporary_class(:C)
-      @object = Object.new
-      Looksee.adapter.public_methods[C] = [:a, :c, :b]
-      Looksee.adapter.ancestors[@object] = [C]
+      @object = C.new
+      Looksee.adapter.stub(internal_public_instance_methods: [:a, :c, :b])
       @lookup_path = Looksee::LookupPath.new(@object)
-      @lookup_path.entries.size.should == 1
       @lookup_path.entries.first.map{|name, visibility| name}.should == ['a', 'b', 'c']
     end
   end
