@@ -1,4 +1,4 @@
-# Looksee  [![Build Status](https://travis-ci.org/oggy/looksee.png)](https://travis-ci.org/oggy/looksee)
+# Looksee [![Build Status](https://travis-ci.org/oggy/looksee.png)](https://travis-ci.org/oggy/looksee) [![Gem Version](https://badge.fury.io/rb/looksee.svg)](http://badge.fury.io/rb/looksee)
 
 A tool for illustrating the ancestry and method lookup path of
 objects. Handy for exploring unfamiliar codebases.
