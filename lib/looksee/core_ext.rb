@@ -3,8 +3,19 @@ module Looksee
     #
     # Shortcut for Looksee[self, *args].
     #
-    def ls(*args)
-      Looksee[self, *args]
+    def method_missing(name, *args)
+      case name.to_s
+      when /^ls$/
+        # when in repl, p is no need.
+        # but when no repl, p is need for output looksee result.
+        if defined? Pry or defined? Irb
+          Looksee[self, *args]
+        else
+          p Looksee[self, *args]
+        end
+      else
+        super
+      end
     end
 
     def self.rename(name)  # :nodoc:

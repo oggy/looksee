@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe Looksee::WirbleCompatibility do
+  before { skip "wirble is not common enough, and it too old for use." }
   describe "when looksee is loaded" do
     #
     # Run the given ruby string, and return the standard output.
