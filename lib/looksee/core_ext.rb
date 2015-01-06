@@ -1,21 +1,21 @@
 module Looksee
   module ObjectMixin
     #
-    # Shortcut for Looksee[self, *args].
+    # Define #ls as a shortcut for Looksee[self, *args].
+    #
+    # This is defined via method_missing to be less intrusive. pry 0.10, e.g.,
+    # relies on Object#ls not existing.
     #
     def method_missing(name, *args)
-      case name.to_s
-      when /^ls$/
-        # when in repl, p is no need.
-        # but when no repl, p is need for output looksee result.
-        if defined? Pry or defined? Irb
-          Looksee[self, *args]
-        else
-          p Looksee[self, *args]
-        end
+      if name == :ls
+        Looksee[self, *args]
       else
         super
       end
+    end
+
+    def respond_to?(name, include_private=false)
+      super || name == :ls
     end
 
     def self.rename(name)  # :nodoc:
