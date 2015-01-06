@@ -1,6 +1,8 @@
 == LATEST
 
  * Support for MRI 2.2.0.
+ * Work with pry.
+ * Replace wirble support.
 
 == 2.1.1 2014-07-13
 
