@@ -127,13 +127,6 @@ This method inspects the object via interpreter extensions, so it works for the
 most Byzantine object. It will also work for `BasicObject` instances that don't
 have an `ls` method. `Object#ls` is simply a wrapper around `Looksee.[]`.
 
-## `ls` in your way?
-
-If you have a library that for some reason can't handle an `ls` method existing
-on `Object`, you may rename it like this:
-
-    Looksee.rename ls: :_ls
-
 ## To the source!
 
 If you want to know more about any of those methods, Looksee can
@@ -145,6 +138,13 @@ By default, this uses `vi`; customize it like this:
 
     # %f = file, %l = line number
     Looksee.editor = "mate -l%l %f"
+
+## `ls` in your way?
+
+If you have a library that for some reason can't handle an `ls` method existing
+on `Object`, you may rename it like this:
+
+    Looksee.rename ls: :_ls
 
 ## Quick Reference
 
