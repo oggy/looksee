@@ -7,7 +7,7 @@ module Looksee
     # relies on Object#ls not existing.
     #
     def method_missing(name, *args)
-      if name == :ls
+      if name == Looksee::ObjectMixin.looksee_method
         Looksee[self, *args]
       else
         super
@@ -15,13 +15,16 @@ module Looksee
     end
 
     def respond_to?(name, include_private=false)
-      super || name == :ls
+      super || name == Looksee::ObjectMixin.looksee_method
+    end
+
+    def self.looksee_method
+      @looksee_method ||= :ls
     end
 
     def self.rename(name)  # :nodoc:
       name = name[:ls] if name.is_a?(Hash)
-      alias_method name, :ls
-      remove_method :ls
+      Looksee::ObjectMixin.instance_variable_set :@looksee_method, name
     end
   end
 
