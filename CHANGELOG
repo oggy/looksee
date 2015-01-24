@@ -1,3 +1,8 @@
+== LATEST
+
+ * Fix Looksee.rename. [Jan Lelis]
+ * Object.respond_to_missing?(:ls) is now true.
+
 == 3.0.0 2015-01-06
 
  * Support for MRI 2.2.0.
