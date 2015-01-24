@@ -7,45 +7,22 @@ module Looksee
     # relies on Object#ls not existing.
     #
     def method_missing(name, *args)
-      if name == Looksee::ObjectMixin.looksee_method
+      if name == Looksee::ObjectMixin.inspection_method
         Looksee[self, *args]
       else
         super
       end
     end
 
-    def respond_to?(name, include_private=false)
-      super || name == Looksee::ObjectMixin.looksee_method
+    def respond_to_missing?(name, include_private=false)
+      name == Looksee::ObjectMixin.inspection_method || super
     end
 
-    def self.looksee_method
-      @looksee_method ||= :ls
+    class << self
+      attr_accessor :inspection_method
     end
-
-    def self.rename(name)  # :nodoc:
-      name = name[:ls] if name.is_a?(Hash)
-      Looksee::ObjectMixin.instance_variable_set :@looksee_method, name
-    end
+    self.inspection_method = ENV['LOOKSEE_METHOD'] || :ls
   end
-
-  #
-  # Rename the #ls method, added to every object. Example:
-  #
-  #     rename :_ls
-  #
-  # This renames Looksee's #ls method to #_ls.
-  #
-  # For backward compatibility, the old-style invocation is also
-  # supported. Please note this is deprecated.
-  #
-  #     rename :ls => :_ls
-  #
-  def self.rename(name)
-    ObjectMixin.rename(name)
-  end
-
-  name = ENV['LOOKSEE_METHOD'] and
-    rename name
 
   Object.send :include, ObjectMixin
 end
