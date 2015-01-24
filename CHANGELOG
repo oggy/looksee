@@ -1,4 +1,4 @@
-== LATEST
+== 3.0.1 2015-01-24
 
  * Fix Looksee.rename. [Jan Lelis]
  * Object.respond_to_missing?(:ls) is now true.
