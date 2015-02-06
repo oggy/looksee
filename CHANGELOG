@@ -1,3 +1,8 @@
+== LATEST
+
+ * Fix performance issue caused by fix for pry. You'll need to use
+   Looksee.rename to use the pry "ls" command.
+
 == 3.0.1 2015-01-24
 
  * Fix Looksee.rename. [Jan Lelis]

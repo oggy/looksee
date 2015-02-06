@@ -1,28 +1,37 @@
 module Looksee
   module ObjectMixin
     #
-    # Define #ls as a shortcut for Looksee[self, *args].
+    # Shortcut for Looksee[self, *args].
     #
-    # This is defined via method_missing to be less intrusive. pry 0.10, e.g.,
-    # relies on Object#ls not existing.
-    #
-    def method_missing(name, *args)
-      if name == Looksee::ObjectMixin.inspection_method
-        Looksee[self, *args]
-      else
-        super
-      end
+    def ls(*args)
+      Looksee[self, *args]
     end
 
-    def respond_to_missing?(name, include_private=false)
-      name == Looksee::ObjectMixin.inspection_method || super
+    def self.rename(name)  # :nodoc:
+      name = name[:ls] if name.is_a?(Hash)
+      alias_method name, :ls
+      remove_method :ls
     end
-
-    class << self
-      attr_accessor :inspection_method
-    end
-    self.inspection_method = ENV['LOOKSEE_METHOD'] || :ls
   end
+
+  #
+  # Rename the #ls method, added to every object. Example:
+  #
+  #     rename :_ls
+  #
+  # This renames Looksee's #ls method to #_ls.
+  #
+  # For backward compatibility, the old-style invocation is also
+  # supported. Please note this is deprecated.
+  #
+  #     rename :ls => :_ls
+  #
+  def self.rename(name)
+    ObjectMixin.rename(name)
+  end
+
+  name = ENV['LOOKSEE_METHOD'] and
+    rename name
 
   Object.send :include, ObjectMixin
 end

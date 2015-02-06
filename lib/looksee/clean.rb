@@ -133,23 +133,6 @@ module Looksee
     end
 
     #
-    # Rename the #ls method, added to every object. Example:
-    #
-    #     rename :_ls
-    #
-    # This renames Looksee's #ls method to #_ls.
-    #
-    # For backward compatibility, the old-style invocation is also
-    # supported. Please note this is deprecated.
-    #
-    #     rename :ls => :_ls
-    #
-    def rename(name)
-      name = name[:ls] if name.is_a?(Hash)
-      ObjectMixin.inspection_method = name
-    end
-
-    #
     # Show a quick reference.
     #
     def help
