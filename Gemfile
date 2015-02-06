@@ -2,7 +2,7 @@ source 'https://rubygems.org/'
 gemspec
 
 gem 'ritual'
-gem 'rspec'
+gem 'rspec', '3.1.0'
 gem 'wirble'
 gem 'rubysl', platform: :rbx
 
