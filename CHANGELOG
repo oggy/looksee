@@ -1,4 +1,4 @@
-== LATEST
+== 3.1.0 2015-02-06
 
  * Fix performance issue caused by fix for pry. You'll need to use
    Looksee.rename to use the pry "ls" command.
