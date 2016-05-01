@@ -71,20 +71,20 @@ typedef struct rb_callable_method_entry_struct { /* same fields with rb_method_e
 static inline void
 METHOD_ENTRY_VISI_SET(rb_method_entry_t *me, rb_method_visibility_t visi)
 {
-    VM_ASSERT((int)visi >= 0 && visi <= 3);
+    //VM_ASSERT((int)visi >= 0 && visi <= 3);
     me->flags = (me->flags & ~(IMEMO_FL_USER0 | IMEMO_FL_USER1)) | (visi << (IMEMO_FL_USHIFT+0));
 }
 static inline void
 METHOD_ENTRY_BASIC_SET(rb_method_entry_t *me, unsigned int basic)
 {
-    VM_ASSERT(basic <= 1);
+    //VM_ASSERT(basic <= 1);
     me->flags = (me->flags & ~(IMEMO_FL_USER2                 )) | (basic << (IMEMO_FL_USHIFT+2));
 }
 static inline void
 METHOD_ENTRY_FLAGS_SET(rb_method_entry_t *me, rb_method_visibility_t visi, unsigned int basic)
 {
-    VM_ASSERT((int)visi >= 0 && visi <= 3);
-    VM_ASSERT(basic <= 1);
+    //VM_ASSERT((int)visi >= 0 && visi <= 3);
+    //VM_ASSERT(basic <= 1);
     me->flags =
       (me->flags & ~(IMEMO_FL_USER0|IMEMO_FL_USER1|IMEMO_FL_USER2)) |
 	((visi << (IMEMO_FL_USHIFT+0)) | (basic << (IMEMO_FL_USHIFT+2)));
