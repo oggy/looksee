@@ -4,7 +4,6 @@ before_install:
   - gem install bundler
 bundler_args: --without dev
 rvm:
-  - ruby-head
   - 2.3.1
   - 2.2.0
   - 2.1.5
@@ -13,9 +12,11 @@ rvm:
   - jruby-1.7.9
   - rbx-2.4.1
   - rbx-2.5.8
+  - ruby-head
 matrix:
   allow_failures:
     # rbx no longer builds on travis
     - rvm: rbx-2.4.1
     - rvm: rbx-2.5.8
+    - rvm: ruby-head
   fast_finish: true
