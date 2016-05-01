@@ -12,8 +12,6 @@ if extension == 'mri'
     $CPPFLAGS << " -Imri/2.0.0"
   elsif RUBY_VERSION >= '1.9.3'
     $CPPFLAGS << " -Imri/1.9.3"
-  elsif RUBY_VERSION >= '1.9.2'
-    $CPPFLAGS << " -Imri/1.9.2"
   end
 end
 create_makefile "looksee/#{extension}", extension

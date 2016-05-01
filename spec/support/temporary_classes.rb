@@ -73,6 +73,5 @@ module TemporaryClasses
       mod.public_instance_methods(false) +
       mod.protected_instance_methods(false) +
       mod.private_instance_methods(false)
-    names.map{|name| name.to_sym}  # they're strings in ruby <1.9
   end
 end
