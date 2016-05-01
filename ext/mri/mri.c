@@ -1,6 +1,9 @@
 #include "ruby.h"
 
 #if RUBY_VERSION >= 200
+#  if RUBY_VERSION >= 230
+#    include "id_table.h"
+#  endif
 #  include "method.h"
 #  include "internal.h"
 #elif RUBY_VERSION >= 193
@@ -18,6 +21,9 @@
 
 #ifndef Looksee_method_table_foreach
 #  define Looksee_method_table_foreach st_foreach
+#endif
+
+#ifndef Looksee_method_table_lookup
 #  define Looksee_method_table_lookup st_lookup
 #endif
 
@@ -94,7 +100,11 @@ static VALUE internal_instance_methods(VALUE klass, VISIBILITY_TYPE visibility) 
   arg.names = rb_ary_new();
   arg.visibility = visibility;
 
-  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_matching, (st_data_t)&arg);
+#if RUBY_VERSION >= 230
+  Looksee_method_table_foreach(RCLASS_M_TBL(klass)->st, add_method_if_matching, (st_data_t)&arg);
+#else
+  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_matching, &arg);
+#endif
   return arg.names;
 }
 
@@ -128,7 +138,11 @@ VALUE Looksee_internal_private_instance_methods(VALUE self, VALUE klass) {
  */
 VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
   VALUE names = rb_ary_new();
-  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_undefined, (st_data_t)&names);
+#if RUBY_VERSION >= 230
+  Looksee_method_table_foreach(RCLASS_M_TBL(klass)->st, add_method_if_undefined, (st_data_t)&names);
+#else
+  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_undefined, &names);
+#endif
   return names;
 }
 
