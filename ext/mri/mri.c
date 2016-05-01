@@ -14,27 +14,11 @@
 #  endif
 #  include "vm_core.h"
 #  include "method.h"
-#elif RUBY_VERSION >= 192
-#  include "vm_core.h"
-#  include "method.h"
-#  include "ruby/st.h"
-#elif RUBY_VERSION >= 190
-#  include "node-1.9.h"
-#  include "ruby/st.h"
-#else
-#  include "node.h"
-#  include "st.h"
 #endif
 
 #ifndef Looksee_method_table_foreach
 #  define Looksee_method_table_foreach st_foreach
 #  define Looksee_method_table_lookup st_lookup
-#endif
-
-#if RUBY_VERSION < 187
-#  define RCLASS_IV_TBL(c) (RCLASS(c)->iv_tbl)
-#  define RCLASS_M_TBL(c) (RCLASS(c)->m_tbl)
-#  define RCLASS_SUPER(c) (RCLASS(c)->super)
 #endif
 
 /*
@@ -61,8 +45,6 @@ VALUE Looksee_internal_superclass(VALUE self, VALUE internal_class) {
 VALUE Looksee_internal_class(VALUE self, VALUE object) {
   return CLASS_OF(object);
 }
-
-#if RUBY_VERSION >= 192
 
 #if RUBY_VERSION >= 230
 // per 18bbd05
@@ -111,54 +93,6 @@ static int add_method_if_undefined(ID method_name, rb_method_entry_t *me, VALUE 
     rb_ary_push(*names, ID2SYM(method_name));
   return ST_CONTINUE;
 }
-
-#else
-
-#  if RUBY_VERSION >= 190
-#    define VISIBILITY(node) ((node)->nd_body->nd_noex & NOEX_MASK)
-#  else
-#    define VISIBILITY(node) ((node)->nd_noex & NOEX_MASK)
-#  endif
-
-#  define VISIBILITY_TYPE unsigned long
-
-typedef struct add_method_if_matching_arg {
-  VALUE names;
-  VISIBILITY_TYPE visibility;
-} add_method_if_matching_arg_t;
-
-static int add_method_if_matching(ID method_name, NODE *body, add_method_if_matching_arg_t *arg) {
-#  ifdef ID_ALLOCATOR
-  /* This entry is for the internal allocator function. */
-  if (method_name == ID_ALLOCATOR)
-    return ST_CONTINUE;
-#  endif
-
-  /* Module#undef_method:
-   *   * sets body->nd_body to NULL in ruby <= 1.8
-   *   * sets body to NULL in ruby >= 1.9
-   */
-  if (!body || !body->nd_body)
-    return ST_CONTINUE;
-
-  if (VISIBILITY(body) == arg->visibility)
-    rb_ary_push(arg->names, ID2SYM(method_name));
-  return ST_CONTINUE;
-}
-
-static int add_method_if_undefined(ID method_name, NODE *body, VALUE *names) {
-#  ifdef ID_ALLOCATOR
-  /* The allocator can be undefined with rb_undef_alloc_func, e.g. Struct. */
-  if (method_name == ID_ALLOCATOR)
-    return ST_CONTINUE;
-#  endif
-
-  if (!body || !body->nd_body)
-    rb_ary_push(*names, ID2SYM(method_name));
-  return ST_CONTINUE;
-}
-
-#endif
 
 static VALUE internal_instance_methods(VALUE klass, VISIBILITY_TYPE visibility) {
   add_method_if_matching_arg_t arg;
@@ -249,58 +183,6 @@ VALUE Looksee_module_name(VALUE self, VALUE module) {
   }
 }
 
-#if RUBY_VERSION < 190
-
-#include "env-1.8.h"
-#include "eval_c-1.8.h"
-
-/*
- * Return the source file and line number of the given object and method.
- */
-VALUE Looksee_source_location(VALUE self, VALUE unbound_method) {
-  if (!rb_obj_is_kind_of(unbound_method, rb_cUnboundMethod))
-    rb_raise(rb_eTypeError, "expected UnboundMethod, got %s", rb_obj_classname(unbound_method));
-
-  struct METHOD *method;
-  Data_Get_Struct(unbound_method, struct METHOD, method);
-
-  NODE *node;
-  switch (nd_type(method->body)) {
-    // Can't be a FBODY or ZSUPER.
-  case NODE_SCOPE:
-    node = method->body->nd_defn;
-    break;
-  case NODE_BMETHOD:
-    {
-      struct BLOCK *block;
-      Data_Get_Struct(method->body->nd_orig, struct BLOCK, block);
-      (node = block->frame.node) || (node = block->body);
-      // Proc#to_s suggests this may be NULL sometimes.
-      if (!node)
-        return Qnil;
-    }
-    break;
-  case NODE_DMETHOD:
-    {
-      struct METHOD *original_method;
-      NODE *body = method->body;
-      Data_Get_Struct(body->nd_orig, struct METHOD, original_method);
-      node = original_method->body->nd_defn;
-    }
-    break;
-  default:
-    return Qnil;
-  }
-  VALUE file = rb_str_new2(node->nd_file);
-  VALUE line = INT2NUM(nd_line(node));
-  VALUE location = rb_ary_new2(2);
-  rb_ary_store(location, 0, file);
-  rb_ary_store(location, 1, line);
-  return location;
-}
-
-#endif
-
 void Init_mri(void) {
   VALUE mLooksee = rb_const_get(rb_cObject, rb_intern("Looksee"));
   VALUE mAdapter = rb_const_get(mLooksee, rb_intern("Adapter"));
@@ -317,7 +199,4 @@ void Init_mri(void) {
   rb_define_method(mMRI, "singleton_instance", Looksee_singleton_instance, 1);
   rb_define_method(mMRI, "real_module", Looksee_real_module, 1);
   rb_define_method(mMRI, "module_name", Looksee_module_name, 1);
-#if RUBY_VERSION < 190
-  rb_define_method(mMRI, "source_location", Looksee_source_location, 1);
-#endif
 }
