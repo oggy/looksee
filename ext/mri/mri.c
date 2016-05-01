@@ -64,10 +64,15 @@ VALUE Looksee_internal_class(VALUE self, VALUE object) {
 
 #if RUBY_VERSION >= 192
 
-#if RUBY_VERSION <= 230
-#  define VISIBILITY_TYPE rb_method_flag_t
-#else
+#if RUBY_VERSION >= 230
+// per 18bbd05
+#  define NOEX_PUBLIC METHOD_VISI_PUBLIC
+#  define NOEX_PRIVATE METHOD_VISI_PRIVATE
+#  define NOEX_PROTECTED METHOD_VISI_PROTECTED
+#  define NOEX_MASK 0x06
 #  define VISIBILITY_TYPE rb_method_visibility_t
+#else
+#  define VISIBILITY_TYPE rb_method_flag_t
 #endif
 
 typedef struct add_method_if_matching_arg {
