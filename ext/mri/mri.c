@@ -64,7 +64,11 @@ VALUE Looksee_internal_class(VALUE self, VALUE object) {
 
 #if RUBY_VERSION >= 192
 
+#if RUBY_VERSION <= 230
 #  define VISIBILITY_TYPE rb_method_flag_t
+#else
+#  define VISIBILITY_TYPE rb_method_visibility_t
+#endif
 
 typedef struct add_method_if_matching_arg {
   VALUE names;
