@@ -47,16 +47,11 @@ VALUE Looksee_internal_class(VALUE self, VALUE object) {
 }
 
 #if RUBY_VERSION >= 230
-// per 18bbd05
-// recreating old constant for compatibility of this file with old and newer rubies
-#  define NOEX_PUBLIC METHOD_VISI_PUBLIC
-#  define NOEX_PRIVATE METHOD_VISI_PRIVATE
-#  define NOEX_PROTECTED METHOD_VISI_PROTECTED
-// we need this mask to remain at 6 because we do not distinguish UNDER/PUBLIC and PRIVATE/PROTECTED
-// new METHOD_VISI_MASK is 0x03
-#  define NOEX_MASK 0x06
 #  define VISIBILITY_TYPE rb_method_visibility_t
 #else
+#  define METHOD_VISI_PUBLIC    NOEX_PUBLIC
+#  define METHOD_VISI_PRIVATE   NOEX_PRIVATE
+#  define METHOD_VISI_PROTECTED NOEX_PROTECTED
 #  define VISIBILITY_TYPE rb_method_flag_t
 // new macro defined in 2.3 in c19d3737
 #  define METHOD_ENTRY_VISI(me)  (me)->flag
@@ -76,7 +71,7 @@ static int add_method_if_matching(ID method_name, rb_method_entry_t *me, add_met
   if (UNDEFINED_METHOD_ENTRY_P(me))
     return ST_CONTINUE;
 
-  if ((METHOD_ENTRY_VISI(me) & NOEX_MASK) == arg->visibility)
+  if (METHOD_ENTRY_VISI(me) == arg->visibility)
     rb_ary_push(arg->names, ID2SYM(method_name));
 
   return ST_CONTINUE;
@@ -108,7 +103,7 @@ static VALUE internal_instance_methods(VALUE klass, VISIBILITY_TYPE visibility) 
  * given internal class.
  */
 VALUE Looksee_internal_public_instance_methods(VALUE self, VALUE klass) {
-  return internal_instance_methods(klass, NOEX_PUBLIC);
+  return internal_instance_methods(klass, METHOD_VISI_PUBLIC);
 }
 
 /*
@@ -116,7 +111,7 @@ VALUE Looksee_internal_public_instance_methods(VALUE self, VALUE klass) {
  * given internal class.
  */
 VALUE Looksee_internal_protected_instance_methods(VALUE self, VALUE klass) {
-  return internal_instance_methods(klass, NOEX_PROTECTED);
+  return internal_instance_methods(klass, METHOD_VISI_PROTECTED);
 }
 
 /*
@@ -124,7 +119,7 @@ VALUE Looksee_internal_protected_instance_methods(VALUE self, VALUE klass) {
  * given internal class.
  */
 VALUE Looksee_internal_private_instance_methods(VALUE self, VALUE klass) {
-  return internal_instance_methods(klass, NOEX_PRIVATE);
+  return internal_instance_methods(klass, METHOD_VISI_PRIVATE);
 }
 
 /*
