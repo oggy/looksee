@@ -89,7 +89,7 @@ static int add_method_if_matching(ID method_name, rb_method_entry_t *me, add_met
   if (UNDEFINED_METHOD_ENTRY_P(me))
     return ST_CONTINUE;
 
-  if ((me->flag & NOEX_MASK) == arg->visibility)
+  if ((me->def->flags.visi & NOEX_MASK) == arg->visibility)
     rb_ary_push(arg->names, ID2SYM(method_name));
 
   return ST_CONTINUE;
