@@ -30,18 +30,18 @@ extern "C" {
 # define __has_attribute(x) 0
 #endif
 
-#if __has_attribute(unused)
-#define UNINITIALIZED_VAR(x) x __attribute__((unused))
+#if __has_attribute(__unused__)
+#define UNINITIALIZED_VAR(x) x __attribute__((__unused__))
 #elif defined(__GNUC__) && __GNUC__ >= 3
 #define UNINITIALIZED_VAR(x) x = x
 #else
 #define UNINITIALIZED_VAR(x) x
 #endif
 
-#if __has_attribute(warn_unused_result)
-#define WARN_UNUSED_RESULT(x) x __attribute__((warn_unused_result))
-#elif defined(__GNUC__) && (__GNUC__ * 1000 + __GNUC_MINOR__) >= 3004
-#define WARN_UNUSED_RESULT(x) x __attribute__((warn_unused_result))
+#if __has_attribute(__warn_unused_result__)
+#define WARN_UNUSED_RESULT(x) x __attribute__((__warn_unused_result__))
+#elif GCC_VERSION_SINCE(3,4,0)
+#define WARN_UNUSED_RESULT(x) x __attribute__((__warn_unused_result__))
 #else
 #define WARN_UNUSED_RESULT(x) x
 #endif
@@ -60,12 +60,6 @@ extern "C" {
 #endif
 
 #define numberof(array) ((int)(sizeof(array) / sizeof((array)[0])))
-
-#define GCC_VERSION_SINCE(major, minor, patchlevel) \
-  (defined(__GNUC__) && !defined(__INTEL_COMPILER) && \
-   ((__GNUC__ > (major)) ||  \
-    (__GNUC__ == (major) && __GNUC_MINOR__ > (minor)) || \
-    (__GNUC__ == (major) && __GNUC_MINOR__ == (minor) && __GNUC_PATCHLEVEL__ >= (patchlevel))))
 
 #ifndef __has_feature
 # define __has_feature(x) 0
@@ -261,22 +255,48 @@ nlz_int128(uint128_t x)
 #endif
 
 static inline int
+nlz_intptr(uintptr_t x) {
+#if SIZEOF_VOIDP == 8
+    return nlz_long_long(x);
+#elif SIZEOF_VOIDP == 4
+    return nlz_int(x);
+#endif
+}
+
+static inline int
 rb_popcount32(uint32_t x) {
+#ifdef HAVE_BUILTIN___BUILTIN_POPCOUNT
+    return __builtin_popcount(x);
+#else
     x = (x & 0x55555555) + (x >> 1 & 0x55555555);
     x = (x & 0x33333333) + (x >> 2 & 0x33333333);
     x = (x & 0x0f0f0f0f) + (x >> 4 & 0x0f0f0f0f);
     x = (x & 0x001f001f) + (x >> 8 & 0x001f001f);
     return (x & 0x0000003f) + (x >>16 & 0x0000003f);
+#endif
 }
 
 static inline int
 rb_popcount64(uint64_t x) {
+#ifdef HAVE_BUILTIN___BUILTIN_POPCOUNT
+    return __builtin_popcountll(x);
+#else
     x = (x & 0x5555555555555555) + (x >> 1 & 0x5555555555555555);
     x = (x & 0x3333333333333333) + (x >> 2 & 0x3333333333333333);
     x = (x & 0x0707070707070707) + (x >> 4 & 0x0707070707070707);
     x = (x & 0x001f001f001f001f) + (x >> 8 & 0x001f001f001f001f);
     x = (x & 0x0000003f0000003f) + (x >>16 & 0x0000003f0000003f);
     return (x & 0x7f) + (x >>32 & 0x7f);
+#endif
+}
+
+static inline int
+rb_popcount_intptr(uintptr_t x) {
+#if SIZEOF_VOIDP == 8
+    return rb_popcount64(x);
+#elif SIZEOF_VOIDP == 4
+    return rb_popcount32(x);
+#endif
 }
 
 static inline int
@@ -528,7 +548,7 @@ struct RComplex {
 
 #ifdef RCOMPLEX_SET_REAL        /* shortcut macro for internal only */
 #undef RCOMPLEX_SET_REAL
-#undef RCOMPLEX_SET_REAL
+#undef RCOMPLEX_SET_IMAG
 #define RCOMPLEX_SET_REAL(cmp, r) RB_OBJ_WRITE((cmp), &((struct RComplex *)(cmp))->real,(r))
 #define RCOMPLEX_SET_IMAG(cmp, i) RB_OBJ_WRITE((cmp), &((struct RComplex *)(cmp))->imag,(i))
 #endif
@@ -555,6 +575,57 @@ struct RHash {
 #ifndef HAVE_SETPROCTITLE
 extern void ruby_init_setproctitle(int argc, char *argv[]);
 #endif
+
+#define RSTRUCT_EMBED_LEN_MAX RSTRUCT_EMBED_LEN_MAX
+#define RSTRUCT_EMBED_LEN_MASK RSTRUCT_EMBED_LEN_MASK
+#define RSTRUCT_EMBED_LEN_SHIFT RSTRUCT_EMBED_LEN_SHIFT
+enum {
+    RSTRUCT_EMBED_LEN_MAX = 3,
+    RSTRUCT_EMBED_LEN_MASK = (RUBY_FL_USER2|RUBY_FL_USER1),
+    RSTRUCT_EMBED_LEN_SHIFT = (RUBY_FL_USHIFT+1),
+
+    RSTRUCT_ENUM_END
+};
+
+struct RStruct {
+    struct RBasic basic;
+    union {
+	struct {
+	    long len;
+	    const VALUE *ptr;
+	} heap;
+	const VALUE ary[RSTRUCT_EMBED_LEN_MAX];
+    } as;
+};
+
+#undef RSTRUCT_LEN
+#undef RSTRUCT_PTR
+#undef RSTRUCT_SET
+#undef RSTRUCT_GET
+#define RSTRUCT_EMBED_LEN(st)                               \
+    (long)((RBASIC(st)->flags >> RSTRUCT_EMBED_LEN_SHIFT) & \
+	   (RSTRUCT_EMBED_LEN_MASK >> RSTRUCT_EMBED_LEN_SHIFT))
+#define RSTRUCT_LEN(st) rb_struct_len(st)
+#define RSTRUCT_LENINT(st) rb_long2int(RSTRUCT_LEN(st))
+#define RSTRUCT_CONST_PTR(st) rb_struct_const_ptr(st)
+#define RSTRUCT_PTR(st) ((VALUE *)RSTRUCT_CONST_PTR(RB_OBJ_WB_UNPROTECT_FOR(STRUCT, st)))
+#define RSTRUCT_SET(st, idx, v) RB_OBJ_WRITE(st, &RSTRUCT_CONST_PTR(st)[idx], (v))
+#define RSTRUCT_GET(st, idx)    (RSTRUCT_CONST_PTR(st)[idx])
+#define RSTRUCT(obj) (R_CAST(RStruct)(obj))
+
+static inline long
+rb_struct_len(VALUE st)
+{
+    return (RBASIC(st)->flags & RSTRUCT_EMBED_LEN_MASK) ?
+	RSTRUCT_EMBED_LEN(st) : RSTRUCT(st)->as.heap.len;
+}
+
+static inline const VALUE *
+rb_struct_const_ptr(VALUE st)
+{
+    return FIX_CONST_VALUE_PTR((RBASIC(st)->flags & RSTRUCT_EMBED_LEN_MASK) ?
+	RSTRUCT(st)->as.ary : RSTRUCT(st)->as.heap.ptr);
+}
 
 /* class.c */
 
@@ -665,15 +736,15 @@ struct RIMemo {
 };
 
 enum imemo_type {
-    imemo_none = 0,
-    imemo_cref = 1,
-    imemo_svar = 2,
+    imemo_env        = 0,
+    imemo_cref       = 1,
+    imemo_svar       = 2,
     imemo_throw_data = 3,
-    imemo_ifunc = 4,
-    imemo_memo = 5,
-    imemo_ment = 6,
-    imemo_iseq = 7,
-    imemo_mask = 0x07
+    imemo_ifunc      = 4,
+    imemo_memo       = 5,
+    imemo_ment       = 6,
+    imemo_iseq       = 7,
+    imemo_mask       = 0x07
 };
 
 static inline enum imemo_type
@@ -753,8 +824,17 @@ struct MEMO {
 #define MEMO_FOR(type, value) ((type *)RARRAY_PTR(value))
 #define NEW_MEMO_FOR(type, value) \
   ((value) = rb_ary_tmp_new_fill(type_roomof(type, VALUE)), MEMO_FOR(type, value))
+#define NEW_PARTIAL_MEMO_FOR(type, value, member) \
+  ((value) = rb_ary_tmp_new_fill(type_roomof(type, VALUE)), \
+   rb_ary_set_len((value), offsetof(type, member) / sizeof(VALUE)), \
+   MEMO_FOR(type, value))
 
 #define STRING_P(s) (RB_TYPE_P((s), T_STRING) && CLASS_OF(s) == rb_cString)
+
+#ifdef RUBY_INTEGER_UNIFICATION
+# define rb_cFixnum rb_cInteger
+# define rb_cBignum rb_cInteger
+#endif
 
 enum {
     cmp_opt_Fixnum,
@@ -767,6 +847,8 @@ struct cmp_opt_data {
     int opt_inited;
 };
 
+#define NEW_CMP_OPT_MEMO(type, value) \
+    NEW_PARTIAL_MEMO_FOR(type, value, cmp_opt)
 #define CMP_OPTIMIZABLE_BIT(type) (1U << TOKEN_PASTE(cmp_opt_,type))
 #define CMP_OPTIMIZABLE(data, type) \
     (((data).opt_inited & CMP_OPTIMIZABLE_BIT(type)) ? \
@@ -863,11 +945,17 @@ int rb_class_has_methods(VALUE c);
 VALUE rb_invcmp(VALUE, VALUE);
 
 /* compile.c */
-struct rb_block_struct;
-int rb_dvar_defined(ID, const struct rb_block_struct *);
-int rb_local_defined(ID, const struct rb_block_struct *);
-const char * rb_insns_name(int i);
+struct rb_block;
+int rb_dvar_defined(ID, const struct rb_block *);
+int rb_local_defined(ID, const struct rb_block *);
+CONSTFUNC(const char * rb_insns_name(int i));
 VALUE rb_insns_name_array(void);
+
+/* complex.c */
+VALUE rb_complex_plus(VALUE, VALUE);
+VALUE rb_complex_mul(VALUE, VALUE);
+VALUE rb_complex_abs(VALUE x);
+VALUE rb_complex_sqrt(VALUE x);
 
 /* cont.c */
 VALUE rb_obj_is_fiber(VALUE);
@@ -883,7 +971,7 @@ void Init_ext(void);
 
 /* encoding.c */
 ID rb_id_encoding(void);
-void rb_gc_mark_encodings(void);
+CONSTFUNC(void rb_gc_mark_encodings(void));
 rb_encoding *rb_enc_get_from_index(int index);
 rb_encoding *rb_enc_check_str(VALUE str1, VALUE str2);
 int rb_encdb_replicate(const char *alias, const char *orig);
@@ -893,7 +981,7 @@ void rb_encdb_declare(const char *name);
 void rb_enc_set_base(const char *name, const char *orig);
 int rb_enc_set_dummy(int index);
 void rb_encdb_set_unicode(int index);
-int rb_data_is_encoding(VALUE obj);
+PUREFUNC(int rb_data_is_encoding(VALUE obj));
 
 /* enum.c */
 VALUE rb_f_send(int argc, VALUE *argv, VALUE recv);
@@ -1012,6 +1100,7 @@ st_table *rb_init_identtable_with_size(st_index_t size);
 VALUE rb_hash_keys(VALUE hash);
 VALUE rb_hash_values(VALUE hash);
 VALUE rb_hash_rehash(VALUE hash);
+int rb_hash_add_new_element(VALUE hash, VALUE key, VALUE val);
 #define HASH_DELETED  FL_USER1
 #define HASH_PROC_DEFAULT FL_USER2
 
@@ -1048,9 +1137,7 @@ VALUE rb_math_hypot(VALUE, VALUE);
 VALUE rb_math_log(int argc, const VALUE *argv);
 VALUE rb_math_sin(VALUE);
 VALUE rb_math_sinh(VALUE);
-#if 0
 VALUE rb_math_sqrt(VALUE);
-#endif
 
 /* newline.c */
 void Init_newline(void);
@@ -1073,6 +1160,7 @@ VALUE rb_int_round(VALUE num, int ndigits);
 VALUE rb_int2str(VALUE num, int base);
 VALUE rb_dbl_hash(double d);
 VALUE rb_fix_plus(VALUE x, VALUE y);
+VALUE rb_int_ge(VALUE x, VALUE y);
 
 #if USE_FLONUM
 #define RUBY_BIT_ROTL(v, n) (((v) << (n)) | ((v) >> ((sizeof(v) * 8) - n)))
@@ -1150,7 +1238,8 @@ rb_float_new_inline(double d)
 
 /* object.c */
 void rb_obj_copy_ivar(VALUE dest, VALUE obj);
-VALUE rb_obj_equal(VALUE obj1, VALUE obj2);
+CONSTFUNC(VALUE rb_obj_equal(VALUE obj1, VALUE obj2));
+CONSTFUNC(VALUE rb_obj_not(VALUE obj));
 VALUE rb_class_search_ancestor(VALUE klass, VALUE super);
 NORETURN(void rb_undefined_alloc(VALUE klass));
 double rb_num_to_dbl(VALUE val);
@@ -1174,7 +1263,7 @@ struct RBasicRaw {
 #endif
 VALUE rb_parser_get_yydebug(VALUE);
 VALUE rb_parser_set_yydebug(VALUE, VALUE);
-VALUE rb_parser_set_context(VALUE, const struct rb_block_struct *, int);
+VALUE rb_parser_set_context(VALUE, const struct rb_block *, int);
 void *rb_parser_load_file(VALUE parser, VALUE name);
 int rb_is_const_name(VALUE name);
 int rb_is_class_name(VALUE name);
@@ -1184,14 +1273,14 @@ int rb_is_attrset_name(VALUE name);
 int rb_is_local_name(VALUE name);
 int rb_is_method_name(VALUE name);
 int rb_is_junk_name(VALUE name);
-int rb_is_const_sym(VALUE sym);
-int rb_is_class_sym(VALUE sym);
-int rb_is_global_sym(VALUE sym);
-int rb_is_instance_sym(VALUE sym);
-int rb_is_attrset_sym(VALUE sym);
-int rb_is_local_sym(VALUE sym);
-int rb_is_method_sym(VALUE sym);
-int rb_is_junk_sym(VALUE sym);
+PUREFUNC(int rb_is_const_sym(VALUE sym));
+PUREFUNC(int rb_is_class_sym(VALUE sym));
+PUREFUNC(int rb_is_global_sym(VALUE sym));
+PUREFUNC(int rb_is_instance_sym(VALUE sym));
+PUREFUNC(int rb_is_attrset_sym(VALUE sym));
+PUREFUNC(int rb_is_local_sym(VALUE sym));
+PUREFUNC(int rb_is_method_sym(VALUE sym));
+PUREFUNC(int rb_is_junk_sym(VALUE sym));
 ID rb_make_internal_id(void);
 void rb_gc_free_dsymbol(VALUE);
 ID rb_id_attrget(ID id);
@@ -1292,27 +1381,25 @@ VALUE rb_fstring_new(const char *ptr, long len);
 #define rb_fstring_lit(str) rb_fstring_new((str), rb_strlen_lit(str))
 #define rb_fstring_literal(str) rb_fstring_lit(str)
 VALUE rb_fstring_cstr(const char *str);
-#if defined(__GNUC__) && !defined(__PCC__)
-#define rb_fstring_cstr(str) __extension__ (	\
-{						\
+#ifdef HAVE_BUILTIN___BUILTIN_CONSTANT_P
+# define rb_fstring_cstr(str) RB_GNUC_EXTENSION_BLOCK(	\
     (__builtin_constant_p(str)) ?		\
 	rb_fstring_new((str), (long)strlen(str)) : \
-	rb_fstring_cstr(str); \
-})
+	rb_fstring_cstr(str) \
+)
 #endif
 #ifdef RUBY_ENCODING_H
 VALUE rb_fstring_enc_new(const char *ptr, long len, rb_encoding *enc);
 #define rb_fstring_enc_lit(str, enc) rb_fstring_enc_new((str), rb_strlen_lit(str), (enc))
 #define rb_fstring_enc_literal(str, enc) rb_fstring_enc_lit(str, enc)
 VALUE rb_fstring_enc_cstr(const char *ptr, rb_encoding *enc);
-#if defined(__GNUC__) && !defined(__PCC__)
-#define rb_fstring_enc_cstr(str, enc) __extension__ ( \
-{						\
+# ifdef HAVE_BUILTIN___BUILTIN_CONSTANT_P
+#  define rb_fstring_enc_cstr(str, enc) RB_GNUC_EXTENSION_BLOCK( \
     (__builtin_constant_p(str)) ?		\
 	rb_fstring_enc_new((str), (long)strlen(str), (enc)) : \
-	rb_fstring_enc_cstr(str, enc); \
-})
-#endif
+	rb_fstring_enc_cstr(str, enc) \
+)
+# endif
 #endif
 int rb_str_buf_cat_escaped_char(VALUE result, unsigned int c, int unicode_p);
 int rb_str_symname_p(VALUE);
@@ -1320,12 +1407,14 @@ VALUE rb_str_quote_unprintable(VALUE);
 VALUE rb_id_quote_unprintable(ID);
 #define QUOTE(str) rb_str_quote_unprintable(str)
 #define QUOTE_ID(id) rb_id_quote_unprintable(id)
-void rb_str_fill_terminator(VALUE str, const int termlen);
+char *rb_str_fill_terminator(VALUE str, const int termlen);
+void rb_str_change_terminator_length(VALUE str, const int oldtermlen, const int termlen);
 VALUE rb_str_locktmp_ensure(VALUE str, VALUE (*func)(VALUE), VALUE arg);
 #ifdef RUBY_ENCODING_H
 VALUE rb_external_str_with_enc(VALUE str, rb_encoding *eenc);
 VALUE rb_str_cat_conv_enc_opts(VALUE newstr, long ofs, const char *ptr, long len,
 			       rb_encoding *from, int ecflags, VALUE ecopts);
+VALUE rb_enc_str_scrub(rb_encoding *enc, VALUE str, VALUE repl);
 #endif
 #define STR_NOEMBED      FL_USER1
 #define STR_SHARED       FL_USER2 /* = ELTS_SHARED */
@@ -1334,7 +1423,7 @@ VALUE rb_str_cat_conv_enc_opts(VALUE newstr, long ofs, const char *ptr, long len
 #define is_ascii_string(str) (rb_enc_str_coderange(str) == ENC_CODERANGE_7BIT)
 #define is_broken_string(str) (rb_enc_str_coderange(str) == ENC_CODERANGE_BROKEN)
 size_t rb_str_memsize(VALUE);
-VALUE rb_sym_proc_call(VALUE args, VALUE sym, int argc, const VALUE *argv, VALUE passed_proc);
+VALUE rb_sym_proc_call(ID mid, int argc, const VALUE *argv, VALUE passed_proc);
 VALUE rb_sym_to_proc(VALUE sym);
 
 /* symbol.c */
@@ -1421,7 +1510,7 @@ VALUE rb_obj_is_thread(VALUE obj);
 void rb_vm_mark(void *ptr);
 void Init_BareVM(void);
 void Init_vm_objects(void);
-VALUE rb_vm_top_self(void);
+PUREFUNC(VALUE rb_vm_top_self(void));
 void rb_thread_recycle_stack_release(VALUE *);
 void rb_vm_change_state(void);
 void rb_vm_inc_const_missing_count(void);
@@ -1435,6 +1524,8 @@ int rb_vm_add_root_module(ID id, VALUE module);
 void rb_vm_check_redefinition_by_prepend(VALUE klass);
 VALUE rb_yield_refine_block(VALUE refinement, VALUE refinements);
 VALUE ruby_vm_sysstack_error_copy(void);
+PUREFUNC(st_table *rb_vm_fstring_table(void));
+
 
 /* vm_dump.c */
 void rb_print_backtrace(void);
@@ -1500,6 +1591,12 @@ VALUE rb_str2big_gmp(VALUE arg, int base, int badcheck);
 
 /* error.c (export) */
 int rb_bug_reporter_add(void (*func)(FILE *, void *), void *data);
+NORETURN(void rb_unexpected_type(VALUE,int));
+#undef Check_Type
+#define Check_Type(v, t) \
+    (!RB_TYPE_P((VALUE)(v), (t)) || \
+     ((t) == RUBY_T_DATA && RTYPEDDATA_P(v)) ? \
+     rb_unexpected_type((VALUE)(v), (t)) : (void)0)
 
 /* file.c (export) */
 #ifdef HAVE_READLINK
