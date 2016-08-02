@@ -1,6 +1,6 @@
 == LATEST
 
- * Prevent installation on ruby 2.3, as compilation fails. Sorry!
+ * Prevent installation on ruby 2.3, as compilation fails. Sorry! [Mathieu Jobin]
 
 == 3.1.0 2015-02-06
 
