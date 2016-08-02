@@ -98,15 +98,17 @@ static int add_method_if_undefined(ID method_name, rb_method_entry_t *me, VALUE 
 
 static VALUE internal_instance_methods(VALUE klass, VISIBILITY_TYPE visibility) {
   names_with_visi_t arg;
-  arg.names = rb_ary_new();
-  arg.visibility = visibility;
+  struct st_table *source_table;
 
 #if RUBY_VERSION >= 230
-  struct st_table *x = ((struct st_id_table *)RCLASS_M_TBL(klass))->st;
-  Looksee_method_table_foreach(x, add_method_if_matching, (st_data_t)&arg);
+  source_table = ((struct st_id_table *)RCLASS_M_TBL(klass))->st;
 #else
-  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_matching, (st_data_t)&arg);
+  source_table = RCLASS_M_TBL(klass);
 #endif
+
+  arg.names = rb_ary_new();
+  arg.visibility = visibility;
+  Looksee_method_table_foreach(source_table, add_method_if_matching, (st_data_t)&arg);
   return arg.names;
 }
 
