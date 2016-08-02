@@ -3,6 +3,7 @@
 #if RUBY_VERSION >= 200
 #  if RUBY_VERSION >= 230
 #    include "id_table.h"
+//    define Looksee_method_table_foreach rb_id_table_foreach
 #  endif
 #  include "method.h"
 #  include "internal.h"
@@ -63,12 +64,12 @@ VALUE Looksee_internal_class(VALUE self, VALUE object) {
 #  define METHOD_ENTRY_VISI(me)  (me)->flag
 #endif
 
-typedef struct add_method_if_matching_arg {
+typedef struct {
   VALUE names;
   VISIBILITY_TYPE visibility;
-} add_method_if_matching_arg_t;
+} names_with_visi_t;
 
-static int add_method_if_matching(ID method_name, rb_method_entry_t *me, add_method_if_matching_arg_t *arg) {
+static int add_method_if_matching(ID method_name, rb_method_entry_t *me, names_with_visi_t *arg) {
 #  ifdef ID_ALLOCATOR
   if (method_name == ID_ALLOCATOR)
     return ST_CONTINUE;
@@ -96,14 +97,15 @@ static int add_method_if_undefined(ID method_name, rb_method_entry_t *me, VALUE 
 }
 
 static VALUE internal_instance_methods(VALUE klass, VISIBILITY_TYPE visibility) {
-  add_method_if_matching_arg_t arg;
+  names_with_visi_t arg;
   arg.names = rb_ary_new();
   arg.visibility = visibility;
 
 #if RUBY_VERSION >= 230
-  Looksee_method_table_foreach(RCLASS_M_TBL(klass)->st, add_method_if_matching, (st_data_t)&arg);
+  struct st_table *x = ((struct st_id_table *)RCLASS_M_TBL(klass))->st;
+  Looksee_method_table_foreach(x, add_method_if_matching, (st_data_t)&arg);
 #else
-  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_matching, &arg);
+  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_matching, (st_data_t)&arg);
 #endif
   return arg.names;
 }
@@ -139,9 +141,9 @@ VALUE Looksee_internal_private_instance_methods(VALUE self, VALUE klass) {
 VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
   VALUE names = rb_ary_new();
 #if RUBY_VERSION >= 230
-  Looksee_method_table_foreach(RCLASS_M_TBL(klass)->st, add_method_if_undefined, (st_data_t)&names);
+  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_undefined, (st_data_t)&names);
 #else
-  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_undefined, &names);
+  Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_undefined, (st_data_t)&names);
 #endif
   return names;
 }
