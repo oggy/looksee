@@ -1,4 +1,4 @@
-== LATEST
+== 3.1.1 2016-08-02
 
  * Prevent installation on ruby 2.3, as compilation fails. Sorry! [Mathieu Jobin]
 
