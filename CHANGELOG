@@ -1,3 +1,7 @@
+== LATEST
+
+ * Prevent installation on ruby 2.3, as compilation fails. Sorry!
+
 == 3.1.0 2015-02-06
 
  * Fix performance issue caused by fix for pry. You'll need to use
