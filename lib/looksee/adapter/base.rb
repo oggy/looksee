@@ -89,16 +89,10 @@ module Looksee
         raise NotImplementedError, "abstract"
       end
 
-      if RUBY_VERSION >= '1.9.0' || Looksee.ruby_engine == 'rbx'
-        def source_location(method)
-          method.is_a?(UnboundMethod) or
-            raise TypeError, "expected UnboundMethod, got #{method.class}"
-          method.source_location
-        end
-      else
-        def source_location(method)
-          raise NotImplementedError, 'abstract'
-        end
+      def source_location(method)
+        method.is_a?(UnboundMethod) or
+          raise TypeError, "expected UnboundMethod, got #{method.class}"
+        method.source_location
       end
     end
   end
