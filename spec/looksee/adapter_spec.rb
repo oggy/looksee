@@ -57,9 +57,9 @@ describe "Looksee.adapter" do
         ['Derived', 'Mod2', 'Mod1', 'Base', 'Object', 'Kernel']
     end
 
-    it "should contain an entry for the object's singleton class if it exists" do
+    it "should contain an entry for the object's singleton class if it has methods" do
       object = Object.new
-      object.singleton_class
+      def object.f; end
 
       filtered_lookup_modules(object).should ==
         ['[Object instance]', 'Object', 'Kernel']
@@ -121,11 +121,11 @@ describe "Looksee.adapter" do
           temporary_module :M
           add_methods M, visibility => :one
           C.send(:prepend, M)
-          @adapter.send(target_method, C).should be_empty
 
-          origin = @adapter.lookup_modules(C.new).
-            find { |mod| @adapter.describe_module(mod) == 'C (origin)' }
-          @adapter.send(target_method, origin).should_not be_empty
+          cs = @adapter.lookup_modules(C.new).
+            select { |mod| @adapter.describe_module(mod) == 'C' }
+          cs.size.should == 1
+          @adapter.send(target_method, cs[0]).should_not be_empty
         end
       end
     end
@@ -214,11 +214,10 @@ describe "Looksee.adapter" do
           M.send(:undef_method, :f)
           C.send(:prepend, M)
 
-          @adapter.internal_undefined_instance_methods(C).should be_empty
-
-          origin = @adapter.lookup_modules(C.new).
-            find { |mod| @adapter.describe_module(mod) == 'C (origin)' }
-          @adapter.internal_undefined_instance_methods(origin).should_not be_empty
+          cs = @adapter.lookup_modules(C.new).
+            select { |mod| @adapter.describe_module(mod) == 'C' }
+          cs.size.should == 1
+          @adapter.internal_undefined_instance_methods(cs[0]).should_not be_empty
         end
       end
     end

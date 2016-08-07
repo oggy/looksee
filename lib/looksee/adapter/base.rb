@@ -6,13 +6,14 @@ module Looksee
       # object's method lookup path.
       #
       def lookup_modules(object)
-        modules = []
-        klass = internal_class(object)
-        while klass
-          modules << klass
-          klass = internal_superclass(klass)
-        end
-        modules
+        start =
+          begin
+            singleton_class = (class << object; self; end)
+            singleton_class unless has_no_methods?(singleton_class) && !(Class === object)
+          rescue TypeError  # immediate object
+          end
+        start ||= Object.instance_method(:class).bind(object).call
+        start.ancestors
       end
 
       #
@@ -49,32 +50,31 @@ module Looksee
         module_or_included_class
       end
 
-      def internal_superclass(klass)
-        raise NotImplementedError, "abstract"
-      end
-
-      def internal_class(object)
-        raise NotImplementedError, "abstract"
-      end
-
       def included_class?(object)
         raise NotImplementedError, "abstract"
       end
 
       def internal_public_instance_methods(mod)
-        raise NotImplementedError, "abstract"
+        Module.instance_method(:public_instance_methods).bind(mod).call(false)
       end
 
       def internal_protected_instance_methods(mod)
-        raise NotImplementedError, "abstract"
+        Module.instance_method(:protected_instance_methods).bind(mod).call(false)
       end
 
       def internal_private_instance_methods(mod)
-        raise NotImplementedError, "abstract"
+        Module.instance_method(:private_instance_methods).bind(mod).call(false)
       end
 
       def internal_undefined_instance_methods(mod)
         raise NotImplementedError, "abstract"
+      end
+
+      def has_no_methods?(mod)
+        internal_public_instance_methods(mod).empty? &&
+          internal_protected_instance_methods(mod).empty? &&
+          internal_private_instance_methods(mod).empty? &&
+          internal_undefined_instance_methods(mod).empty?
       end
 
       def singleton_class?(object)

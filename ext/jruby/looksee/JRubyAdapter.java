@@ -33,16 +33,6 @@ public class JRubyAdapter extends RubyObject {
     super(runtime, klass);
   }
 
-  @JRubyMethod(name = "internal_superclass")
-  public static IRubyObject internalSuperclass(ThreadContext context, IRubyObject self, IRubyObject internalClass) {
-    return ((RubyModule)internalClass).getSuperClass();
-  }
-
-  @JRubyMethod(name = "internal_class")
-  public static IRubyObject internalClass(ThreadContext context, IRubyObject self, IRubyObject object) {
-    return object.getMetaClass();
-  }
-
   @JRubyMethod(name = "internal_public_instance_methods")
   public static IRubyObject internalPublicInstanceMethods(ThreadContext context, IRubyObject self, IRubyObject module) {
     return findMethodsByVisibility(context.getRuntime(), module, Visibility.PUBLIC);

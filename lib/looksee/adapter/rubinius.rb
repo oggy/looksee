@@ -4,10 +4,6 @@ require 'looksee/rbx'
 module Looksee
   module Adapter
     class Rubinius < Base
-      def internal_superclass(klass)
-        klass.direct_superclass
-      end
-
       def internal_public_instance_methods(mod)
         return [] if !mod.origin.equal?(mod)
         mod.method_table.public_names
