@@ -53,7 +53,7 @@ describe "Looksee.adapter" do
         include Mod1
         include Mod2
       end
-      filtered_lookup_modules(Derived.new) ==
+      filtered_lookup_modules(Derived.new).should ==
         ['Derived', 'Mod2', 'Mod1', 'Base', 'Object', 'Kernel']
     end
 
