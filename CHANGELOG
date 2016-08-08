@@ -1,3 +1,12 @@
+== LATEST
+
+ * Incomplete ruby 2.3 compatibility. Undef'd methods cannot be rendered; a
+   warning will be emitted the first time this may affect something.
+ * Looksee no longer supports MRI < 2.1, Rubinius < 3, or JRuby < 9.
+ * "Origin classes" are no longer shown. If you don't know what these are, good!
+ * Internal overhaul. The extensions have been shrunk to minimize the use of
+   private interpreter APIs.
+
 == 3.1.1 2016-08-02
 
  * Prevent installation on ruby 2.3, as compilation fails. Sorry! [Mathieu Jobin]
