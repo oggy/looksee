@@ -46,7 +46,7 @@ VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
 }
 
 VALUE Looksee_singleton_instance(VALUE self, VALUE klass) {
-  if (!IMMEDIATE_P(klass) && BUILTIN_TYPE(klass) == T_CLASS && FL_TEST(klass, FL_SINGLETON)) {
+  if (!SPECIAL_CONST_P(klass) && BUILTIN_TYPE(klass) == T_CLASS && FL_TEST(klass, FL_SINGLETON)) {
     VALUE object;
     if (!Looksee_method_table_lookup(RCLASS_IV_TBL(klass), rb_intern("__attached__"), (st_data_t *)&object))
       rb_raise(rb_eRuntimeError, "[looksee bug] can't find singleton object");
