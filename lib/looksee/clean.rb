@@ -138,6 +138,11 @@ module Looksee
     def help
       Help.new
     end
+
+    # Call mod#method on receiver, ignoring any overrides in receiver's class.
+    def safe_call(mod, name, receiver, *args) # :nodoc:
+      mod.instance_method(name).bind(receiver).call(*args)
+    end
   end
 
   self.default_specifiers = [:public, :protected, :private, :undefined, :overridden]

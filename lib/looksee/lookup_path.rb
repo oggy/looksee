@@ -84,7 +84,8 @@ module Looksee
       def find_methods
         methods = {}
         [:public, :protected, :private].each do |visibility|
-          visibility_methods(visibility).each do |method|
+          meths = Looksee.safe_call(Module, "#{visibility}_instance_methods", @module, false)
+          meths.each do |method|
             methods[method.to_s] = visibility
           end
         end
@@ -92,10 +93,6 @@ module Looksee
           methods[method.to_s] = :undefined
         end
         methods
-      end
-
-      def visibility_methods(visibility)
-        Module.instance_method("#{visibility}_instance_methods").bind(@module).call(false)
       end
     end
   end

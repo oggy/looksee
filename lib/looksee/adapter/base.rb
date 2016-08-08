@@ -12,7 +12,7 @@ module Looksee
             singleton_class unless has_no_methods?(singleton_class) && !(Class === object)
           rescue TypeError  # immediate object
           end
-        start ||= Object.instance_method(:class).bind(object).call
+        start ||= Looksee.safe_call(Object, :class, object)
         start.ancestors
       end
 
@@ -60,7 +60,7 @@ module Looksee
 
       def has_no_methods?(mod)
         [:public, :protected, :private].all? do |visibility|
-          Module.instance_method("#{visibility}_instance_methods").bind(mod).call(false).empty?
+          Looksee.safe_call(Module, "#{visibility}_instance_methods", mod, false).empty?
         end && internal_undefined_instance_methods(mod).empty?
       end
 
