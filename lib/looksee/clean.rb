@@ -15,7 +15,6 @@ module Looksee
   autoload :Help, 'looksee/help'
   autoload :Inspector, 'looksee/inspector'
   autoload :LookupPath, 'looksee/lookup_path'
-  autoload :WirbleCompatibility, 'looksee/wirble_compatibility'
 
   class << self
     #
