@@ -6,7 +6,7 @@ bundler_args: --without dev
 rvm:
   - 2.1.9
   - 2.2.5
-  - jruby-1.7.9
+  - jruby-9.1.2.0
   - rbx-2.4.1
   - rbx-2.5.8
 matrix:
