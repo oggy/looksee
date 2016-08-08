@@ -2,7 +2,8 @@ $:.unshift File.expand_path('..', File.dirname(__FILE__))
 ENV['LOOKSEE_METHOD'] = nil
 
 require 'rspec'
-require 'pry'
+require 'pry' unless ENV['CI']
+
 require 'looksee'
 
 require 'rbconfig'
