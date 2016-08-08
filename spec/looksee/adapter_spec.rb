@@ -78,47 +78,55 @@ describe "Looksee.adapter" do
     end
 
     describe ".internal_undefined_instance_methods" do
-      it "should return the list of undefined instance methods directly on a class" do
-        temporary_class :C
-        add_methods(C, undefined: [:f])
-        @adapter.internal_undefined_instance_methods(C).should == [:f]
-      end
+      if Looksee.ruby_engine == 'ruby' && RUBY_VERSION >= '2.3'
+        it "just returns an empty array" do
+          temporary_class :C
+          add_methods C, undefined: [:f]
+          @adapter.internal_undefined_instance_methods(C).should == []
+        end
+      else
+        it "should return the list of undefined instance methods directly on a class" do
+          temporary_class :C
+          add_methods(C, undefined: [:f])
+          @adapter.internal_undefined_instance_methods(C).should == [:f]
+        end
 
-      it "should return the list of undefined instance methods directly on a module" do
-        temporary_module :M
-        add_methods(M, undefined: [:f])
-        @adapter.internal_undefined_instance_methods(M).should == [:f]
-      end
+        it "should return the list of undefined instance methods directly on a module" do
+          temporary_module :M
+          add_methods(M, undefined: [:f])
+          @adapter.internal_undefined_instance_methods(M).should == [:f]
+        end
 
-      it "should return the list of undefined instance methods directly on a singleton class" do
-        temporary_class :C
-        c = C.new
-        add_methods(c.singleton_class, undefined: [:f])
-        @adapter.internal_undefined_instance_methods(c.singleton_class).should == [:f]
-      end
+        it "should return the list of undefined instance methods directly on a singleton class" do
+          temporary_class :C
+          c = C.new
+          add_methods(c.singleton_class, undefined: [:f])
+          @adapter.internal_undefined_instance_methods(c.singleton_class).should == [:f]
+        end
 
-      it "should return the list of undefined instance methods directly on a class' singleton class" do
-        temporary_class :C
-        add_methods(C.singleton_class, undefined: [:f])
-        @adapter.internal_undefined_instance_methods(C.singleton_class).should == [:f]
-      end
+        it "should return the list of undefined instance methods directly on a class' singleton class" do
+          temporary_class :C
+          add_methods(C.singleton_class, undefined: [:f])
+          @adapter.internal_undefined_instance_methods(C.singleton_class).should == [:f]
+        end
 
-      it "should not return defined methods" do
-        temporary_class :C
-        C.send(:define_method, :f){}
-        @adapter.internal_undefined_instance_methods(C).should == []
-      end
+        it "should not return defined methods" do
+          temporary_class :C
+          C.send(:define_method, :f){}
+          @adapter.internal_undefined_instance_methods(C).should == []
+        end
 
-      it "should not return removed methods" do
-        temporary_class :C
-        C.send(:define_method, :f){}
-        C.send(:remove_method, :f)
-        @adapter.internal_undefined_instance_methods(C).should == []
-      end
+        it "should not return removed methods" do
+          temporary_class :C
+          C.send(:define_method, :f){}
+          C.send(:remove_method, :f)
+          @adapter.internal_undefined_instance_methods(C).should == []
+        end
 
-      it "should handle the MRI allocator being undefined (e.g. Struct)" do
-        struct_singleton_class = (class << Struct; self; end)
-        @adapter.internal_undefined_instance_methods(struct_singleton_class).should == []
+        it "should handle the MRI allocator being undefined (e.g. Struct)" do
+          struct_singleton_class = (class << Struct; self; end)
+          @adapter.internal_undefined_instance_methods(struct_singleton_class).should == []
+        end
       end
     end
   end

@@ -80,10 +80,12 @@ describe Looksee::LookupPath do
       lookup_path.find('g').should be_nil
     end
 
-    it "should return nil if the method has been undefined" do
-      add_methods(C, undefined: [:f])
-      lookup_path = Looksee::LookupPath.new(@object)
-      lookup_path.find('f').should be_nil
+    unless RUBY_VERSION >= '2.3.0'
+      it "should return nil if the method has been undefined" do
+        add_methods(C, undefined: [:f])
+        lookup_path = Looksee::LookupPath.new(@object)
+        lookup_path.find('f').should be_nil
+      end
     end
   end
 

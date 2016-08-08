@@ -1,5 +1,9 @@
 #include "ruby.h"
 
+#if RUBY_VERSION >= 230
+#  define VM_ASSERT(expr) ((void)0)
+#endif
+
 #include "method.h"
 #include "internal.h"
 
@@ -25,11 +29,20 @@ static int add_method_if_undefined(ID method_name, rb_method_entry_t *me, VALUE 
  * given internal class.
  */
 VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
+#if RUBY_VERSION >= 230
+  static int warned = 0;
+  if (!warned) {
+    rb_warn("Looksee cannot display undef'd methods on MRI 2.3");
+    warned = 1;
+  }
+  return rb_ary_new();
+#else
   VALUE names = rb_ary_new();
   if (RCLASS_ORIGIN(klass) != klass)
     klass = RCLASS_ORIGIN(klass);
   Looksee_method_table_foreach(RCLASS_M_TBL(klass), add_method_if_undefined, (st_data_t)&names);
   return names;
+#endif
 }
 
 VALUE Looksee_singleton_instance(VALUE self, VALUE klass) {
