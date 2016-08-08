@@ -81,7 +81,7 @@ describe Looksee::LookupPath do
     end
 
     it "should return nil if the method has been undefined" do
-      C.send(:undef_method, :f)
+      add_methods(C, undefined: [:f])
       lookup_path = Looksee::LookupPath.new(@object)
       lookup_path.find('f').should be_nil
     end

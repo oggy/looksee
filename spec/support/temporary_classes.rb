@@ -65,7 +65,9 @@ module TemporaryClasses
           define_method(name){} unless method_defined?(name)
           undef_method(name)
         end
-        Looksee.adapter.set_undefined_methods(mod, methods)
+        if Looksee.adapter.is_a?(TestAdapter)
+          Looksee.adapter.set_undefined_methods(mod, methods)
+        end
       end
     end
   end

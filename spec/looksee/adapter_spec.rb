@@ -80,30 +80,26 @@ describe "Looksee.adapter" do
     describe ".internal_undefined_instance_methods" do
       it "should return the list of undefined instance methods directly on a class" do
         temporary_class :C
-        C.send(:define_method, :f){}
-        C.send(:undef_method, :f)
+        add_methods(C, undefined: [:f])
         @adapter.internal_undefined_instance_methods(C).should == [:f]
       end
 
       it "should return the list of undefined instance methods directly on a module" do
         temporary_module :M
-        M.send(:define_method, :f){}
-        M.send(:undef_method, :f)
+        add_methods(M, undefined: [:f])
         @adapter.internal_undefined_instance_methods(M).should == [:f]
       end
 
       it "should return the list of undefined instance methods directly on a singleton class" do
         temporary_class :C
         c = C.new
-        c.singleton_class.send(:define_method, :f){}
-        c.singleton_class.send(:undef_method, :f)
+        add_methods(c.singleton_class, undefined: [:f])
         @adapter.internal_undefined_instance_methods(c.singleton_class).should == [:f]
       end
 
       it "should return the list of undefined instance methods directly on a class' singleton class" do
         temporary_class :C
-        C.singleton_class.send(:define_method, :f){}
-        C.singleton_class.send(:undef_method, :f)
+        add_methods(C.singleton_class, undefined: [:f])
         @adapter.internal_undefined_instance_methods(C.singleton_class).should == [:f]
       end
 
