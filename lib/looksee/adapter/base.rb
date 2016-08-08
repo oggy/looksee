@@ -32,7 +32,7 @@ module Looksee
         if included_class?(mod) || object.is_a?(Module)
           description = module_name(object)
           if description.empty?
-            is_class = real_module(object).is_a?(Class)
+            is_class = Class === object
             description = "unnamed #{is_class ? 'Class' : 'Module'}"
           end
         else
@@ -44,10 +44,6 @@ module Looksee
         else
           "#{'['*num_brackets}#{description}#{']'*num_brackets}"
         end
-      end
-
-      def real_module(module_or_included_class)
-        module_or_included_class
       end
 
       def included_class?(object)

@@ -65,15 +65,6 @@ public class JRubyAdapter extends RubyObject {
       throw runtime.newTypeError("expected singleton class, got " + singleton_class.getMetaClass().getName());
   }
 
-  @JRubyMethod(name = "real_module")
-  public static IRubyObject realModule(ThreadContext context, IRubyObject self, IRubyObject module) {
-    Ruby runtime = context.getRuntime();
-    if (module instanceof IncludedModuleWrapper)
-      return ((IncludedModuleWrapper)module).getNonIncludedClass();
-    else
-      return module;
-  }
-
   @JRubyMethod(name = "module_name")
   public static IRubyObject moduleName(ThreadContext context, IRubyObject self, IRubyObject module) {
     Ruby runtime = context.getRuntime();
