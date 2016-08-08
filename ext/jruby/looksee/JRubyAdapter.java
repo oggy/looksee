@@ -44,19 +44,13 @@ public class JRubyAdapter extends RubyObject {
     return result;
   }
 
-  @JRubyMethod(name = "singleton_class?")
-  public static IRubyObject isSingletonClass(ThreadContext context, IRubyObject self, IRubyObject object) {
-    Ruby runtime = context.getRuntime();
-    return runtime.newBoolean(object instanceof MetaClass);
-  }
-
   @JRubyMethod(name = "singleton_instance")
   public static IRubyObject singletonInstance(ThreadContext context, IRubyObject self, IRubyObject singleton_class) {
     Ruby runtime = context.getRuntime();
     if (singleton_class instanceof MetaClass)
       return ((MetaClass)singleton_class).getAttached();
     else
-      throw runtime.newTypeError("expected singleton class, got " + singleton_class.getMetaClass().getName());
+      return runtime.getNil();
   }
 
   @JRubyMethod(name = "source_location")

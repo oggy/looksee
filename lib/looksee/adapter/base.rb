@@ -26,9 +26,9 @@ module Looksee
           raise TypeError, "expected Module, got: #{mod.inspect}"
         num_brackets = 0
         object = mod
-        while singleton_class?(object)
+        while (instance = singleton_instance(object))
           num_brackets += 1
-          object = singleton_instance(object)
+          object = instance
         end
 
         if object.is_a?(Module)
@@ -56,10 +56,6 @@ module Looksee
         [:public, :protected, :private].all? do |visibility|
           Looksee.safe_call(Module, "#{visibility}_instance_methods", mod, false).empty?
         end && internal_undefined_instance_methods(mod).empty?
-      end
-
-      def singleton_class?(object)
-        raise NotImplementedError, "abstract"
       end
 
       def singleton_instance(singleton_class)

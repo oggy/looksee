@@ -13,14 +13,12 @@ module Looksee
         names
       end
 
-      def singleton_class?(object)
-        object.is_a?(Class) && !!::Rubinius::Type.singleton_class_object(object)
-      end
-
       def singleton_instance(singleton_class)
-        singleton_class?(singleton_class) or
-          raise TypeError, "expected singleton class, got #{singleton_class.class}"
-        ::Rubinius::Type.singleton_class_object(singleton_class)
+        if Class === singleton_class && (instance = ::Rubinius::Type.singleton_class_object(singleton_class))
+          instance
+        else
+          nil
+        end
       end
 
       def source_location(method)

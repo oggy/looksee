@@ -148,50 +148,6 @@ describe "Looksee.adapter" do
     end
   end
 
-  describe "#singleton_class?" do
-    it "should return true if the object is a singleton class of an object" do
-      object = (class << Object.new; self; end)
-      @adapter.singleton_class?(object).should == true
-    end
-
-    it "should return true if the object is a singleton class of a class" do
-      object = (class << Class.new; self; end)
-      @adapter.singleton_class?(object).should == true
-    end
-
-    it "should return true if the object is a singleton class of a singleton class" do
-      object = (class << (class << Class.new; self; end); self; end)
-      @adapter.singleton_class?(object).should == true
-    end
-
-    it "should return false if the object is just a class" do
-      object = Class.new
-      @adapter.singleton_class?(object).should == false
-    end
-
-    it "should return false if the object is just a module" do
-      object = Module.new
-      @adapter.singleton_class?(object).should == false
-    end
-
-    it "should return false if the object is just an object" do
-      object = Object.new
-      @adapter.singleton_class?(object).should == false
-    end
-
-    it "should return false if the object is TrueClass" do
-      @adapter.singleton_class?(TrueClass).should == false
-    end
-
-    it "should return false if the object is FalseClass" do
-      @adapter.singleton_class?(FalseClass).should == false
-    end
-
-    it "should return false if the object is NilClass" do
-      @adapter.singleton_class?(NilClass).should == false
-    end
-  end
-
   describe "singleton_instance" do
     it "should return the instance of the given singleton class" do
       object = Object.new
@@ -208,22 +164,30 @@ describe "Looksee.adapter" do
       @adapter.singleton_instance((class << mod; self; end)).should equal(mod)
     end
 
-    it "should raise a TypeError if the given object is just a class" do
-      lambda do
-        @adapter.singleton_instance(Class.new)
-      end.should raise_error(TypeError)
+    it "should return the instance of the given singleton class singleton class" do
+      singleton_class = (class << Class.new; self; end)
+      super_singleton_class = (class << singleton_class; self; end)
+      @adapter.singleton_instance(super_singleton_class).should equal(singleton_class)
     end
 
-    it "should raise a TypeError if the given object is just a module" do
-      lambda do
-        @adapter.singleton_instance(Module.new)
-      end.should raise_error(TypeError)
+    it "should return nil if the given object is just a class" do
+      @adapter.singleton_instance(Class.new).should be_nil
     end
 
-    it "should raise a TypeError if the given object is just a object" do
-      lambda do
-        @adapter.singleton_instance(Object.new)
-      end.should raise_error(TypeError)
+    it "should return nil if the given object is just a module" do
+      @adapter.singleton_instance(Module.new).should be_nil
+    end
+
+    it "should return nil if the given object is just a object" do
+      @adapter.singleton_instance(Object.new).should be_nil
+    end
+
+    it "should return nil if the given object is an immediate object" do
+      @adapter.singleton_instance(nil).should be_nil
+      @adapter.singleton_instance(true).should be_nil
+      @adapter.singleton_instance(false).should be_nil
+      @adapter.singleton_instance(1).should be_nil
+      @adapter.singleton_instance(:hi).should be_nil
     end
   end
 

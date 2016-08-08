@@ -89,18 +89,14 @@ VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
   return names;
 }
 
-VALUE Looksee_singleton_class_p(VALUE self, VALUE object) {
-  return BUILTIN_TYPE(object) == T_CLASS && FL_TEST(object, FL_SINGLETON) ? Qtrue : Qfalse;
-}
-
-VALUE Looksee_singleton_instance(VALUE self, VALUE singleton_class) {
-  if (BUILTIN_TYPE(singleton_class) == T_CLASS && FL_TEST(singleton_class, FL_SINGLETON)) {
+VALUE Looksee_singleton_instance(VALUE self, VALUE klass) {
+  if (!IMMEDIATE_P(klass) && BUILTIN_TYPE(klass) == T_CLASS && FL_TEST(klass, FL_SINGLETON)) {
     VALUE object;
-    if (!Looksee_method_table_lookup(RCLASS_IV_TBL(singleton_class), rb_intern("__attached__"), (st_data_t *)&object))
+    if (!Looksee_method_table_lookup(RCLASS_IV_TBL(klass), rb_intern("__attached__"), (st_data_t *)&object))
       rb_raise(rb_eRuntimeError, "[looksee bug] can't find singleton object");
     return object;
   } else {
-    rb_raise(rb_eTypeError, "expected singleton class, got %s", rb_obj_classname(singleton_class));
+    return Qnil;
   }
 }
 
@@ -162,7 +158,6 @@ void Init_mri(void) {
   VALUE mBase = rb_const_get(mAdapter, rb_intern("Base"));
   VALUE mMRI = rb_define_class_under(mAdapter, "MRI", mBase);
   rb_define_method(mMRI, "internal_undefined_instance_methods", Looksee_internal_undefined_instance_methods, 1);
-  rb_define_method(mMRI, "singleton_class?", Looksee_singleton_class_p, 1);
   rb_define_method(mMRI, "singleton_instance", Looksee_singleton_instance, 1);
 #if RUBY_VERSION < 190
   rb_define_method(mMRI, "source_location", Looksee_source_location, 1);
