@@ -9,8 +9,6 @@ rvm:
   - 2.3.1
   - jruby-9.0.5.0
   - jruby-9.1.2.0
-  - rbx-3.0
-  - rbx-3.42
 matrix:
   allow_failures:
     # rbx no longer builds on travis
