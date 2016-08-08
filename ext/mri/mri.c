@@ -104,21 +104,6 @@ VALUE Looksee_singleton_instance(VALUE self, VALUE singleton_class) {
   }
 }
 
-VALUE Looksee_module_name(VALUE self, VALUE module) {
-  if (BUILTIN_TYPE(module) == T_CLASS || BUILTIN_TYPE(module) == T_MODULE) {
-    VALUE name = rb_mod_name(module);
-    return name == Qnil ? rb_str_new2("") : name;
-  } else if (BUILTIN_TYPE(module) == T_ICLASS) {
-    VALUE wrapped = RBASIC(module)->klass;
-    VALUE name = Looksee_module_name(self, wrapped);
-    if (BUILTIN_TYPE(wrapped) == T_CLASS)
-      name = rb_str_cat2(name, " (origin)");
-    return name;
-  } else {
-    rb_raise(rb_eTypeError, "expected module, got %s", rb_obj_classname(module));
-  }
-}
-
 #if RUBY_VERSION < 190
 
 #include "env-1.8.h"
@@ -179,7 +164,6 @@ void Init_mri(void) {
   rb_define_method(mMRI, "internal_undefined_instance_methods", Looksee_internal_undefined_instance_methods, 1);
   rb_define_method(mMRI, "singleton_class?", Looksee_singleton_class_p, 1);
   rb_define_method(mMRI, "singleton_instance", Looksee_singleton_instance, 1);
-  rb_define_method(mMRI, "module_name", Looksee_module_name, 1);
 #if RUBY_VERSION < 190
   rb_define_method(mMRI, "source_location", Looksee_source_location, 1);
 #endif

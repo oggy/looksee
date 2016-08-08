@@ -22,10 +22,6 @@ class TestAdapter < Looksee::Adapter::Base
     NATIVE_ADAPTER.singleton_instance(object)
   end
 
-  def module_name(object)
-    NATIVE_ADAPTER.module_name(object)
-  end
-
   def set_undefined_methods(mod, names)
     self.undefined_methods[mod] = names
   end

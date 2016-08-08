@@ -23,23 +23,6 @@ module Looksee
         ::Rubinius::Type.singleton_class_object(singleton_class)
       end
 
-      def module_name(mod)
-        mod.is_a?(Module) or
-          raise TypeError, "expected module, got #{mod.class}"
-
-        if ::Rubinius::IncludedModule === mod
-          if Class === mod.module
-            "#{module_name(mod.module)} (origin)"
-          else
-            module_name(mod.module)
-          end
-        elsif ::Rubinius::Type.respond_to?(:module_name)
-          ::Rubinius::Type.module_name(mod) || ''
-        else
-          mod.__name__
-        end
-      end
-
       def source_location(method)
         method.is_a?(UnboundMethod) or
           raise TypeError, "expected UnboundMethod, got #{method.class}"

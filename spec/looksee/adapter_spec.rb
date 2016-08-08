@@ -227,69 +227,21 @@ describe "Looksee.adapter" do
     end
   end
 
-  describe "#module_name" do
-    it "should return the fully-qualified name of the given module" do
-      ::M = Module.new
-      M::N = Module.new
-      begin
-        @adapter.module_name(M::N).should == 'M::N'
-      ensure
-        Object.send :remove_const, :M
-      end
-    end
-
-    it "should return the fully-qualified name of the given class" do
-      ::M = Module.new
-      M::C = Class.new
-      begin
-        @adapter.module_name(M::C).should == 'M::C'
-      ensure
-        Object.send :remove_const, :M
-      end
-    end
-
-    it "should not be affected by overridding the module's #to_s or #name" do
-      begin
-        ::M = Module.new
-        ::M::C = Class.new do
-          def name
-            'overridden'
-          end
-          def to_s
-            'overridden'
-          end
-        end
-        @adapter.describe_module(M::C).should == 'M::C'
-      ensure
-        Object.send :remove_const, :M
-      end
-    end
-
-    it "should return an empty string for unnamed modules" do
-      @adapter.module_name(Module.new).should == ''
-    end
-
-    it "should return an empty string for unnamed classes" do
-      @adapter.module_name(Class.new).should == ''
-    end
-
-    it "should return an empty string for singleton classes" do
-      object = Object.new
-      @adapter.module_name((class << object; self; end)).should == ''
-    end
-
-    it "should raise a TypeError if the argumeent is not a module" do
-      lambda do
-        @adapter.module_name(Object.new)
-      end.should raise_error(TypeError)
-    end
-  end
-
   describe "#describe_module" do
     it "should return the fully-qualified name of a module" do
       begin
         ::M = Module.new
         ::M::N = Module.new
+        @adapter.describe_module(::M::N).should == 'M::N'
+      ensure
+        Object.send :remove_const, :M
+      end
+    end
+
+    it "should return the fully-qualified name of a class" do
+      begin
+        ::M = Module.new
+        ::M::N = Class.new
         @adapter.describe_module(::M::N).should == 'M::N'
       ensure
         Object.send :remove_const, :M
@@ -385,6 +337,12 @@ describe "Looksee.adapter" do
           Object.send :remove_const, :M
         end
       end
+    end
+
+    it "should raise a TypeError if the argumeent is not a module" do
+      lambda do
+        @adapter.describe_module(Object.new)
+      end.should raise_error(TypeError)
     end
   end
 

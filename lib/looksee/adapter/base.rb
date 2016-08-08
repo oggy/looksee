@@ -22,6 +22,8 @@ module Looksee
       # This is used for the module labels in the Inspector output.
       #
       def describe_module(mod)
+        Module === mod or
+          raise TypeError, "expected Module, got: #{mod.inspect}"
         num_brackets = 0
         object = mod
         while singleton_class?(object)
@@ -65,7 +67,7 @@ module Looksee
       end
 
       def module_name(mod)
-        raise NotImplementedError, "abstract"
+        Looksee.safe_call(Module, :name, mod) || ''
       end
 
       if RUBY_VERSION >= '1.9.0' || Looksee.ruby_engine == 'rbx'
