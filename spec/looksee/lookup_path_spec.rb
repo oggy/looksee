@@ -11,8 +11,20 @@ describe Looksee::LookupPath do
       temporary_class(:C) { include M }
       @object = Object.new
       Looksee.adapter.ancestors[@object] = [C, M]
-      Looksee.adapter.set_methods(M, [:public1, :public2], [:protected1, :protected2], [:private1, :private2], [:undefined1, :undefined2])
-      Looksee.adapter.set_methods(C, [:public1, :public2], [:protected1, :protected2], [:private1, :private2], [:undefined1, :undefined2])
+      add_methods(
+        M,
+        public: [:pub1, :pub2],
+        protected: [:pro1, :pro2],
+        private: [:pri1, :pri2],
+        undefined: [:und1, :und2],
+      )
+      add_methods(
+        C,
+        public: [:pub1, :pub2],
+        protected: [:pro1, :pro2],
+        private: [:pri1, :pri2],
+        undefined: [:und1, :und2],
+      )
       @lookup_path = Looksee::LookupPath.new(@object)
     end
 
@@ -22,22 +34,22 @@ describe Looksee::LookupPath do
 
     it "should include methods of all visibilities, including overridden ones" do
       @lookup_path.entries[0].methods.should == {
-        'public1'    => :public   , 'public2'    => :public,
-        'protected1' => :protected, 'protected2' => :protected,
-        'private1'   => :private  , 'private2'   => :private,
-        'undefined1' => :undefined, 'undefined2' => :undefined,
+        'pub1' => :public, 'pub2' => :public,
+        'pro1' => :protected, 'pro2' => :protected,
+        'pri1' => :private, 'pri2' => :private,
+        'und1' => :undefined, 'und2' => :undefined,
       }
       @lookup_path.entries[1].methods.should == {
-        'public1'    => :public   , 'public2'    => :public,
-        'protected1' => :protected, 'protected2' => :protected,
-        'private1'   => :private  , 'private2'   => :private,
-        'undefined1' => :undefined, 'undefined2' => :undefined,
+        'pub1' => :public, 'pub2' => :public,
+        'pro1' => :protected, 'pro2' => :protected,
+        'pri1' => :private, 'pri2' => :private,
+        'und1' => :undefined, 'und2' => :undefined,
       }
     end
 
     it "should know which methods have been overridden" do
-      @lookup_path.entries[0].overridden?('public1').should == false
-      @lookup_path.entries[1].overridden?('public1').should == true
+      @lookup_path.entries[0].overridden?('pub1').should == false
+      @lookup_path.entries[1].overridden?('pub1').should == true
     end
   end
 
@@ -78,9 +90,8 @@ describe Looksee::LookupPath do
   describe Looksee::LookupPath::Entry do
     it "should iterate over methods in alphabetical order" do
       temporary_class(:C)
-      @object = C.new
-      Looksee.adapter.stub(internal_public_instance_methods: [:a, :c, :b])
-      @lookup_path = Looksee::LookupPath.new(@object)
+      add_methods(C, public: [:a, :c, :b])
+      @lookup_path = Looksee::LookupPath.new(C.new)
       @lookup_path.entries.first.map{|name, visibility| name}.should == ['a', 'b', 'c']
     end
   end

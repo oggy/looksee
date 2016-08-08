@@ -83,12 +83,19 @@ module Looksee
 
       def find_methods
         methods = {}
-        [:public, :protected, :private, :undefined].each do |visibility|
-          Looksee.adapter.send("internal_#{visibility}_instance_methods", @module).each do |method|
+        [:public, :protected, :private].each do |visibility|
+          visibility_methods(visibility).each do |method|
             methods[method.to_s] = visibility
           end
         end
+        Looksee.adapter.send("internal_undefined_instance_methods", @module).each do |method|
+          methods[method.to_s] = :undefined
+        end
         methods
+      end
+
+      def visibility_methods(visibility)
+        Module.instance_method("#{visibility}_instance_methods").bind(@module).call(false)
       end
     end
   end

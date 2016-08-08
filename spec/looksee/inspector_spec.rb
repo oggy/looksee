@@ -17,8 +17,8 @@ describe Looksee::Inspector do
 
     describe "output width" do
       before do
-        Looksee.adapter.public_methods[C] = ['aa', 'bb', 'cc', 'dd', 'ee', 'ff', 'gg', 'hh', 'ii', 'jj']
-        Looksee.adapter.public_methods[M] = ['aaa', 'bbb', 'ccc', 'ddd', 'eee', 'fff', 'ggg', 'hhh']
+        add_methods C, public: ['aa', 'bb', 'cc', 'dd', 'ee', 'ff', 'gg', 'hh', 'ii', 'jj']
+        add_methods M, public: ['aaa', 'bbb', 'ccc', 'ddd', 'eee', 'fff', 'ggg', 'hhh']
         @lookup_path = Looksee::LookupPath.new(@object)
       end
 
@@ -67,78 +67,78 @@ describe Looksee::Inspector do
     end
 
     it "should not show any blank lines if a module has no methods" do
-      Looksee.adapter.public_methods[M] = [:public1, :public2]
+      add_methods M, public: [:pub1, :pub2]
       lookup_path = Looksee::LookupPath.new(@object)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public])
       inspector.inspect.should == <<-EOS.demargin.chomp
         |M
-        |  public1  public2
+        |  pub1  pub2
         |C
       EOS
     end
 
     it "should show singleton classes as class names in brackets" do
       Looksee.adapter.ancestors[C] = [C.singleton_class]
-      Looksee.adapter.public_methods[C.singleton_class] = [:public1, :public2]
+      add_methods C.singleton_class, public: [:pub1, :pub2]
       lookup_path = Looksee::LookupPath.new(C)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public])
       inspector.inspect.should == <<-EOS.demargin.chomp
         |[C]
-        |  public1  public2
+        |  pub1  pub2
       EOS
     end
 
     it "should handle singleton classes of singleton classes correctly" do
       Looksee.adapter.ancestors[C.singleton_class] = [C.singleton_class.singleton_class]
-      Looksee.adapter.public_methods[C.singleton_class.singleton_class] = [:public1, :public2]
+      add_methods C.singleton_class.singleton_class, public: [:pub1, :pub2]
       lookup_path = Looksee::LookupPath.new(C.singleton_class)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public])
       inspector.inspect.should == <<-EOS.demargin.chomp
         |[[C]]
-        |  public1  public2
+        |  pub1  pub2
       EOS
     end
 
     it "should only show methods of the selected visibilities" do
       temporary_class :E
-      Looksee.adapter.set_methods(E, [:public], [:protected], [:private], [:undefined])
+      add_methods(E, public: [:pub], protected: [:pro], private: [:pri], undefined: [:und])
       Looksee.adapter.ancestors[@object] = [E]
       lookup_path = Looksee::LookupPath.new(@object)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:protected])
       inspector.inspect.should == <<-EOS.demargin.chomp
         |E
-        |  protected
+        |  pro
       EOS
     end
 
     it "should show overridden methods if selected" do
-      Looksee.adapter.set_methods(C, [:public], [:protected], [:private], [:undefined])
-      Looksee.adapter.set_methods(M, [:public], [:protected], [:private], [:undefined])
+      add_methods(C, public: [:pub], protected: [:pro], private: [:pri], undefined: [:und])
+      add_methods(M, public: [:pub], protected: [:pro], private: [:pri], undefined: [:und])
       lookup_path = Looksee::LookupPath.new(@object)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public, :overridden])
       inspector.inspect.should == <<-EOS.demargin.chomp
         |M
-        |  public
+        |  pub
         |C
-        |  public
+        |  pub
       EOS
     end
 
     it "should not show overridden methods if not selected" do
-      Looksee.adapter.set_methods(C, [:public], [:protected], [:private], [:undefined])
-      Looksee.adapter.set_methods(M, [:public], [:protected], [:private], [:undefined])
+      add_methods(C, public: [:pub], protected: [:pro], private: [:pri], undefined: [:und])
+      add_methods(M, public: [:pub], protected: [:pro], private: [:pri], undefined: [:und])
       lookup_path = Looksee::LookupPath.new(@object)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public, :nooverridden])
       inspector.inspect.should == <<-EOS.demargin.chomp
         |M
         |C
-        |  public
+        |  pub
       EOS
     end
 
     it "should only show methods that match the given filters, if any are given" do
-      Looksee.adapter.public_methods[C] = [:ab, :ax, :ba, :xa]
-      Looksee.adapter.public_methods[M] = [:ab, :ax, :ba, :xa]
+      add_methods C, public: [:ab, :ax, :ba, :xa]
+      add_methods M, public: [:ab, :ax, :ba, :xa]
       lookup_path = Looksee::LookupPath.new(@object)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public, :overridden], :filters => [/^a/, 'b'])
       inspector.inspect.should == <<-EOS.demargin.chomp
@@ -167,12 +167,12 @@ describe Looksee::Inspector do
       temporary_class :C
       c = C.new
       Looksee.adapter.ancestors[c] = [C]
-      Looksee.adapter.set_methods(C, [:public], [:protected], [:private], [:undefined])
+      add_methods(C, public: [:pub], protected: [:pro], private: [:pri], undefined: [:und])
       lookup_path = Looksee::LookupPath.new(c)
       inspector = Looksee::Inspector.new(lookup_path, :visibilities => [:public, :protected, :private, :undefined, :overridden])
       inspector.inspect.should == <<-EOS.demargin.chomp
         |\`C\'
-        |  <private>  [protected]  {public}  ~undefined~
+        |  <pri>  [pro]  {pub}  ~und~
       EOS
     end
   end

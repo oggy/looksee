@@ -4,21 +4,6 @@ require 'looksee/rbx'
 module Looksee
   module Adapter
     class Rubinius < Base
-      def internal_public_instance_methods(mod)
-        return [] if !mod.origin.equal?(mod)
-        mod.method_table.public_names
-      end
-
-      def internal_protected_instance_methods(mod)
-        return [] if !mod.origin.equal?(mod)
-        mod.method_table.protected_names
-      end
-
-      def internal_private_instance_methods(mod)
-        return [] if !mod.origin.equal?(mod)
-        mod.method_table.private_names
-      end
-
       def internal_undefined_instance_methods(mod)
         return [] if !mod.origin.equal?(mod)
         names = []

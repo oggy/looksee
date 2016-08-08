@@ -33,30 +33,6 @@ public class JRubyAdapter extends RubyObject {
     super(runtime, klass);
   }
 
-  @JRubyMethod(name = "internal_public_instance_methods")
-  public static IRubyObject internalPublicInstanceMethods(ThreadContext context, IRubyObject self, IRubyObject module) {
-    return findMethodsByVisibility(context.getRuntime(), module, Visibility.PUBLIC);
-  }
-
-  @JRubyMethod(name = "internal_protected_instance_methods")
-  public static IRubyObject internalProtectedInstanceMethods(ThreadContext context, IRubyObject self, IRubyObject module) {
-    return findMethodsByVisibility(context.getRuntime(), module, Visibility.PROTECTED);
-  }
-
-  @JRubyMethod(name = "internal_private_instance_methods")
-  public static IRubyObject internalPrivateInstanceMethods(ThreadContext context, IRubyObject self, IRubyObject module) {
-    return findMethodsByVisibility(context.getRuntime(), module, Visibility.PRIVATE);
-  }
-
-  private static RubyArray findMethodsByVisibility(Ruby runtime, IRubyObject module, Visibility visibility) {
-    RubyArray result = runtime.newArray();
-    for (Map.Entry<String, DynamicMethod> entry : ((RubyModule)module).getMethods().entrySet()) {
-      if (entry.getValue().getVisibility() == visibility)
-        result.add(runtime.newSymbol(entry.getKey()));
-    }
-    return result;
-  }
-
   @JRubyMethod(name = "internal_undefined_instance_methods")
   public static RubyArray internalUndefinedInstanceMethods(ThreadContext context, IRubyObject self, IRubyObject module) {
     Ruby runtime = context.getRuntime();

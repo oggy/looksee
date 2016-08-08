@@ -54,27 +54,14 @@ module Looksee
         raise NotImplementedError, "abstract"
       end
 
-      def internal_public_instance_methods(mod)
-        Module.instance_method(:public_instance_methods).bind(mod).call(false)
-      end
-
-      def internal_protected_instance_methods(mod)
-        Module.instance_method(:protected_instance_methods).bind(mod).call(false)
-      end
-
-      def internal_private_instance_methods(mod)
-        Module.instance_method(:private_instance_methods).bind(mod).call(false)
-      end
-
       def internal_undefined_instance_methods(mod)
         raise NotImplementedError, "abstract"
       end
 
       def has_no_methods?(mod)
-        internal_public_instance_methods(mod).empty? &&
-          internal_protected_instance_methods(mod).empty? &&
-          internal_private_instance_methods(mod).empty? &&
-          internal_undefined_instance_methods(mod).empty?
+        [:public, :protected, :private].all? do |visibility|
+          Module.instance_method("#{visibility}_instance_methods").bind(mod).call(false).empty?
+        end && internal_undefined_instance_methods(mod).empty?
       end
 
       def singleton_class?(object)

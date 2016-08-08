@@ -47,10 +47,6 @@ module TemporaryClasses
   #
   # +methods+ is a hash of visibilities to names.
   #
-  # As Ruby's reflection on singleton classes of classes isn't quite
-  # adequate, you need to provide a :class_singleton option when such
-  # a class is given.
-  #
   # e.g.:
   #
   #   replace_methods MyClass, :public => [:a, :b]
@@ -63,16 +59,14 @@ module TemporaryClasses
           send visibility, name
         end
       end
+
+      if (methods = options[:undefined])
+        Array(methods).each do |name|
+          define_method(name){} unless method_defined?(name)
+          undef_method(name)
+        end
+        Looksee.adapter.set_undefined_methods(mod, methods)
+      end
     end
-  end
-
-  private  # ---------------------------------------------------------
-
-  def all_instance_methods(mod)
-    names =
-      mod.public_instance_methods(false) +
-      mod.protected_instance_methods(false) +
-      mod.private_instance_methods(false)
-    names.map{|name| name.to_sym}  # they're strings in ruby <1.9
   end
 end
