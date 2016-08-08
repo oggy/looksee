@@ -99,7 +99,7 @@ describe Looksee::Editor do
     end
 
     it "should raise NoSourceLocationError and not run the editor if no source location is available" do
-      Looksee.adapter.stub(source_location: nil)
+      UnboundMethod.any_instance.stub(source_location: nil)
       expect { editor.edit(object, :f) }.to raise_error(Looksee::NoSourceLocationError)
       editor_invocation.should be_nil
     end

@@ -64,7 +64,7 @@ describe Looksee::LookupPath do
       lookup_path = Looksee::LookupPath.new(@object)
       method = lookup_path.find('f')
       method.owner.should == C
-      method.name.should == (RUBY_VERSION < "1.9.0" ? 'f' : :f)
+      method.name.should == :f
     end
 
     it "should find methods in included modules" do
@@ -72,7 +72,7 @@ describe Looksee::LookupPath do
       lookup_path = Looksee::LookupPath.new(@object)
       method = lookup_path.find('g')
       method.owner.should == M
-      method.name.should == (RUBY_VERSION < "1.9.0" ? 'g' : :g)
+      method.name.should == :g
     end
 
     it "should return nil if the method does not exist" do

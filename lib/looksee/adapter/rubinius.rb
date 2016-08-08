@@ -20,23 +20,6 @@ module Looksee
           nil
         end
       end
-
-      def source_location(method)
-        method.is_a?(UnboundMethod) or
-          raise TypeError, "expected UnboundMethod, got #{method.class}"
-        source_location = method.source_location and
-          return source_location
-
-        # #source_location doesn't always work. If it returns nil, try
-        # a little harder.
-        case (executable = method.executable)
-        when ::Rubinius::BlockEnvironment::AsMethod
-          method = executable.instance_variable_get(:@block_env).method
-          [method.file.to_s, method.lines[1]]
-        when ::Rubinius::DelegatedMethod
-          executable.instance_variable_get(:@receiver).source_location
-        end
-      end
     end
   end
 end

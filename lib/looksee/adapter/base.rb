@@ -65,18 +65,6 @@ module Looksee
       def module_name(mod)
         Looksee.safe_call(Module, :name, mod) || ''
       end
-
-      if RUBY_VERSION >= '1.9.0' || Looksee.ruby_engine == 'rbx'
-        def source_location(method)
-          method.is_a?(UnboundMethod) or
-            raise TypeError, "expected UnboundMethod, got #{method.class}"
-          method.source_location
-        end
-      else
-        def source_location(method)
-          raise NotImplementedError, 'abstract'
-        end
-      end
     end
   end
 end

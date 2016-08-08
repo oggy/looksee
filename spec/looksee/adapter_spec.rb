@@ -30,15 +30,11 @@ describe "Looksee.adapter" do
       junk_patterns = [
         # pollution from testing libraries
         'Mocha', 'Spec',
-        # RSpec adds this under ruby 1.8.6
-        'InstanceExecHelper',
         # RSpec 2
         'RSpec::',
-        # only in ruby 1.9
-        'BasicObject',
-        # something pulls this in under ruby 1.9
+        # not sure what pulls this in
         'PP',
-        # our own pollution,
+        # our own pollution
         'Looksee::ObjectMixin',
       ]
       pattern = /\b(#{junk_patterns.join('|')})\b/
@@ -54,7 +50,7 @@ describe "Looksee.adapter" do
         include Mod2
       end
       filtered_lookup_modules(Derived.new).should ==
-        ['Derived', 'Mod2', 'Mod1', 'Base', 'Object', 'Kernel']
+        ['Derived', 'Mod2', 'Mod1', 'Base', 'Object', 'Kernel', 'BasicObject']
     end
 
     it "should contain an entry for the object's singleton class if it has methods" do
@@ -62,13 +58,13 @@ describe "Looksee.adapter" do
       def object.f; end
 
       filtered_lookup_modules(object).should ==
-        ['[Object instance]', 'Object', 'Kernel']
+        ['[Object instance]', 'Object', 'Kernel', 'BasicObject']
     end
 
     it "should contain entries for singleton classes of all ancestors for class objects" do
       temporary_class :C
       filtered_lookup_modules(C).should ==
-        ['[C]', '[Object]', 'Class', 'Module', 'Object', 'Kernel']
+        ['[C]', '[Object]', '[BasicObject]', 'Class', 'Module', 'Object', 'Kernel', 'BasicObject']
     end
 
     it "should work for immediate objects" do
@@ -127,23 +123,6 @@ describe "Looksee.adapter" do
       it "should handle the MRI allocator being undefined (e.g. Struct)" do
         struct_singleton_class = (class << Struct; self; end)
         @adapter.internal_undefined_instance_methods(struct_singleton_class).should == []
-      end
-
-      if RUBY_VERSION >= '2'
-        it "should return an empty list for non-origin classes" do
-          temporary_class :C
-          C.send(:define_method, :f){}
-          C.send(:undef_method, :f)
-          temporary_module :M
-          M.send(:define_method, :f){}
-          M.send(:undef_method, :f)
-          C.send(:prepend, M)
-
-          cs = @adapter.lookup_modules(C.new).
-            select { |mod| @adapter.describe_module(mod) == 'C' }
-          cs.size.should == 1
-          @adapter.internal_undefined_instance_methods(cs[0]).should_not be_empty
-        end
       end
     end
   end
@@ -306,128 +285,6 @@ describe "Looksee.adapter" do
     it "should raise a TypeError if the argumeent is not a module" do
       lambda do
         @adapter.describe_module(Object.new)
-      end.should raise_error(TypeError)
-    end
-  end
-
-  describe "#source_location" do
-    def load_source(source)
-      @tmp = "#{ROOT}/spec/tmp"
-      # rbx 1.2.3 caches the file content by file name - ensure file names are different.
-      @source_path = "#@tmp/c#{__id__}.rb"
-      FileUtils.mkdir_p @tmp
-      open(@source_path, 'w') { |f| f.print source }
-      load @source_path
-      @source_path
-    end
-
-    after do
-      FileUtils.rm_rf @tmp if @tmp
-      Object.send(:remove_const, :C) if Object.const_defined?(:C)
-    end
-
-    it "should return the file and line number the given method was defined on" do
-      path = load_source <<-EOS.demargin
-        |class C
-        |  def f
-        |  end
-        |end
-      EOS
-      method = C.instance_method(:f)
-      @adapter.source_location(method).should == [path, 2]
-    end
-
-    it "should work for methods defined via a block (MRI BMETHOD)" do
-      path = load_source <<-EOS.demargin
-        |class C
-        |  define_method :f do
-        |  end
-        |end
-      EOS
-      method = C.instance_method(:f)
-      @adapter.source_location(method).should == [path, 2]
-    end
-
-    it "should work for methods defined via a proc (MRI BMETHOD)" do
-      path = load_source <<-EOS.demargin
-        |class C
-        |  f = lambda do
-        |  end
-        |  define_method :f, f
-        |end
-      EOS
-      method = C.instance_method(:f)
-      @adapter.source_location(method).should == [path, 2]
-    end
-
-    it "should work for methods defined via a UnboundMethod (MRI DMETHOD)" do
-      path = load_source <<-EOS.demargin
-        |class C
-        |  def f
-        |  end
-        |  define_method :g, instance_method(:f)
-        |end
-      EOS
-      method = C.instance_method(:g)
-      @adapter.source_location(method).should == [path, 2]
-    end
-
-    it "should work for methods defined via a BoundMethod (MRI DMETHOD)" do
-      path = load_source <<-EOS.demargin
-        |class C
-        |  def f
-        |  end
-        |  define_method :g, new.method(:f)
-        |end
-      EOS
-      method = C.instance_method(:g)
-      @adapter.source_location(method).should == [path, 2]
-    end
-
-    it "should work for methods whose visibility is overridden in a subclass (MRI ZSUPER)" do
-      path = load_source <<-EOS.demargin
-        |class C
-        |  def f
-        |  end
-        |end
-        |class D < C
-        |  private :f
-        |end
-      EOS
-      begin
-        method = D.instance_method(:f)
-        @adapter.source_location(method).should == [path, 2]
-      ensure
-        Object.send(:remove_const, :D)
-      end
-    end
-
-    it "should work for aliases (MRI FBODY)" do
-      path = load_source <<-EOS.demargin
-        |class C
-        |  def f
-        |  end
-        |  alias g f
-        |end
-      EOS
-      method = C.instance_method(:g)
-      @adapter.source_location(method).should == [path, 2]
-    end
-
-    it "should return nil for primitive methods (MRI CBODY)" do
-      method = String.instance_method(:bytesize)
-      @adapter.source_location(method).should == nil
-    end
-
-    it "should raise a TypeError if the argument is not an UnboundMethod" do
-      path = load_source <<-EOS.demargin
-        |class C
-        |  def f
-        |  end
-        |end
-      EOS
-      lambda do
-        @adapter.source_location(nil)
       end.should raise_error(TypeError)
     end
   end
