@@ -44,12 +44,6 @@ public class JRubyAdapter extends RubyObject {
     return result;
   }
 
-  @JRubyMethod(name = "included_class?")
-  public static IRubyObject isIncludedClass(ThreadContext context, IRubyObject self, IRubyObject object) {
-    Ruby runtime = context.getRuntime();
-    return runtime.newBoolean(object instanceof IncludedModuleWrapper);
-  }
-
   @JRubyMethod(name = "singleton_class?")
   public static IRubyObject isSingletonClass(ThreadContext context, IRubyObject self, IRubyObject object) {
     Ruby runtime = context.getRuntime();

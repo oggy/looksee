@@ -13,10 +13,6 @@ module Looksee
         names
       end
 
-      def included_class?(object)
-        object.is_a?(::Rubinius::IncludedModule)
-      end
-
       def singleton_class?(object)
         object.is_a?(Class) && !!::Rubinius::Type.singleton_class_object(object)
       end

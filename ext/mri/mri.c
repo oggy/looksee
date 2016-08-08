@@ -89,15 +89,6 @@ VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
   return names;
 }
 
-/*
- * Return true if the given object is an included class or origin class, false
- * otherwise.
- */
-VALUE Looksee_included_class_p(VALUE self, VALUE object) {
-  return !SPECIAL_CONST_P(object) && BUILTIN_TYPE(object) == T_ICLASS ?
-    Qtrue : Qfalse;
-}
-
 VALUE Looksee_singleton_class_p(VALUE self, VALUE object) {
   return BUILTIN_TYPE(object) == T_CLASS && FL_TEST(object, FL_SINGLETON) ? Qtrue : Qfalse;
 }
@@ -186,7 +177,6 @@ void Init_mri(void) {
   VALUE mBase = rb_const_get(mAdapter, rb_intern("Base"));
   VALUE mMRI = rb_define_class_under(mAdapter, "MRI", mBase);
   rb_define_method(mMRI, "internal_undefined_instance_methods", Looksee_internal_undefined_instance_methods, 1);
-  rb_define_method(mMRI, "included_class?", Looksee_included_class_p, 1);
   rb_define_method(mMRI, "singleton_class?", Looksee_singleton_class_p, 1);
   rb_define_method(mMRI, "singleton_instance", Looksee_singleton_instance, 1);
   rb_define_method(mMRI, "module_name", Looksee_module_name, 1);

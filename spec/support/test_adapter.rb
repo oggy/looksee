@@ -14,10 +14,6 @@ class TestAdapter < Looksee::Adapter::Base
     undefined_methods[mod]
   end
 
-  def included_class?(object)
-    NATIVE_ADAPTER.included_class?(object)
-  end
-
   def singleton_class?(object)
     NATIVE_ADAPTER.singleton_class?(object)
   end

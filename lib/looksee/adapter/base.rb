@@ -29,7 +29,7 @@ module Looksee
           object = singleton_instance(object)
         end
 
-        if included_class?(mod) || object.is_a?(Module)
+        if object.is_a?(Module)
           description = module_name(object)
           if description.empty?
             is_class = Class === object
@@ -44,10 +44,6 @@ module Looksee
         else
           "#{'['*num_brackets}#{description}#{']'*num_brackets}"
         end
-      end
-
-      def included_class?(object)
-        raise NotImplementedError, "abstract"
       end
 
       def internal_undefined_instance_methods(mod)
