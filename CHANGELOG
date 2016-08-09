@@ -1,4 +1,4 @@
-== LATEST
+== 4.0.0 2016-08-09
 
  * Incomplete ruby 2.3 compatibility. Undef'd methods cannot be rendered; a
    warning will be emitted the first time this may affect something.

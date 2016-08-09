@@ -1,5 +1,5 @@
 module Looksee
-  VERSION = [3, 1, 1]
+  VERSION = [4, 0, 0]
 
   class << VERSION
     include Comparable
