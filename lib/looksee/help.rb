@@ -4,7 +4,8 @@ module Looksee
       <<-EOS.gsub(/^ *\|/, '')
         |== Looksee Quick Reference
         |
-        |  object.ls(*specifiers)  or  Looksee[object, *specifiers]
+        |  \e[1mobject.ls(*specifiers)\e[0m  or  \e[1mLooksee[object, *specifiers]\e[0m
+        |
         |    Print the methods of \`object\'.
         |
         |    Available specifiers:
@@ -40,7 +41,7 @@ module Looksee
         |          ...
         |        }
         |
-        |  object.ls.edit(method)
+        |  \e[1mobject.ls.edit(method)\e[0m
         |
         |    Jump to the source of the given method. Set your editor
         |    with Looksee.editor or the LOOKSEE_EDITOR environment
