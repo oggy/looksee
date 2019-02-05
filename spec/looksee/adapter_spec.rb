@@ -68,7 +68,11 @@ describe "Looksee.adapter" do
     end
 
     it "should work for immediate objects" do
-      filtered_lookup_modules(1).first.should == 'Fixnum'
+      if RUBY_VERSION >= "2.4.0"
+        filtered_lookup_modules(1).first.should == 'Integer'
+      else
+        filtered_lookup_modules(1).first.should == 'Fixnum'
+      end
     end
   end
 

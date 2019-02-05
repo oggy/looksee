@@ -9,12 +9,12 @@
 
 **********************************************************************/
 
-#ifndef RUBY_INTERNAL_H
-#define RUBY_INTERNAL_H 1
-
 #include "ruby.h"
 #include "ruby/encoding.h"
 #include "ruby/io.h"
+
+#ifndef RUBY_INTERNAL_H
+#define RUBY_INTERNAL_H 1
 
 #if defined(__cplusplus)
 extern "C" {
