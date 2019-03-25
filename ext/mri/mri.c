@@ -32,7 +32,7 @@ VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
 #if RUBY_VERSION >= 230
   static int warned = 0;
   if (!warned) {
-    rb_warn("Looksee cannot display undef'd methods on MRI 2.3");
+    rb_warn("Looksee cannot display undef-ed methods on MRI 2.3 or later");
     warned = 1;
   }
   return rb_ary_new();
