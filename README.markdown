@@ -144,18 +144,19 @@ Enjoy!
 
 ## Troubleshooting
 
-### ASCII Color Codes
-My output is not pretty, it's full of escape characters and looks something like this:
+### ANSI Escapes
 
-    ESC[1;37mModuleESC[0m
-    ESC[1;32m<ESC[0m                ESC[1;32mancestorsESC[0m                ESC[1;32mattr_internal_readerESC[0m       ESC[1;32mcattr_writerESC[0m             ESC[1;32mconst_setESC[0m            ESC[1;32mfreezeESC[0m            ESC[1;32minstance_methodESC[0m   ESC[1;32mmethod_visibilityESC[0m  ESC[1;31mprepend_featuresESC[0m          ESC[1;31mprotectedESC[0m                   ESC[1;32mpublic_method_defined?ESC[0m     ESC[1;32mremove_possible_methodESC[0m       ESC[1;32mthread_mattr_writerESC[0m
-    ESC[1;32m<=ESC[0m
+If your pager is not configured, you may see ugly output like this:
 
-These are color codes for the display, but when you have long output, your console uses a pager which isn't displaying them properly. You can verify this is the problem by checking ```[].ls(:public)``` assuming that fits on one page, your console won't use a pager and it should look normal. 
+    ESC[1;37mArrayESC[0m
+    ESC[1;32m&ESC[0m ESC[1;32mcompact!ESC[0m ESC[1;32minclude?ESC[0m
+    ESC[1;32mrassocESC[0m ESC[1;32mto_aESC[0m
 
-If less is your pager, then the solution is to add the -R option. I add this to my ```.zshrc```
+The most common pager is `less`, which you can configure by setting an
+environment variable like this in your shell configuration (usually
+`~/.bashrc`):
 
-    export LESS='-R'
+    export LESS=-R
 
 ## Contributing
 
