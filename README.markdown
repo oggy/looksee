@@ -132,7 +132,7 @@ By default, this uses `vi`; customize it like this:
 If you have a library that for some reason can't handle an `ls` method existing
 on `Object`, you may rename it like this:
 
-    Looksee.rename ls: :_ls
+    Looksee.rename :_ls
 
 ## Quick Reference
 
