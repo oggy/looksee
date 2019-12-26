@@ -12,17 +12,19 @@
 #  define Looksee_method_table_lookup st_lookup
 #endif
 
+#if RUBY_VERSION < 230
 static int add_method_if_undefined(ID method_name, rb_method_entry_t *me, VALUE *names) {
-#ifdef ID_ALLOCATOR
+#  ifdef ID_ALLOCATOR
   /* The allocator can be undefined with rb_undef_alloc_func, e.g. Struct. */
   if (method_name == ID_ALLOCATOR)
     return ST_CONTINUE;
-#endif
+#  endif
 
   if (UNDEFINED_METHOD_ENTRY_P(me))
     rb_ary_push(*names, ID2SYM(method_name));
   return ST_CONTINUE;
 }
+#endif
 
 /*
  * Return the list of undefined instance methods (as Symbols) of the
