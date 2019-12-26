@@ -1360,7 +1360,7 @@ void rb_gc_mark_global_tbl(void);
 void rb_mark_generic_ivar(VALUE);
 VALUE rb_const_missing(VALUE klass, VALUE name);
 int rb_class_ivar_set(VALUE klass, ID vid, VALUE value);
-st_table *rb_st_copy(VALUE obj, struct st_table *orig_tbl);
+// st_table *rb_st_copy(VALUE obj, struct st_table *orig_tbl);
 
 /* gc.c (export) */
 VALUE rb_wb_protected_newobj_of(VALUE, VALUE);
