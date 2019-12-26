@@ -32,8 +32,8 @@ describe "Looksee.adapter" do
         'Mocha', 'Spec',
         # RSpec 2
         'RSpec::',
-        # not sure what pulls this in
-        'PP',
+        # not sure what pulls these in
+        'PP', 'JSON::Ext::Generator::GeneratorMethods::Object',
         # our own pollution
         'Looksee::ObjectMixin',
       ]
