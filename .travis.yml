@@ -6,15 +6,24 @@ rvm:
   - 2.1.9
   - 2.2.9
   - 2.3.8
-  - 2.4.9
-  - 2.5.7
-  - 2.6.5
-  - 2.7.0
-  - jruby-9.0.5.0
-  - jruby-9.1.2.0
+  - 2.4.10
+  - 2.5.8
+  - 2.6.6
+  - 2.7.1
+  - ruby-head
+  - jruby-9.1
+  - jruby-9.2
+  - rbx-2.4
+  - rbx-2.5
+  - rbx-3
+  - rbx-4
+
 matrix:
   allow_failures:
     # rbx no longer builds on travis
-    - rvm: rbx-2.4.1
-    - rvm: rbx-2.5.8
+    # https://github.com/rvm/rvm/issues/3617
+    - rvm: rbx-2.4
+    - rvm: rbx-2.5
+    - rvm: rbx-3
+    - rvm: rbx-4
   fast_finish: true
