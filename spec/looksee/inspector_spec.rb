@@ -150,6 +150,48 @@ describe Looksee::Inspector do
     end
   end
 
+  describe "#pretty_print" do
+    before do
+      Looksee.stub(:default_lookup_path_options).and_return({})
+      Looksee.stub(:styles).and_return(Hash.new{"\e[1;31m%s\e[0m"})
+
+      @object = Object.new
+      temporary_class :C
+      Looksee.adapter.ancestors[@object] = [C]
+
+      add_methods C, public: ['aa']
+      @lookup_path = Looksee::LookupPath.new(@object)
+      @inspector = Looksee::Inspector.new(@lookup_path, :visibilities => [:public])
+    end
+
+    it "should produce the same output as #inspect" do
+      pp = PP.new
+      @inspector.pretty_print(pp)
+      pp.output.should == <<-EOS.demargin.chomp
+        |\e[1;31mC\e[0m
+        |  \e[1;31maa\e[0m
+      EOS
+    end
+
+    it "should not get messed up by IRB::ColorPrinter" do
+      begin
+        require 'irb/color_printer'
+        has_irb_color_printer = true
+      rescue LoadError
+        has_irb_color_printer = false
+      end
+
+      if has_irb_color_printer
+        pp = IRB::ColorPrinter.new
+        @inspector.pretty_print(pp)
+        pp.output.should == <<-EOS.demargin.chomp
+          |\e[1;31mC\e[0m
+          |  \e[1;31maa\e[0m
+        EOS
+      end
+    end
+  end
+
   describe ".styles" do
     before do
       styles = {
