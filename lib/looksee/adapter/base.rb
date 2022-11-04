@@ -13,7 +13,7 @@ module Looksee
           rescue TypeError  # immediate object
           end
         start ||= Looksee.safe_call(Object, :class, object)
-        start.ancestors
+        Looksee.safe_call(Module, :ancestors, start)
       end
 
       #
@@ -59,7 +59,7 @@ module Looksee
       end
 
       def includes_no_modules?(klass)
-        ancestors = klass.ancestors
+        ancestors = Looksee.safe_call(Module, :ancestors, klass)
         ancestors.size == 1 ||
           klass.included_modules == klass.ancestors[1].included_modules
       end
