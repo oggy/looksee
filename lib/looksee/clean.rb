@@ -18,7 +18,7 @@ module Looksee
 
   class << self
     #
-    # The default options passed to #ls.
+    # The default options passed to #look.
     #
     # Default: <tt>[:public, :protected, :private, :undefined,
     # :overridden]</tt>

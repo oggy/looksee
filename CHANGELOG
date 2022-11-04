@@ -1,5 +1,7 @@
 == LATEST
 
+ * Rename #ls to #look. Sorry! irb now defines an ls built-in, though, and the
+   old name emits a warning on startup.
  * Fix showing modules included in singleton classes with no direct methods.
  * Fix ANSI color escaping in ruby >= 3.0.
 
