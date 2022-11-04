@@ -9,7 +9,7 @@ module Looksee
         start =
           begin
             singleton_class = (class << object; self; end)
-            singleton_class unless has_no_methods?(singleton_class) && !(Class === object)
+            singleton_class unless has_no_methods?(singleton_class) && includes_no_modules?(singleton_class) && !(Class === object)
           rescue TypeError  # immediate object
           end
         start ||= Looksee.safe_call(Object, :class, object)
@@ -56,6 +56,12 @@ module Looksee
         [:public, :protected, :private].all? do |visibility|
           Looksee.safe_call(Module, "#{visibility}_instance_methods", mod, false).empty?
         end && internal_undefined_instance_methods(mod).empty?
+      end
+
+      def includes_no_modules?(klass)
+        ancestors = klass.ancestors
+        ancestors.size == 1 ||
+          klass.included_modules == klass.ancestors[1].included_modules
       end
 
       def singleton_instance(singleton_class)

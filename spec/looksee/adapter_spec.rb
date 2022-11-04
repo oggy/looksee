@@ -67,6 +67,14 @@ describe "Looksee.adapter" do
         ['[C]', '[Object]', '[BasicObject]', 'Class', 'Module', 'Object', 'Kernel', 'BasicObject']
     end
 
+    it "should contain entries for modules included in the singleton class" do
+      temporary_module :M
+      c = Object.new
+      c.extend(M)
+      filtered_lookup_modules(c).should ==
+        ['[Object instance]', 'M', 'Object', 'Kernel', 'BasicObject']
+    end
+
     it "should work for immediate objects" do
       if RUBY_VERSION >= "2.4.0"
         filtered_lookup_modules(1).first.should == 'Integer'

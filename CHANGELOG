@@ -1,5 +1,6 @@
 == LATEST
 
+ * Fix showing modules included in singleton classes with no direct methods.
  * Fix ANSI color escaping in ruby >= 3.0.
 
 == 4.4.0 2021-01-17
