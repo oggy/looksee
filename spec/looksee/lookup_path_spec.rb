@@ -89,7 +89,7 @@ describe Looksee::LookupPath do
     end
   end
 
-  describe Looksee::LookupPath::Entry do
+  describe 'Looksee::LookupPath::Entry' do
     it "should iterate over methods in alphabetical order" do
       temporary_class(:C)
       add_methods(C, public: [:a, :c, :b])

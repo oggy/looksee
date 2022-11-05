@@ -2,6 +2,8 @@
 
  * Rename #ls to #look. Sorry! irb now defines an ls built-in, though, and the
    old name emits a warning on startup.
+ * Support for MRI 3.2.0 preview2. From 3.2 onwards, we once again display
+   undef'd methods.
  * Fix showing modules included in singleton classes with no direct methods.
  * Fix ANSI color escaping in ruby >= 3.0.
 

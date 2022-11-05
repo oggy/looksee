@@ -89,7 +89,7 @@ module Looksee
             methods[method.to_s] = visibility
           end
         end
-        Looksee.adapter.send("internal_undefined_instance_methods", @module).each do |method|
+        Looksee.adapter.undefined_instance_methods(@module).each do |method|
           methods[method.to_s] = :undefined
         end
         methods

@@ -35,10 +35,12 @@ static int add_method_if_undefined(ID method_name, rb_method_entry_t *me, VALUE 
  * given internal class.
  */
 VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
-#if RUBY_VERSION >= 230
+#if RUBY_VERSION >= 320
+  rb_raise(rb_eRuntimeError, "internal_undefined_instance_methods not implemented on MRI 3.2+ -- use Module#undefined_instance_methods instead");
+#elif RUBY_VERSION >= 230
   static int warned = 0;
   if (!warned) {
-    rb_warn("Looksee cannot display undef-ed methods on MRI 2.3 or later");
+    rb_warn("Looksee cannot display undef-ed methods on MRI 2.3.0 -- 3.1.x");
     warned = 1;
   }
   return rb_ary_new();

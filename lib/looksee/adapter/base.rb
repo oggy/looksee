@@ -48,6 +48,14 @@ module Looksee
         end
       end
 
+      def undefined_instance_methods(mod)
+        if Module.method_defined?(:undefined_instance_methods)
+          mod.undefined_instance_methods
+        else
+          internal_undefined_instance_methods(mod)
+        end
+      end
+
       def internal_undefined_instance_methods(mod)
         raise NotImplementedError, "abstract"
       end
@@ -55,7 +63,7 @@ module Looksee
       def has_no_methods?(mod)
         [:public, :protected, :private].all? do |visibility|
           Looksee.safe_call(Module, "#{visibility}_instance_methods", mod, false).empty?
-        end && internal_undefined_instance_methods(mod).empty?
+        end && undefined_instance_methods(mod).empty?
       end
 
       def includes_no_modules?(klass)
