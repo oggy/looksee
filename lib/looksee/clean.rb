@@ -165,8 +165,6 @@ module Looksee
   case ruby_engine
   when 'jruby'
     self.adapter = Adapter::JRuby.new
-  when 'rbx'
-    self.adapter = Adapter::Rubinius.new
   else
     self.adapter = Adapter::MRI.new
   end

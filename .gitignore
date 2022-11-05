@@ -1,7 +1,6 @@
 .bundle
 *.rbc
 lib/looksee/mri.bundle
-lib/looksee/rbx.bundle
 lib/looksee/JRuby.jar
 
 ext/Makefile
