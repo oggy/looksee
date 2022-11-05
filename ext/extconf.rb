@@ -8,14 +8,8 @@ if extension == 'mri'
     $CPPFLAGS << " -Imri/3.2.0"
   elsif RUBY_VERSION >= '3.0.0'
     $CPPFLAGS << " -Imri/3.0.0"
-  elsif RUBY_VERSION >= '2.7.0'
+  else
     $CPPFLAGS << " -Imri/2.7.0"
-  elsif RUBY_VERSION >= '2.3.0'
-    $CPPFLAGS << " -Imri/2.3.0"
-  elsif RUBY_VERSION >= '2.2.0'
-    $CPPFLAGS << " -Imri/2.2.0"
-  elsif RUBY_VERSION >= '2.1.0'
-    $CPPFLAGS << " -Imri/2.1.0"
   end
 end
 

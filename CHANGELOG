@@ -4,6 +4,7 @@
    old name emits a warning on startup.
  * Support for MRI 3.2.0 preview2. From 3.2 onwards, we once again display
    undef'd methods.
+ * Remove support for MRI < 2.7. (2.6 is EOL anyway.)
  * Fix showing modules included in singleton classes with no direct methods.
  * Fix ANSI color escaping in ruby >= 3.0.
 
