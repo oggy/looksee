@@ -7,6 +7,10 @@
 #include "method.h"
 #include "internal.h"
 
+#if RUBY_VERSION >= 320
+#  include "internal/class.h"
+#endif
+
 #ifndef Looksee_method_table_foreach
 #  define Looksee_method_table_foreach st_foreach
 #  define Looksee_method_table_lookup st_lookup
