@@ -1,0 +1,28 @@
+FROM jruby:9.3.9.0-jdk
+
+RUN apt update
+
+# JRuby easily exhausts entropy leading to horrible performance.
+# https://github.com/jruby/jruby/wiki/Improving-startup-time#ensure-your-system-has-adequate-entropy
+#
+# This seems sufficient to get stuff to use a faster random.
+RUN sed -i \
+  -e "s/securerandom.source=file:\/dev\/random/securerandom.source=file:\/dev\/urandom/g" \
+  -e "s/securerandom.strongAlgorithms=NativePRNGBlocking/securerandom.strongAlgorithms=NativePRNG/g" \
+  $JAVA_HOME/jre/lib/security/java.security
+
+# Make things not stupidly slow for us.
+ENV JRUBY_OPTS=--dev
+
+# Need bundler 2.3.17+ to fix https://github.com/rubygems/rubygems/issues/5743 .
+RUN gem update bundler
+
+COPY Gemfile looksee.gemspec /src/
+COPY lib/looksee/version.rb /src/lib/looksee/
+
+WORKDIR /src
+RUN bundle
+COPY . /src
+RUN rake ext
+
+CMD ["irb", "-I/src/lib", "-rlooksee"]

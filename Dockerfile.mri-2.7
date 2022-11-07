@@ -1,0 +1,11 @@
+FROM ruby:2.7.6
+
+COPY Gemfile Gemfile.lock looksee.gemspec /src/
+COPY lib/looksee/version.rb /src/lib/looksee/
+
+WORKDIR /src
+RUN bundle
+COPY . /src
+RUN rake ext
+
+CMD ["irb", "-I/src/lib", "-rlooksee"]
