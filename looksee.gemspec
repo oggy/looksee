@@ -23,5 +23,9 @@ Gem::Specification.new do |gem|
   gem.require_path = 'lib'
 
   gem.specification_version = 3
-  gem.required_ruby_version = ['>= 2.7']
+  if RUBY_PLATFORM == 'java'
+    gem.required_ruby_version = ['>= 2.5']
+  else
+    gem.required_ruby_version = ['>= 2.7']
+  end
 end
