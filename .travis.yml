@@ -1,30 +1,6 @@
+os: linux
+dist: focal
 language: ruby
-before_install:
-  - gem install bundler -v '1.17.3'
+services: docker
 bundler_args: --without dev
-rvm:
-  - 2.1.9
-  - 2.2.9
-  - 2.3.8
-  - 2.4.10
-  - 2.5.8
-  - 2.6.6
-  - 2.7.2
-  - 3.0.0
-  - ruby-head
-  - jruby-9.1
-  - jruby-9.2
-  - rbx-2.4
-  - rbx-2.5
-  - rbx-3
-  - rbx-4
-
-matrix:
-  allow_failures:
-    # rbx no longer builds on travis
-    # https://github.com/rvm/rvm/issues/3617
-    - rvm: rbx-2.4
-    - rvm: rbx-2.5
-    - rvm: rbx-3
-    - rvm: rbx-4
-  fast_finish: true
+script: bundle exec rake test_all
