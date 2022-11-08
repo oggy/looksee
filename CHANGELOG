@@ -1,4 +1,4 @@
-== LATEST
+== 5.0.0 2022-11-08
 
  * Rename #ls to #look. Sorry! irb now defines an ls built-in, though, and the
    old name emits a warning on startup.
