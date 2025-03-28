@@ -17,7 +17,11 @@ VALUE Looksee_internal_undefined_instance_methods(VALUE self, VALUE klass) {
 
 VALUE Looksee_singleton_instance(VALUE self, VALUE klass) {
   if (!SPECIAL_CONST_P(klass) && BUILTIN_TYPE(klass) == T_CLASS && FL_TEST(klass, FL_SINGLETON)) {
+#if RUBY_VERSION < 330
     VALUE object = rb_ivar_get(klass, rb_intern("__attached__"));
+#else
+    VALUE object = rb_class_attached_object(klass);
+#endif
     if (object == Qnil)
       rb_raise(rb_eRuntimeError, "[looksee bug] can't find singleton object");
     return object;

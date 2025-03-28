@@ -1,3 +1,7 @@
+== LATEST
+
+ * Support for MRI 3.3.
+
 == 5.0.0 2022-11-08
 
  * Rename #ls to #look. Sorry! irb now defines an ls built-in, though, and the
