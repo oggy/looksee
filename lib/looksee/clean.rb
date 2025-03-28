@@ -15,6 +15,7 @@ module Looksee
   autoload :Help, 'looksee/help'
   autoload :Inspector, 'looksee/inspector'
   autoload :LookupPath, 'looksee/lookup_path'
+  autoload :PrettyPrintHack, 'looksee/pretty_print_hack'
 
   class << self
     #

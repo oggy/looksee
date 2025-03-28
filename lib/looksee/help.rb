@@ -1,5 +1,7 @@
 module Looksee
   class Help
+    include PrettyPrintHack
+
     def inspect
       <<-EOS.gsub(/^ *\|/, '')
         |== Looksee Quick Reference

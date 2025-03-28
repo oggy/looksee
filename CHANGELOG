@@ -1,6 +1,7 @@
 == LATEST
 
  * Support for MRI 3.3.
+ * Fix color escaping in Looksee.help.
 
 == 5.0.0 2022-11-08
 
