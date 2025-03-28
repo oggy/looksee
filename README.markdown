@@ -13,73 +13,97 @@ Pop this in your `.irbrc`:
 
     require 'looksee'
 
-Now each object has a method `ls`, which shows you all its methods.
+Now each object has a method `look`, which shows you all its methods.
 
-    irb> [].ls
-    => BasicObject
-      !   __id__    initialize     method_missing            singleton_method_undefined
-      !=  __send__  instance_eval  singleton_method_added
-      ==  equal?    instance_exec  singleton_method_removed
+    irb> [].look
+    =>
+    BasicObject
+      !       __send__       instance_exec             singleton_method_undefined
+      !=      equal?         method_missing
+      ==      initialize     singleton_method_added
+      __id__  instance_eval  singleton_method_removed
     Kernel
-      !~                       enum_for                    kind_of?                  respond_to_missing?
-      <=>                      eql?                        lambda                    select
-      ===                      eval                        load                      send
-      =~                       exec                        local_variables           set_trace_func
-      Array                    exit                        loop                      singleton_class
-      Complex                  exit!                       method                    singleton_method
-      Float                    extend                      methods                   singleton_methods
-      Hash                     fail                        nil?                      sleep
-      Integer                  fork                        object_id                 spawn
-      Rational                 format                      open                      sprintf
-      String                   freeze                      p                         srand
-      __callee__               frozen?                     print                     syscall
-      __dir__                  gem                         printf                    system
-      __method__               gem_original_require        private_methods           taint
-      `                        gets                        proc                      tainted?
-      abort                    global_variables            protected_methods         tap
-      at_exit                  hash                        public_method             test
-      autoload                 initialize_clone            public_methods            throw
-      autoload?                initialize_copy             public_send               to_enum
-      binding                  initialize_dup              putc                      to_s
-      block_given?             inspect                     puts                      trace_var
-      caller                   instance_of?                raise                     trap
-      caller_locations         instance_variable_defined?  rand                      trust
-      catch                    instance_variable_get       readline                  untaint
-      class                    instance_variable_set       readlines                 untrace_var
-      clone                    instance_variables          remove_instance_variable  untrust
-      define_singleton_method  is_a?                       require                   untrusted?
-      display                  iterator?                   require_relative          warn
-      dup                      itself                      respond_to?
+      !~                       format                      public_method
+      <=>                      freeze                      public_methods
+      ===                      frozen?                     public_send
+      Array                    gem                         putc
+      Complex                  gem_original_require        puts
+      Float                    gets                        raise
+      Hash                     global_variables            rand
+      Integer                  hash                        readline
+      Pathname                 initialize_clone            readlines
+      Rational                 initialize_copy             remove_instance_variable
+      String                   initialize_dup              require
+      __callee__               inspect                     require_relative
+      __dir__                  instance_of?                respond_to?
+      __method__               instance_variable_defined?  respond_to_missing?
+      `                        instance_variable_get       select
+      abort                    instance_variable_set       send
+      at_exit                  instance_variables          set_trace_func
+      autoload                 is_a?                       singleton_class
+      autoload?                iterator?                   singleton_method
+      binding                  itself                      singleton_methods
+      block_given?             kind_of?                    sleep
+      caller                   lambda                      spawn
+      caller_locations         load                        sprintf
+      catch                    local_variables             srand
+      class                    loop                        syscall
+      clone                    method                      system
+      define_singleton_method  methods                     tap
+      display                  nil?                        test
+      dup                      object_id                   then
+      enum_for                 open                        throw
+      eql?                     p                           to_enum
+      eval                     pp                          to_s
+      exec                     pretty_inspect              trace_var
+      exit                     print                       trap
+      exit!                    printf                      untrace_var
+      extend                   private_methods             warn
+      fail                     proc                        yield_self
+      fork                     protected_methods
     Looksee::ObjectMixin
-      ls
+      look
+    PP::ObjectMixin
+      pretty_print        pretty_print_inspect
+      pretty_print_cycle  pretty_print_instance_variables
     Object
-      DelegateClass  default_src_encoding  irb_binding
+      DelegateClass
     Enumerable
-      all?            detect            entries     group_by  min        reject        take
-      any?            drop              find        include?  min_by     reverse_each  take_while
-      chunk           drop_while        find_all    inject    minmax     select        to_a
-      chunk_while     each_cons         find_index  lazy      minmax_by  slice_after   to_h
-      collect         each_entry        first       map       none?      slice_before  to_set
-      collect_concat  each_slice        flat_map    max       one?       slice_when    zip
-      count           each_with_index   grep        max_by    partition  sort
-      cycle           each_with_object  grep_v      member?   reduce     sort_by
+      all?            drop              find_all    max        reject        tally
+      any?            drop_while        find_index  max_by     reverse_each  to_a
+      chain           each_cons         first       member?    select        to_h
+      chunk           each_entry        flat_map    min        slice_after   to_set
+      chunk_while     each_slice        grep        min_by     slice_before  uniq
+      collect         each_with_index   grep_v      minmax     slice_when    zip
+      collect_concat  each_with_object  group_by    minmax_by  sort
+      compact         entries           include?    none?      sort_by
+      count           filter            inject      one?       sum
+      cycle           filter_map        lazy        partition  take
+      detect          find              map         reduce     take_while
     Array
-      &              collect!     eql?             keep_if               reverse       sort!
-      *              combination  fetch            last                  reverse!      sort_by!
-      +              compact      fill             length                reverse_each  take
-      -              compact!     find_index       map                   rindex        take_while
-      <<             concat       first            map!                  rotate        to_a
-      <=>            count        flatten          pack                  rotate!       to_ary
-      ==             cycle        flatten!         permutation           sample        to_h
-      []             delete       frozen?          pop                   select        to_s
-      []=            delete_at    hash             product               select!       transpose
-      any?           delete_if    include?         push                  shift         uniq
-      assoc          dig          index            rassoc                shuffle       uniq!
-      at             drop         initialize       reject                shuffle!      unshift
-      bsearch        drop_while   initialize_copy  reject!               size          values_at
-      bsearch_index  each         insert           repeated_combination  slice         zip
-      clear          each_index   inspect          repeated_permutation  slice!        |
-      collect        empty?       join             replace               sort
+      &              count        include?         pretty_print          size
+      *              cycle        index            pretty_print_cycle    slice
+      +              deconstruct  initialize       product               slice!
+      -              delete       initialize_copy  push                  sort
+      <<             delete_at    insert           rassoc                sort!
+      <=>            delete_if    inspect          reject                sort_by!
+      ==             difference   intersect?       reject!               sum
+      []             dig          intersection     repeated_combination  take
+      []=            drop         join             repeated_permutation  take_while
+      all?           drop_while   keep_if          replace               to_a
+      any?           each         last             reverse               to_ary
+      append         each_index   length           reverse!              to_h
+      assoc          empty?       map              reverse_each          to_s
+      at             eql?         map!             rindex                transpose
+      bsearch        fetch        max              rotate                union
+      bsearch_index  fill         min              rotate!               uniq
+      clear          filter       minmax           sample                uniq!
+      collect        filter!      none?            select                unshift
+      collect!       find_index   one?             select!               values_at
+      combination    first        pack             shelljoin             zip
+      compact        flatten      permutation      shift                 |
+      compact!       flatten!     pop              shuffle
+      concat         hash         prepend          shuffle!
 
 Methods are colored according to whether they're public, protected,
 private, undefined (using Module#undef_method), or overridden.
@@ -88,11 +112,11 @@ private, undefined (using Module#undef_method), or overridden.
 
 You can hide, say, private methods like this:
 
-    irb> [].ls :noprivate
+    irb> [].look :noprivate
 
 Or filter the list by Regexp:
 
-    irb> [].ls /^to_/
+    irb> [].look /^to_/
      => BasicObject
     Kernel
       to_enum  to_s
@@ -107,32 +131,32 @@ Or filter the list by Regexp:
 ## Proxy objects
 
 Objects that delegate everything via `method_missing` to some other object can
-be tricky, because they will delegate `ls` itself. To view such objects, you can
-always do:
+be tricky, because they will delegate `look` itself. To view such objects, you
+can always do:
 
     Looksee[object]
 
-This will also work for `BasicObject` instances that don't have an `ls` method.
-`Object#ls` is simply a wrapper around `Looksee.[]`.
+This will also work for `BasicObject` instances that don't have an `look`
+method.  `Object#look` is simply a wrapper around `Looksee.[]`.
 
 ## To the source!
 
 If you want to know more about any of those methods, Looksee can
 take you straight to the source in your editor:
 
-    [].ls.edit :to_set
+    [].look.edit :to_set
 
 By default, this uses `vi`; customize it like this:
 
     # %f = file, %l = line number
     Looksee.editor = "mate -l%l %f"
 
-## `ls` in your way?
+## `look` in your way?
 
-If you have a library that for some reason can't handle an `ls` method existing
-on `Object`, you may rename it like this:
+If you have a library that for some reason can't handle an `look` method
+existing on `Object`, you may rename it like this:
 
-    Looksee.rename :_ls
+    Looksee.rename :_look
 
 ## Quick Reference
 
